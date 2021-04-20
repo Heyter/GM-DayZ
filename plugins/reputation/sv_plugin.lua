@@ -5,7 +5,7 @@ local SH_SZ = SH_SZ
 -- PlayerEnterSafeZone -- realm @server
 -- CanPlayerEnterSafeZone -- realm @server
 
-function PLUGIN:PlayerDeath(victim, inflictor, attacker)
+function PLUGIN:PlayerDeath(victim, _, attacker)
 	if (IsValid(attacker) and attacker:IsPlayer() and attacker != victim) then
 		local reputation, level = victim:GetReputation(), math.abs(victim:GetReputationLevel())
 		local bandit = reputation < 0
@@ -29,7 +29,9 @@ function PLUGIN:PlayerDeath(victim, inflictor, attacker)
 			attacker:AddReputation(repDiff)
 		end
 
-		attacker:SafePenalty()
+		if (attacker:Alive()) then -- если умереть вместе с целью, то вешается пенальти
+			attacker:SafePenalty()
+		end
 	end
 
 	victim:ResetPenalty()

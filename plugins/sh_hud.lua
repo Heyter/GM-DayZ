@@ -166,7 +166,7 @@ else
 
 		surface.SetDrawColor(192, 57, 43)
 		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen * awto, h - sscale(6))
-		ix.util.DrawText((awto * 100) .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
+		ix.util.DrawText(math.max(0, (awto * 100)) .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
 	end
 
 	function hud:drawText(wok, title, font)
@@ -470,13 +470,46 @@ else
 		--	perc.y = perc.y - perc.h - margin
 		--	hud:status(perc, "굶주림")
 		--end
-		-- if (char:getData("b_bld")) then
-			-- perc.y = perc.y - perc.h - margin
-			-- hud:status(perc, "출혈")
-		-- end
-		if (client:GetLocalVar("legBroken")) then
+		if (client:GetNetVar("bleeding")) then
+			local damage = client:GetNetVar("bleeding")
+
+			if (damage >= 65) then
+				damage = damage * 2
+			end
+
+			perc.textColor = LerpColorHSV(nil, nil, client:GetMaxHealth(), client:GetMaxHealth() - damage, 0) -- цвет серьёзности кровотечения
 			perc.y = perc.y - perc.h - margin
-			hud:status(perc, "Broken leg")
+			hud:status(perc, "BLOOD LOSS", "5")
+		end
+
+		-- blood loss effect
+		for _, v in ipairs(player.GetAll()) do
+			if (IsValid(v) and v:Health() > 0) then
+				local damage = v:GetNetVar("bleeding")
+
+				if (damage and (!v.timeBlood or v.timeBlood < CurTime())) then
+					local bone_pos = v:GetBonePosition(v:LookupBone("ValveBiped.Bip01_Spine"))
+					local effect = EffectData()
+						effect:SetOrigin(bone_pos)
+						effect:SetMagnitude(1)
+						--effect:SetNormal((v:GetPos() - bone_pos):GetNormalized())
+						--effect:SetScale(200)
+					util.Effect("blooddrop", effect, nil)
+
+					local dmgPerc = math.max(0, (v:GetMaxHealth() - damage) / v:GetMaxHealth())
+					if (damage >= 5) then
+						dmgPerc = dmgPerc * 0.85
+					end
+
+					v.timeBlood = CurTime() + math.max(0.5, math.floor(2 * dmgPerc))
+				end
+			end
+		end
+
+		if (client:GetLocalVar("legBroken")) then
+			perc.textColor = Color(255, 0, 0) -- todo: сделать библиотеку цветов
+			perc.y = perc.y - perc.h - margin
+			hud:status(perc, "BROKEN LEG")
 		end
 		-- if (char:getData("b_inf")) then
 			-- perc.y = perc.y - perc.h - margin

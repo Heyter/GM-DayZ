@@ -14,13 +14,7 @@ function PLUGIN:ScalePlayerDamage(client, hit_group, dmg_info)
 			dmg_info:ScaleDamage(0.5)
 		elseif (hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) then
 			dmg_info:ScaleDamage(0.75)
-
-			if (client:Health() <= dmg_info:GetDamage()) then
-				client:BreakLeg(10) -- todo убрать 10
-			end
 		end
-
-		Schema:PlayerEmitPainSound(client, hit_group)
 	end
 end
 

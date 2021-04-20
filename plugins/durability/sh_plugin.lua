@@ -20,7 +20,7 @@ if (CLIENT) then
 		ix.lang.AddTable("english", {
 			['RepairKitWrong'] = 'You do not have a repair kit!',
 			['DurabilityUnusableTip'] = "This weapon is broken.",
-			conditionDesc = "Condition: %s (%s%%)",
+			conditionDesc = "Durability: %s (%s%%)",
 			txtCond0 = "Factory New",
 			txtCond1 = "Almost New",
 			txtCond2 = "Visibly Wornout",
