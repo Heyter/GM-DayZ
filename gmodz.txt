@@ -1,0 +1,7 @@
+"gmodz"
+{
+	"base" 			"helix"
+	"title" 		"GmodZ"
+	"author" 		"Hikka"
+	"menusystem"	"1"
+}

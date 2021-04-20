@@ -1,0 +1,8 @@
+"Modulate"
+{
+	"$znearer" 1
+	"$basetexture" "overlays/vignette01"
+	"$translucent" "1"
+	"$additive" "1"
+	"$mod2x" "1"
+}

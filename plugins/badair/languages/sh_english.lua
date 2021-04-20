@@ -1,0 +1,15 @@
+LANGUAGE = {
+	gmskNeedFilter = "You don't have any filter to exchange.",
+	gmskFilter = "You exchanged the filter.",
+	filterTip = "Changes the filter to make it functional again.",
+	maskEquipped = "You're trying to equip another Gas Mask on your face!",
+	noFilter = "There is no Gas Mask Filter in the inventory.",
+	maskFull = "This Gas Mask's filter is already new.",
+	gasMaskDesc = "A Gas-mask type Respirator that protects you from bad airs.\nMust be equipped to avoid harzadous environments.",
+	gasMaskFilterDesc = "Filter: %s (%s's.)",
+	gasMaskDescEntity = "A Gas-mask type Respirator that protects you from bad airs.",
+	filterDesc = "A Filter for Gas Mask. Gas Mask won't be functional without filters.\nYou can Drag and Drop this item on Gas Mask to change the filter.",
+	filterDescEntity = "A Filter for Gas Mask.",
+	txtFunc = "Functional",
+	txtFail = "Empty",
+}
