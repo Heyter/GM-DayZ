@@ -19,7 +19,7 @@ function ENT:Use(activator)
 	if (inventory and !ix.storage.InUse(inventory)) then
 		ix.storage.Open(activator, inventory, {
 			entity = self,
-			name = self:GetStoredName() or "Grave",
+			name = self:GetStoredName() or L"grave",
 			searchTime = 0.7,
 			data = {money = self:GetMoney()}
 		})

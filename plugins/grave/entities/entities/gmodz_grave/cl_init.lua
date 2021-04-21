@@ -28,6 +28,9 @@ function ENT:Draw()
 end
 
 function ENT:DoDraw(alpha)
+	local to_loot = L"to_loot"
+	local here_lies = L"here_lies"
+
 	local steamIcon = ix.steam.GetAvatar(self:GetStoredID())
 	local ownerNick = self:GetStoredName()
 	local repData = Schema.ranks[self:GetReputation()] or Schema.ranks[0]
@@ -39,7 +42,7 @@ function ENT:DoDraw(alpha)
 	local pos = -150
 
 	local white = ColorAlpha(color_white, alpha)								
-	draw.DrawText("Here lies", "GraveTitle", 0, pos - 10, white, TEXT_ALIGN_CENTER)
+	draw.DrawText(here_lies, "GraveTitle", 0, pos - 10, white, TEXT_ALIGN_CENTER)
 	draw.DrawText(tostring(ownerNick), "GraveTitleLarge", 0, pos + 30, ColorAlpha(repData[2] or color_white, alpha), TEXT_ALIGN_CENTER) -- reputation
 
 	pos = pos + 85
@@ -52,9 +55,9 @@ function ENT:DoDraw(alpha)
 
 	local useText = string.upper(Format("[%s]", input.LookupBinding("+use")) or "NA")
 	surface.SetFont("GraveTitle")
-	local lootTextX = surface.GetTextSize("to loot")
+	local lootTextX = surface.GetTextSize(to_loot)
 	local useTextX = surface.GetTextSize(useText)
 
 	draw.DrawText(useText, "GraveTitle", -lootTextX / 2, pos + 95, Color(50, 255, 50, alpha), TEXT_ALIGN_CENTER)
-	draw.DrawText("to loot", "GraveTitle", useTextX / 2 + 10, pos + 95, white, TEXT_ALIGN_CENTER)
+	draw.DrawText(to_loot, "GraveTitle", useTextX / 2 + 10, pos + 95, white, TEXT_ALIGN_CENTER)
 end

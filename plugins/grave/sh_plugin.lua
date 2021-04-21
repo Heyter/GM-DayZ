@@ -10,6 +10,18 @@ ix.config.Add("GraveLifetime", 300, "How long it takes for a grave to decay in s
 })
 
 if (CLIENT) then
+	ix.lang.AddTable("russian", {
+		here_lies = "Здесь покоится",
+		to_loot = "чтобы обокрасть",
+		grave = "Могила"
+	})
+
+	ix.lang.AddTable("english", {
+		here_lies = "Here lies",
+		to_loot = "to loot",
+		grave = "Grave"
+	})
+
 	function PLUGIN:LoadFonts()
 		surface.CreateFont("GraveTitle",
 		{
