@@ -44,7 +44,7 @@ function PLUGIN:PlayerSpawn(client)
 	end
 end
 
-local thinkTime = CurTime()
+local thinkTime, regenTime = CurTime(), CurTime()
 function PLUGIN:PlayerPostThink(client)
 	if (!client:GetCharacter() or !client:Alive()) then return end
 
@@ -65,7 +65,7 @@ function PLUGIN:PlayerPostThink(client)
 		thinkTime = CurTime() + ix.config.Get("needsTime", 1)
 	end
 
-	if (!client.regenTime or client.regenTime < CurTime()) then
+	if (regenTime < CurTime()) then
 		if (hook.Run("CanPlayerRegenHealth", client) != false and client:Health() < client:GetMaxHealth()) then
 			local hunger = 1 - client:GetHungerPercent()
 			local thirst = 1 - client:GetThirstPercent()
@@ -75,7 +75,7 @@ function PLUGIN:PlayerPostThink(client)
 			end
 		end
 
-		client.regenTime = CurTime() + 5
+		regenTime = CurTime() + 5
 	end
 end
 
