@@ -450,15 +450,17 @@ else
 		hud:drawText(perc, L(repData[1]))
 
 		-- Human needs
+		local getHunger = math.Round((1 - client:GetHungerPercent()) * 100)
+		local getThirst = math.Round((1 - client:GetThirstPercent()) * 100)
+
 		perc.textColor = color_white
 		perc.w = sscale(30)
 		perc.h = sscale(25)
 		perc.x = oldX
 		perc.y = perc.y - perc.h - margin
-		hud:percDisp(perc, "HUNGER", 100)
+		hud:percDisp(perc, "HUNGER", getHunger)
 		perc.x = perc.x + perc.w + margin
-		hud:percDisp(perc, "THIRST", 100)
-		--hud:percDisp(perc, "허기", math.Round((1 - client:getHungerPercent())*100))
+		hud:percDisp(perc, "THIRST", getThirst)
 		perc.x = perc.x + perc.w + margin
 		hud:percDisp(perc, "STAMINA", math.Round(client:GetLocalVar("stm", 0)))
 
@@ -466,20 +468,23 @@ else
 		perc.h = sscale(15)
 		perc.x = sscale(5)
 
-		--if (client:getHungerPercent() >= 1) then
-		--	perc.y = perc.y - perc.h - margin
-		--	hud:status(perc, "굶주림")
-		--end
 		if (client:GetNetVar("bleeding")) then
 			local damage = client:GetNetVar("bleeding")
+			local prefix = "MILD"
 
-			if (damage >= 65) then
-				damage = damage * 2
+			if (damage >= 50) then
+				prefix = "SERIOUS"
+
+				if (damage >= 65) then
+					damage = damage * 2
+				end
+			elseif (damage >= 30) then
+				prefix = "AVERAGE"
 			end
 
 			perc.textColor = LerpColorHSV(nil, nil, client:GetMaxHealth(), client:GetMaxHealth() - damage, 0) -- цвет серьёзности кровотечения
 			perc.y = perc.y - perc.h - margin
-			hud:status(perc, "BLOOD LOSS", "5")
+			hud:status(perc, prefix .. " BLOOD LOSS", "5")
 		end
 
 		-- blood loss effect
@@ -509,16 +514,8 @@ else
 		if (client:GetLocalVar("legBroken")) then
 			perc.textColor = Color(255, 0, 0) -- todo: сделать библиотеку цветов
 			perc.y = perc.y - perc.h - margin
-			hud:status(perc, "BROKEN LEG")
+			hud:status(perc, "BROKEN LEG") -- НОГА ПОВРЕЖДЕНА
 		end
-		-- if (char:getData("b_inf")) then
-			-- perc.y = perc.y - perc.h - margin
-			-- hud:status(perc, "감염")
-		-- end
-		-- if (client:getNetVar("brth")) then
-			-- perc.y = perc.y - perc.h - margin
-			-- hud:status(perc, "지침", "k")
-		-- end
 
 		-- Safezone
 		if (!client:CanEnterSafe()) then
@@ -550,7 +547,13 @@ else
 			perc.y = perc.y - perc.h - margin
 			perc.textColor = Color(255, 0, 0)
 
-			hud:status(perc, "COMBAT LOGGED " .. string.ToMinutesSeconds(pvpTime), "R")
+			hud:status(perc, "COMBAT LOGGED " .. string.ToMinutesSeconds(pvpTime), "R") -- В БОЮ
+		end
+
+		if (getHunger >= 90 and getThirst >= 90) then
+			perc.textColor = Color(50, 200, 50)
+			perc.y = perc.y - perc.h - margin
+			hud:status(perc, "WELL FED", "j") -- СЫТ
 		end
 	end
 end

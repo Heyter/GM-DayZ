@@ -22,8 +22,16 @@ function PLUGIN:OnCharacterDisconnect(client)
 end
 
 function PLUGIN:PlayerDeath(client)
-	client:HealLeg()
-	client:HealBleeding()
+	client.healBody = true
+end
+
+function PLUGIN:PlayerSpawn(client)
+	if (client.healBody) then
+		client:HealLeg()
+		client:HealBleeding()
+
+		client.healBody = nil
+	end
 end
 
 function PLUGIN:EntityTakeDamage(victim, dmg_info)
@@ -109,6 +117,11 @@ function playerMeta:SetBleeding(damage, bForce)
 
 		timer.Create("ixBleeding" .. self:EntIndex(), delay, repetitions, function()
 			if (IsValid(self)) then
+				if (!self:Alive()) then
+					timer.Remove("ixBleeding" .. self:EntIndex())
+					return
+				end
+
 				local amt = math.max(0, self:Health() - loss)
 
 				if (amt <= 0) then

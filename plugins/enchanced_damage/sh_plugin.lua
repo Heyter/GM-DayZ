@@ -18,13 +18,16 @@ function PLUGIN:ScalePlayerDamage(client, hit_group, dmg_info)
 	end
 end
 
-function PLUGIN:Move(client, move_data)
+function PLUGIN:Move(client, mv)
 	if (client:GetMoveType() != MOVETYPE_WALK) then return end
 
 	if (client:GetLocalVar("legBroken")) then
-		local speed = move_data:GetMaxSpeed() * .4
-		move_data:SetMaxSpeed(speed)
-		move_data:SetMaxClientSpeed(speed)
+		-- local speed = mv:GetMaxSpeed() * .4
+		-- mv:SetMaxSpeed(speed)
+		-- mv:SetMaxClientSpeed(speed)
+		local forward = math.Clamp(mv:GetForwardSpeed() * .25, 0, client:GetWalkSpeed())
+		mv:SetForwardSpeed(math.abs(math.sin(CurTime() * 3)) * forward)
+		mv:SetSideSpeed(0)
 	end
 end
 
