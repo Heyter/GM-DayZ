@@ -33,21 +33,11 @@ local translate_to = {
 	["zh-tw"] = "Traditional Chinese",
 }
 
-function L(key, ...)
-	local languages = ix.lang.stored
-	local langKey = translate_to[GetConVar("gmod_language"):GetString()]:lower()
-	local info = languages[langKey] or languages.english
+hook.Add("InitializedConfig", "native_language.InitializedConfig", function()
+	if (!LocalPlayer().native_lang) then
+		local langKey = translate_to[GetConVar("gmod_language"):GetString()]
+		ix.option.Set("language", langKey and langKey:lower() or "english", true)
 
-	return string.format(info and info[key] or languages.english[key] or key, ...)
-end
-
-function L2(key, ...)
-	local langKey = translate_to[GetConVar("gmod_language"):GetString()]:lower()
-	local info = ix.lang.stored[langKey]
-
-	if (info and info[key]) then
-		return string.format(info[key], ...)
+		LocalPlayer().native_lang = true
 	end
-end
-
-ix.option.Get("language", "english").populate = nil
+end)
