@@ -33,6 +33,10 @@ function PLUGIN:CanPlayerEnterSafeZone(entity, activator)
 	end
 end
 
+function PLUGIN:PlayerExitSafeZone(client)
+	client.protection_time = CurTime() + 10
+end
+
 function PLUGIN:PlayerInitialSpawn(client)
 	client:SetCustomCollisionCheck(true)
 	client:SetAvoidPlayers(false)

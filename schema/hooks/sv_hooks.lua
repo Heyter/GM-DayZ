@@ -20,11 +20,12 @@ function Schema:CanPlayerAccessDoor(client, door, access)
 end
 
 function Schema:PlayerShouldTakeDamage(client, attacker)
-	if (IsValid(attacker) and attacker:IsPlayer() and (attacker:GetLocalVar("protection"))) then
+	if (IsValid(attacker) and attacker:IsPlayer() and (attacker:GetLocalVar("protection")
+		or (attacker.protection_time or 0) > CurTime())) then
 		return false
 	end
 
-	if (client:GetLocalVar("protection")) then
+	if (client:GetLocalVar("protection") or (client.protection_time or 0) > CurTime()) then
 		return false
 	end
 end
