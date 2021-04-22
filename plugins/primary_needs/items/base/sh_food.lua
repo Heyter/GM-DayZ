@@ -104,7 +104,7 @@ else
 		end
 
 		if (self.hungerAmount != 0) then
-			client:AddHunger(self.hungerAmount * ix.config.Get("hungrySeconds", 3000))
+			client:AddHunger(self.hungerAmount * ix.config.Get("hungrySeconds", 3500))
 		end
 
 		if (self.thirstAmount != 0) then

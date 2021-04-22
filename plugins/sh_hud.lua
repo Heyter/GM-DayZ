@@ -470,21 +470,21 @@ else
 
 		if (client:GetNetVar("bleeding")) then
 			local damage = client:GetNetVar("bleeding")
-			local prefix = "MILD"
+			local prefix = "MILD" -- ЛЕГКОЕ
 
 			if (damage >= 50) then
-				prefix = "SERIOUS"
+				prefix = "SERIOUS" -- СЕРЬЁЗНОЕ
 
 				if (damage >= 65) then
 					damage = damage * 2
 				end
 			elseif (damage >= 30) then
-				prefix = "AVERAGE"
+				prefix = "AVERAGE" -- СРЕДНЕЕ
 			end
 
 			perc.textColor = LerpColorHSV(nil, nil, client:GetMaxHealth(), client:GetMaxHealth() - damage, 0) -- цвет серьёзности кровотечения
 			perc.y = perc.y - perc.h - margin
-			hud:status(perc, prefix .. " BLOOD LOSS", "5")
+			hud:status(perc, prefix .. " BLOOD LOSS", "5") -- КРОВОТЕЧЕНИЕ
 		end
 
 		-- blood loss effect
