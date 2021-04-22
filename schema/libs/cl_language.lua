@@ -36,7 +36,14 @@ local translate_to = {
 hook.Add("InitializedConfig", "native_language.InitializedConfig", function()
 	if (!LocalPlayer().native_lang) then
 		local langKey = translate_to[GetConVar("gmod_language"):GetString()]
-		ix.option.Set("language", langKey and langKey:lower() or "english", true)
+
+		if (langKey) then
+			langKey = langKey:lower()
+
+			if (ix.lang.stored[langKey]) then
+				ix.option.Set("language", langKey, true)
+			end
+		end
 
 		LocalPlayer().native_lang = true
 	end
