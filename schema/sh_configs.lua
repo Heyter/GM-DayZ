@@ -2,6 +2,7 @@ ix.currency.symbol = ""
 ix.currency.singular = ""
 ix.currency.plural = "RU"
 
+ix.config.SetDefault("font", "Jura")
 ix.config.SetDefault("genericFont", "Malgun Gothic")
 ix.config.SetDefault("music", "music/hl2_song19.mp3")
 ix.config.SetDefault("maxAttributes", 0)
