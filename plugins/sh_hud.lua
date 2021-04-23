@@ -401,6 +401,18 @@ else
 		end
 	end)
 
+	function PLUGIN:Think()
+		for k, v in ipairs(player.GetAll()) do
+			if not v:GetNetVar("brth") then continue end
+
+			local cooldown = v.breath_cooldown
+			if (not cooldown or cooldown < CurTime()) then  
+				v.breath_cooldown = CurTime() + 5
+				v:EmitSound("gmodz/breath.wav")
+			end
+		end
+	end
+
 	local lastEntity
 	function PLUGIN:HUDPaint()
 		local client = LocalPlayer()
