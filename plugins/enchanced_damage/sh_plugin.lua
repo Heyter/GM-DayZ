@@ -25,7 +25,13 @@ function PLUGIN:Move(client, mv)
 		-- local speed = mv:GetMaxSpeed() * .4
 		-- mv:SetMaxSpeed(speed)
 		-- mv:SetMaxClientSpeed(speed)
-		local forward = math.Clamp(mv:GetForwardSpeed() * .25, 0, client:GetWalkSpeed())
+		local walkSpeed = client:GetWalkSpeed()
+
+		if (client:HasBuff("adrenaline")) then
+			walkSpeed = walkSpeed * 1.25
+		end
+
+		local forward = math.Clamp(mv:GetForwardSpeed() * .25, 0, walkSpeed)
 		mv:SetForwardSpeed(math.abs(math.sin(CurTime() * 3)) * forward)
 		mv:SetSideSpeed(0)
 	end
