@@ -5,12 +5,13 @@ ix.currency.plural = "RU"
 ix.config.SetDefault("font", "Jura")
 ix.config.SetDefault("genericFont", "Malgun Gothic")
 ix.config.SetDefault("music", "music/hl2_song19.mp3")
-ix.config.SetDefault("maxAttributes", 0)
-ix.config.SetDefault("maxCharacters", 1)
-ix.config.SetDefault("allowVoice", true)
+ix.config.Set("maxAttributes", 0)
+ix.config.Set("maxCharacters", 1)
+ix.config.Set("allowVoice", true)
 ix.config.SetDefault("communityURL", "https://steamcommunity.com/id/meow1337")
-ix.config.SetDefault("weaponAlwaysRaised", true)
+ix.config.Set("weaponAlwaysRaised", true)
 ix.config.SetDefault("color", Color(75, 119, 190, 255))
+ix.config.Set("thirdperson", true)
 
 ix.config.Add("jumpStamina", 10, "How much stamina jumpes use up.", nil, {
 	data = {min = 0, max = 100},
@@ -19,7 +20,6 @@ ix.config.Add("jumpStamina", 10, "How much stamina jumpes use up.", nil, {
 
 -- unload plugins
 local noLoad = {
-	thirdperson = true,
 	saveitems = true,
 	recognition = true,
 	wepselect = true

@@ -2,6 +2,9 @@ PLUGIN.name = "First Person Effects"
 PLUGIN.author = "Black Tea"
 PLUGIN.desc = "This plugin adds more effects on First Person Perspective."
 
+local status = true
+if (status) then return end
+
 if (CLIENT) then
 	ix.option.Add("toggleEffects", ix.type.bool, true, {
 		category = "appearance"
