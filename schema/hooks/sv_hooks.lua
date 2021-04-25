@@ -36,6 +36,10 @@ function Schema:ShutDown()
 		if (v:GetClass() == "ix_item" or v:GetClass() == "gmodz_grave") then
 			v:Remove()
 		end
+
+		if (v:GetClass() == "prop_ragdoll" and v.ixInventory) then
+			v:Remove()
+		end
 	end
 end
 

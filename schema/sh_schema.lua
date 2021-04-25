@@ -2,6 +2,8 @@ Schema.name = "GmodZ"
 Schema.author = "Hikka"
 Schema.description = ""
 
+math.randomseed(os.time())
+
 function Schema:GetGameDescription()
 	return self.name
 end
