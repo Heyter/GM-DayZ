@@ -15,7 +15,7 @@ local map = {
 	font = "Default",
 
 	key = KEY_M,
-	delay = 2,
+	delay = 1,
 
 	panel_w = ScrH() * 0.7,
 	panel_h = ScrH() * 0.7,
@@ -82,32 +82,30 @@ function map.DrawMap(x, y, w, h)
 end
 
 function map.Open()
+	if not MAP then return end
+
 	if IsValid(map.panel) then
 		map.panel:Remove()
 		return
 	end
 
-	-- May be it can be removed
-	if not MAP then
-		net.Start("minimap.Request")
-		net.SendToServer()
-	end
-
 	map.panel = vgui.Create("DFrame")
 		map.panel:SetSize(map.panel_w, map.panel_h)
 		map.panel:Center()
+		map.panel:MakePopup()
 
-	local container = vgui.Create("Panel", map.panel)
+	local container = vgui.Create("DPanel", map.panel)
 		container:Dock(FILL)
 
-	local x, y = container:GetPos()
+	local x, y = map.panel:GetPos()
+	local ww, wh = map.panel_w, map.panel_h
 
 	function container:Paint(w, h)
-		for k, v in ipairs(map.markers) do
-			map.DrawMarker(v, w, h)
-		end
+		map.DrawMap(x, y + 24, ww, wh)
 
-		map.DrawMap(x, y, w, h)
+		for k, v in ipairs(map.markers) do
+			map.DrawMarker(v, ww, wh)
+		end
 	end
 end
 

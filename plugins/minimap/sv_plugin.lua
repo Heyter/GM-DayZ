@@ -57,15 +57,14 @@ end
 
 -- Black magic ended. Normal code here
 
+local MAP
+
+hook.Add("InitPostEntity", "minimap.InitPostEntity", function()
+	MAP = GetMap()
+end)
+
 net.Receive("minimap.Request", function(_, player)
-	local time = os.time()
-
-	if (!player.map_cooldown or player.map_cooldown < time) then
-		net.Start("minimap.Request")
-			net.WriteTable(GetMap())
-		net.Send(player)
-
-		-- На всякий случай. Все-таки что-то тут высчитывается. В теории сервер можно положить.
-		player.map_cooldown = time + 120
-	end
+	net.Start("minimap.Request")
+		net.WriteTable(MAP)
+	net.Send(player)
 end)
