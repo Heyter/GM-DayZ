@@ -1,16 +1,5 @@
 local PLUGIN = PLUGIN
 
-local MAP
-
-hook.Add("InitPostEntity", "minimap.InitPostEntity", function()
-	net.Start("minimap.Request")
-	net.SendToServer()
-end)
-
-net.Receive("minimap.Request", function()
-	MAP = net.ReadTable()
-end)
-
 local map = {
 	font = "Default",
 
@@ -27,6 +16,58 @@ local map = {
 		}
 	}
 }
+
+local MAP
+
+function map.Generate()
+	local LP = LocalPlayer()
+
+	MAP = {}
+
+	local uptrace = util.TraceLine( {
+		start = Vector(0,0,2000),
+		endpos = Vector(0,0,2000)+Vector(0,0,1)*1000000,
+		mask = MASK_NPCWORLDSTATIC
+	} )
+
+	local startpos = Vector(0,0,uptrace.HitPos.z-25)
+	local righttrace = util.TraceLine( {
+		start = startpos,
+		endpos = startpos+Vector(0,1,0)*1000000,
+		mask = MASK_NPCWORLDSTATIC
+	} )
+	local lefttrace = util.TraceLine( {
+		start = startpos,
+		endpos = startpos-Vector(0,1,0)*1000000,
+		mask = MASK_NPCWORLDSTATIC
+	} )
+	local fronttrace = util.TraceLine( {
+		start = startpos,
+		endpos = startpos+Vector(1,0,0)*1000000,
+		mask = MASK_NPCWORLDSTATIC
+	} )
+	local backtrace = util.TraceLine( {
+		start = startpos,
+		endpos = startpos-Vector(1,0,0)*1000000,
+		mask = MASK_NPCWORLDSTATIC
+	} )
+
+	local pos = LP:GetPos()
+	MAP.MapCenter = (righttrace.HitPos+lefttrace.HitPos+fronttrace.HitPos+backtrace.HitPos)*0.25
+	MAP.MapCenter.z = LP:GetPos().z+2500
+
+	local MapSize = (righttrace.HitPos):Distance((lefttrace.HitPos))
+	MapSize = MapSize*0.5
+
+	MAP.SizeW = -MapSize - 250
+	MAP.SizeE = MapSize + 250
+	MAP.SizeS = -MapSize - 250
+	MAP.SizeW = MapSize + 250
+end
+
+hook.Add("InitPostEntity", "minimap.InitPostEntity", function()
+	map.Generate()
+end)
 
 function map.DrawMarker(data, w, h)
 	local font = map.font
@@ -65,10 +106,14 @@ end
 function map.DrawMap(x, y, w, h)
 	local old = DisableClipping(true)
 		render.RenderView( {
-			origin = Vector(0, 0, MAP.SizeHeight * 0.8),
-			angles = Angle(90, 90, 0),
+			origin = MAP.MapCenter,
+			angles = Angle(90, 0, 0),
 			x = x, y = y,
 			w = w, h = h,
+
+			aspectratio = 1,
+			znear = -10000,
+			zfar = 10000,
 
 			bloomtone = false,
 			drawviewmodel = false,
@@ -82,7 +127,7 @@ function map.DrawMap(x, y, w, h)
 end
 
 function map.Open()
-	if not MAP then return end
+	if not MAP then map.Generate() return end
 
 	if IsValid(map.panel) then
 		map.panel:Remove()
