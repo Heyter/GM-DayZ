@@ -1,5 +1,28 @@
 local PLUGIN = PLUGIN
 
+function PLUGIN:GetLocalAreaPosition(startPosition, endPosition)
+	local center = LerpVector(0.5, startPosition, endPosition)
+	local min = WorldToLocal(startPosition, angle_zero, center, angle_zero)
+	local max = WorldToLocal(endPosition, angle_zero, center, angle_zero)
+
+	return center, min, max
+end
+
+local function drawCircle( x, y, radius, seg )
+	local cir = {}
+
+	table.insert( cir, { x = x, y = y, u = 0.5, v = 0.5 } )
+	for i = 0, seg do
+		local a = math.rad( ( i / seg ) * -360 )
+		table.insert( cir, { x = x + math.sin( a ) * radius, y = y + math.cos( a ) * radius, u = math.sin( a ) / 2 + 0.5, v = math.cos( a ) / 2 + 0.5 } )
+	end
+
+	local a = math.rad( 0 ) -- This is needed for non absolute segment counts
+	table.insert( cir, { x = x + math.sin( a ) * radius, y = y + math.cos( a ) * radius, u = math.sin( a ) / 2 + 0.5, v = math.cos( a ) / 2 + 0.5 } )
+
+	surface.DrawPoly( cir )
+end
+
 local map = {
 	font = "Default",
 
@@ -62,7 +85,13 @@ function map.Generate()
 	MAP.SizeW = -MapSize - 250
 	MAP.SizeE = MapSize + 250
 	MAP.SizeS = -MapSize - 250
-	MAP.SizeW = MapSize + 250
+	MAP.SizeN = MapSize + 250
+
+	MAP.SizeX = MAP.SizeE + math.abs(MAP.SizeW)
+	MAP.SizeY = MAP.SizeN + math.abs(MAP.SizeS)
+
+	MAP.SizeX = math.abs(MAP.SizeX)
+	MAP.SizeY = math.abs(MAP.SizeY)
 end
 
 hook.Add("InitPostEntity", "minimap.InitPostEntity", function()
@@ -92,15 +121,45 @@ function map.DrawMarker(data, w, h)
     -- map.panel_w
     local numa = ScrH() * 0.7
 
-    draw.RoundedBox(0, math.Clamp(b/MAP.SizeX * numa, 0, w ) - 5, h - math.Clamp(a/MAP.SizeY * numa, 0, h), 12, 4, Color(0, 0, 0, 255))
-    draw.RoundedBox(0, math.Clamp(b/MAP.SizeX * numa, 0, w ) - 1, h - math.Clamp(a/MAP.SizeY * numa, 0, h) - 4, 4, 12, Color(0, 0, 0, 255))
+    --draw.RoundedBox(0, math.Clamp(b/MAP.SizeX * numa, 0, w ) - 5, h - math.Clamp(a/MAP.SizeY * numa, 0, h), 12, 4, Color(0, 0, 0, 255))
+    surface.SetDrawColor(color_white)
+    surface.DrawCircle(math.Clamp(b/MAP.SizeX * numa, 0, w ), h - math.Clamp(a/MAP.SizeY * numa, 0, h), 4)
 
-    draw.RoundedBox(0, math.Clamp(b/MAP.SizeX * numa, 0, w ) - 5, h - math.Clamp(a/MAP.SizeY * numa, 0, h), 11, 3, color)
-    draw.RoundedBox(0, math.Clamp(b/MAP.SizeX * numa, 0, w ) - 1, h - math.Clamp(a/MAP.SizeY * numa, 0, h) - 4, 3, 11, color)
-    draw.SimpleText(text,  font, math.Clamp(b/MAP.SizeX * numa, 0, w) + 1, 
-    	h - math.Clamp(a/MAP.SizeY * numa, 0, h) + 11, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)  
-    draw.SimpleText(text,  font, math.Clamp(b/MAP.SizeX * numa, 0, w), 
-    	h - math.Clamp(a/MAP.SizeY * numa, 0, h) + 10, color, TEXT_ALIGN_CENTER)
+    if data.text then
+    	draw.SimpleText(text,  font, math.Clamp(b/MAP.SizeX * numa, 0, w) + 1, 
+    		h - math.Clamp(a/MAP.SizeY * numa, 0, h) + 6, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)  
+    	draw.SimpleText(text,  font, math.Clamp(b/MAP.SizeX * numa, 0, w), 
+    		h - math.Clamp(a/MAP.SizeY * numa, 0, h) + 5, color, TEXT_ALIGN_CENTER)
+    end
+    --draw.RoundedBox(0, math.Clamp(b/MAP.SizeX * numa, 0, w ) - 1, h - math.Clamp(a/MAP.SizeY * numa, 0, h) - 4, 4, 12, Color(0, 0, 0, 255))
+
+    --draw.RoundedBox(0, math.Clamp(b/MAP.SizeX * numa, 0, w ) - 5, h - math.Clamp(a/MAP.SizeY * numa, 0, h), 11, 3, color)
+    --draw.RoundedBox(0, math.Clamp(b/MAP.SizeX * numa, 0, w ) - 1, h - math.Clamp(a/MAP.SizeY * numa, 0, h) - 4, 3, 11, color)
+    --
+end
+
+function map.DrawArea(pos, radius, outline_color, inline_color, w, h)
+	local a, b
+
+	if MAP.SizeS > 0 then
+    	a = pos.y + MAP.SizeN
+    else
+        a = pos.y - MAP.SizeS
+    end
+
+    if MAP.SizeW > 0 then
+        b = pos.x + MAP.SizeE
+    else
+        b = pos.x - MAP.SizeW
+    end
+
+    local numa = ScrH() * 0.7
+
+	surface.SetDrawColor(inline_color)
+	drawCircle(math.Clamp(b/MAP.SizeX * numa, 0, w ), h - math.Clamp(a/MAP.SizeY * numa, 0, h), radius, 128)
+
+	surface.SetDrawColor(outline_color)
+	surface.DrawCircle(math.Clamp(b/MAP.SizeX * numa, 0, w ), h - math.Clamp(a/MAP.SizeY * numa, 0, h), radius)
 end
 
 function map.DrawMap(x, y, w, h)
@@ -150,6 +209,18 @@ function map.Open()
 
 		for k, v in ipairs(map.markers) do
 			map.DrawMarker(v, ww, wh)
+		end
+		
+		for k, v in pairs(ix.area.stored) do
+			local center = PLUGIN:GetLocalAreaPosition(v.startPosition, v.endPosition)
+
+			map.DrawMarker({
+				pos = center,
+				text = k
+			}, ww, wh)
+
+			-- TODO: Find radius
+			map.DrawArea(center, 6, color_white, Color(152, 251, 152,200), ww, wh)
 		end
 	end
 end
