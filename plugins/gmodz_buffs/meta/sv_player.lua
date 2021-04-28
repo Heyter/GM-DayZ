@@ -91,13 +91,3 @@ function playerMeta:ClearBuffs(bOnlyTimer)
 		self.timer_buffs = {}
 	end
 end
-
-
--- TODO: удалить
-concommand.Add("add_buff", function(c)
-	c:AddBuff("adrenaline")
-end)
-
-concommand.Add("clear_buff", function(c)
-	c:ClearBuffs()
-end)

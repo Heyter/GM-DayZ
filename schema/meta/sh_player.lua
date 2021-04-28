@@ -29,8 +29,4 @@ do
 
 	playerMeta.Nick = playerMeta.GetName
 	playerMeta.Name = playerMeta.GetName
-
-	-- function playerMeta:HasWhitelist(faction)
-		-- return true
-	-- end
 end

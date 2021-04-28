@@ -31,3 +31,9 @@ do
 end
 
 ix.util.Include("sv_plugin.lua")
+
+function PLUGIN:CanPlayerRegenHealth(client)
+	if (client:GetNetVar("bleeding")) then
+		return false
+	end
+end

@@ -29,12 +29,18 @@ function PLUGIN:PlayerDeath(victim, _, attacker)
 			attacker:AddReputation(repDiff)
 		end
 
-		if (attacker:Alive()) then -- если умереть вместе с целью, то вешается пенальти
-			attacker:SafePenalty()
-		end
+		attacker:SafePenalty()
 	end
 
 	victim:ResetPenalty()
+	victim.resetPenalty = true -- bugfix: если умереть вместе с целью, например от взрыва, то вешается пенльти.
+end
+
+function PLUGIN:PlayerSpawn(client)
+	if (client.resetPenalty) then
+		client:ResetPenalty()
+		client.resetPenalty = nil
+	end
 end
 
 function PLUGIN:EntityTakeDamage(victim, dmgInfo)

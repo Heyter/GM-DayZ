@@ -561,10 +561,12 @@ else
 			hud:status(perc, "COMBAT LOGGED " .. string.ToMinutesSeconds(pvpTime), "R") -- В БОЮ
 		end
 
-		if (getHunger >= 90 and getThirst >= 90) then
-			perc.textColor = Color(50, 200, 50)
-			perc.y = perc.y - perc.h - margin
-			hud:status(perc, "WELL FED", "j") -- СЫТ
+		if (hook.Run("CanPlayerRegenHealth", client) != false) then
+			if (getHunger >= 90 and getThirst >= 90) then
+				perc.textColor = Color(50, 200, 50)
+				perc.y = perc.y - perc.h - margin
+				hud:status(perc, "WELL FED", "j") -- СЫТ
+			end
 		end
 	end
 end

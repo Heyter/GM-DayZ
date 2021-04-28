@@ -78,7 +78,6 @@ function PLUGIN:PlayerPostThink(client)
 	end
 end
 
-
 -- PLAYER META
 do
 	local playerMeta = FindMetaTable("Player")

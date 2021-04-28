@@ -1,16 +1,28 @@
-util.AddNetworkString("killfeed.Message")
+util.AddNetworkString('ixDeathNotice')
 
-local PLUGIN = PLUGIN
+function PLUGIN:DoPlayerDeath(victim, attacker, dmg_info)
+	local inflictor = dmg_info:GetInflictor()
 
-function PLUGIN:DoPlayerDeath(player, attacker, dmg)
-	local weapon = attacker.GetActiveWeapon and attacker:GetActiveWeapon() or nil
-	local attacker = attacker:GetName()
+	if (IsValid(victim.bleeding_att) and (victim.DeathMsg or "") == "bledout") then
+		attacker = victim.bleeding_att
+	else
+		if (inflictor == attacker and inflictor != victim) then
+			local weapon = attacker.GetActiveWeapon and attacker:GetActiveWeapon() or nil
 
-	net.Start("killfeed.Message")
-		net.WriteString(player:GetName())
-		net.WriteString(attacker)
-		net.WriteString(weapon and weapon:GetName() or "NULL")
+			if (IsValid(weapon)) then
+				inflictor = weapon
+			end
+		end
+	end
 
-		net.WriteBool(player:GetNetVar("bleeding", false))
+	if (IsValid(attacker) and attacker:IsPlayer() and attacker != victim) then
+		attacker:AddFrags(1)
+	end
+
+	net.Start("ixDeathNotice")
+		net.WriteEntity(victim)
+		net.WriteEntity(attacker)
+		net.WriteString(inflictor:GetClass())
+		net.WriteString(victim.DeathMsg or "")
 	net.Broadcast()
 end

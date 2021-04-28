@@ -9,7 +9,7 @@ function PLUGIN:GetFallDamage(client, speed)
 		client:EmitSound("Flesh.Break")
 
 		if (math.random() >= 0.8) then -- почему бы и нет.
-			client:SetBleeding(damage)
+			client:SetBleeding(damage, nil, client)
 		end
 	end
 
@@ -26,6 +26,8 @@ function PLUGIN:PlayerDeath(client)
 end
 
 function PLUGIN:PlayerSpawn(client)
+	client.DeathMsg = nil
+
 	if (client.healBody) then
 		client:HealLeg()
 		client:HealBleeding()
@@ -47,7 +49,7 @@ function PLUGIN:EntityTakeDamage(victim, dmg_info)
 		local hit_group = victim:LastHitGroup()
 
 		if (dmg_info:IsBulletDamage() or dmg_info:IsExplosionDamage()) then
-			victim:SetBleeding(damage)
+			victim:SetBleeding(damage, nil, attacker)
 
 			if (damage > victim:Health() / 2 and damage < victim:Health() and (hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG)) then
 				victim:BreakLeg()
@@ -87,7 +89,7 @@ function playerMeta:HealLeg(bSetOnlyTimer)
 	end
 end
 
-function playerMeta:SetBleeding(damage, bForce)
+function playerMeta:SetBleeding(damage, bForce, inflictor)
 	if (!damage) then return end
 	if (!bForce and hook.Run("PlayerShouldTakeDamage", self, self) == false) then return end
 
@@ -98,6 +100,8 @@ function playerMeta:SetBleeding(damage, bForce)
 	if (amt_bleeding and amt_bleeding > damage) then return end -- не перезаписываем более лучшее кровотечение
 
 	if (damage >= 15) then
+		self.bleeding_att = inflictor
+
 		local delay, repetitions, loss = 10, 0, 4
 		local dmgPerc = math.max(0, (max_health - damage) / max_health)
 
@@ -125,7 +129,8 @@ function playerMeta:SetBleeding(damage, bForce)
 				local amt = math.max(0, self:Health() - loss)
 
 				if (amt <= 0) then
-					timer.Remove("ixBleeding" .. self:EntIndex()) -- по сути, это вызывается в HealBleeding
+					timer.Remove("ixBleeding" .. self:EntIndex())
+					self.DeathMsg = "bledout"
 					self:Kill()
 					return
 				end
@@ -139,6 +144,8 @@ end
 function playerMeta:HealBleeding(amount)
 	timer.Remove("ixBleeding" .. self:EntIndex())
 	self:SetNetVar("bleeding", nil)
+
+	self.bleeding_att = nil
 
 	if (amount) then
 		self:SetHealth(math.min(self:GetMaxHealth(), self:Health() + amount))
