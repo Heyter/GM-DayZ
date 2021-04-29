@@ -67,8 +67,8 @@ else
 		surface.CreateFont("ixDHUDNum", {
 			font = "Jura",
 			extended = true,
-			size = sscale(11),
-			weight = 300,
+			size = math.max(sscale(11), 23),
+			weight = 100,
 		})
 
 		surface.CreateFont("nutDHUDIcon", {
@@ -152,21 +152,25 @@ else
 		wok.w = w
 	end
 
-	function hud:edgyBar(wok, color, text)
+	function hud:edgyBar(wok, color)
 		local x, y, w, h = wok.x, wok.y, wok.w, wok.h
 
 		dbox(wok.rnd or 8, x, y, w, h, ColorAlpha(color_black, 200))
 		local tx, ty = ix.util.DrawText("A", x + sscale(4), y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "nutDHUDIcon")
 
 		local totallen = w - tx - sscale(12)
-		local awto = (LocalPlayer():Health() / LocalPlayer():GetMaxHealth())
+
+		local maxHP = LocalPlayer():GetMaxHealth()
+		local HP = LocalPlayer():Health()
+
+		self.awto = Lerp(FrameTime() * 5, self.awto or HP, HP)
 
 		surface.SetDrawColor(192, 57, 43, 75)
 		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen, h - sscale(6))
 
 		surface.SetDrawColor(192, 57, 43)
-		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen * awto, h - sscale(6))
-		ix.util.DrawText(math.max(0, (awto * 100)) .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
+		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen * math.min(maxHP, self.awto) / maxHP, h - sscale(6))
+		ix.util.DrawText(math.Clamp(math.Round(self.awto), 0, maxHP) .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 0, TEXT_ALIGN_CENTER, "ixDHUDNum")
 	end
 
 	function hud:drawText(wok, title, font)
@@ -487,6 +491,8 @@ else
 				prefix = "SERIOUS" -- СЕРЬЁЗНОЕ
 
 				if (damage >= 65) then
+					prefix = "HEAVY" -- ТЯЖЕЛОЕ
+
 					damage = damage * 2
 				end
 			elseif (damage >= 30) then
@@ -512,12 +518,16 @@ else
 						--effect:SetScale(200)
 					util.Effect("blooddrop", effect, nil)
 
-					local dmgPerc = math.max(0, (v:GetMaxHealth() - damage) / v:GetMaxHealth())
-					if (damage >= 5) then
-						dmgPerc = dmgPerc * 0.85
+					local delay = 5
+
+					if (damage >= 50) then
+						delay = (damage >= 65 and 0.25 or 0.5)
+					else
+						local dmgPerc = math.max(0, (v:GetMaxHealth() - damage) / v:GetMaxHealth())
+						delay = math.max(0.25, 2 * dmgPerc)
 					end
 
-					v.timeBlood = CurTime() + math.max(0.5, math.floor(2 * dmgPerc))
+					v.timeBlood = CurTime() + delay
 				end
 			end
 		end
