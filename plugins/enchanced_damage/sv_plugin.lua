@@ -8,7 +8,7 @@ function PLUGIN:GetFallDamage(client, speed)
 		client:BreakLeg()
 		client:EmitSound("Flesh.Break")
 
-		if (math.random() >= 0.7) then -- почему бы и нет.
+		if (math.random() >= 0.8) then -- почему бы и нет.
 			client:SetBleeding(damage)
 		end
 	end

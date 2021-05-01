@@ -12,7 +12,7 @@ ix.util.Include("sv_plugin.lua")
 ix.util.Include("meta/sh_buff.lua", "shared")
 ix.util.Include("meta/sv_player.lua", "server")
 
-local function RegisterBuff(uniqueID, path, isSingleFile)
+function ix.buff.Register(uniqueID, path, isSingleFile)
 	if (!uniqueID) then
 		ErrorNoHalt("[GMODZ::Buffs] You tried to register an buff without uniqueID!\n")
 		return
@@ -21,7 +21,9 @@ local function RegisterBuff(uniqueID, path, isSingleFile)
 	BUFF = ix.buff.list[uniqueID] or setmetatable({}, ix.buff.meta)
 	BUFF.uniqueID = uniqueID
 
-	ix.util.Include(isSingleFile and path or path.."/sh_init.lua", "shared")
+	if (path) then
+		ix.util.Include(isSingleFile and path or path.."/sh_init.lua", "shared")
+	end
 
 	for k, v in pairs(BUFF) do
 		if (isfunction(v)) then
@@ -32,6 +34,8 @@ local function RegisterBuff(uniqueID, path, isSingleFile)
 
 	ix.buff.list[BUFF.uniqueID] = BUFF
 	BUFF = nil
+
+	return ix.buff.list[uniqueID]
 end
 
 function PLUGIN:InitializedPlugins()
@@ -40,11 +44,11 @@ function PLUGIN:InitializedPlugins()
 	local files, folders = file.Find(directory.."/*", "LUA")
 
 	for _, v in ipairs(folders) do
-		RegisterBuff(v, directory.."/"..v)
+		ix.buff.Register(v, directory.."/"..v)
 	end
 
 	for _, v in ipairs(files) do
-		RegisterBuff(string.StripExtension(v), directory.."/"..v, true)
+		ix.buff.Register(string.StripExtension(v), directory.."/"..v, true)
 	end
 end
 

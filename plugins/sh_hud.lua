@@ -66,8 +66,7 @@ else
 	function PLUGIN:LoadFonts()
 		surface.CreateFont("ixDHUDNum", {
 			font = "Jura",
-			extended = true,
-			size = math.max(sscale(11), 23),
+			size = sscale(10),
 			weight = 100,
 		})
 

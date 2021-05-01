@@ -21,17 +21,20 @@ end
 function PLUGIN:Move(client, mv)
 	if (client:GetMoveType() != MOVETYPE_WALK) then return end
 
-	if (client:GetLocalVar("legBroken")) then
-		local walkSpeed = client:GetWalkSpeed() * .8
+	local additive, walkSpeed = 0, mv:GetMaxSpeed()
 
-		if (client:HasBuff("adrenaline")) then
-			walkSpeed = walkSpeed * 1.75
-		end
-
-		local speed = walkSpeed
-		mv:SetMaxSpeed(speed)
-		mv:SetMaxClientSpeed(speed)
+	if (client:HasBuff("adrenaline")) then
+		additive = additive + 30
 	end
+
+	if (client:GetLocalVar("legBroken")) then
+		walkSpeed = (additive < 1 and client:GetWalkSpeed() * .8 or walkSpeed * .8) + additive
+	elseif (additive > 0) then
+		walkSpeed = walkSpeed + additive
+	end
+
+	mv:SetMaxSpeed(walkSpeed)
+	mv:SetMaxClientSpeed(walkSpeed)
 end
 
 if (CLIENT) then
