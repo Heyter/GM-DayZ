@@ -78,3 +78,38 @@ end
 function Schema:PlayerSpawnVehicle(client)
 	return client:IsSuperAdmin()
 end
+
+do
+	local Hit_Sounds = {head = {}, body = {}, death = {}}
+
+	for i = 1, 4 do
+		Hit_Sounds.head[#Hit_Sounds.head + 1] = "gmodz/player/headshot" .. i .. ".ogg"
+	end
+
+	for i = 1, 16 do
+		Hit_Sounds.body[#Hit_Sounds.body + 1] = "gmodz/player/hit" .. i .. ".wav"
+	end
+
+	for i = 1, 10 do
+		Hit_Sounds.death[#Hit_Sounds.death + 1] = "gmodz/player/death" .. i .. ".wav"
+	end
+
+	function Schema:EntityTakeDamage(target, dmg_info)
+		if (dmg_info:GetDamage() > 0 and IsValid(target) and (target:IsNPC() or target:IsPlayer()) and dmg_info:IsBulletDamage()) then
+			if (target:LastHitGroup() == HITGROUP_HEAD) then
+				--target:EmitSound(Hit_Sounds.head[ math.random(1, #Hit_Sounds.head ) ])
+				sound.Play(Hit_Sounds.head[ math.random(1, #Hit_Sounds.head) ], target:GetShootPos(), 90, 100)
+				-- vol = 40 + math.min(90, dmg_info:GetDamage())
+				-- ply:ViewPunch(Angle(math.random(-40, 40), math.random(-40, 40), 0))
+			else
+				--target:EmitSound(Hit_Sounds.body[ math.random(1, #Hit_Sounds.body ) ])
+				sound.Play(Hit_Sounds.body[ math.random(1, #Hit_Sounds.body) ], target:GetShootPos(), 90, 100)
+			end
+		end
+	end
+
+	function Schema:GetPlayerDeathSound(client)
+		client:EmitSound(Hit_Sounds.death[ math.random(1, #Hit_Sounds.death) ])
+		return false
+	end
+end

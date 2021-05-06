@@ -89,7 +89,7 @@ function Schema:GetPainSound(gender, hit_group)
 			return "vo/npc/"..gender.."01/startle0"..math.random(1, 2)..".wav"
 		end
 	end
-	
+
 	return "vo/npc/"..gender.."01/pain0"..math.random(1, 9)..".wav"
 end
 

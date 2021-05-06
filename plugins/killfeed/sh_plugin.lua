@@ -7,8 +7,14 @@ ix.util.Include("sv_plugin.lua")
 if (CLIENT) then
 	local PLUGIN = PLUGIN
 	PLUGIN.DeathNotify = PLUGIN.DeathNotify or nil
+	PLUGIN.WeaponsList = PLUGIN.WeaponsList or {}
 
 	function PLUGIN:InitPostEntity()
+		self.WeaponsList = list.Get("Weapon")
+		self.WeaponsList['rpg_missile'] = 'RPG Missile'
+		self.WeaponsList['npc_satchel'] = 'S.L.A.M'
+		self.WeaponsList['npc_grenade_frag'] = 'Frag Grenade'
+
 		local panel = vgui.Create("DNotify")
 		panel:SetPos(0, 25)
 		panel:SetSize(ScrW() - 25, ScrH())
@@ -25,7 +31,7 @@ if (CLIENT) then
 		if (death_msg == "bledout") then
 			text = "bled out"
 		elseif (ent_class) then
-			text = weapons.Get(ent_class) or scripted_ents.Get(ent_class) or ent_class
+			text = weapons.Get(ent_class) or scripted_ents.Get(ent_class) or PLUGIN.WeaponsList[ent_class] or ent_class
 
 			if (istable(text)) then
 				if (text.TrueName) then
