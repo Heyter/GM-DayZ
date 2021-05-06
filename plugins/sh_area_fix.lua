@@ -1,6 +1,6 @@
 PLUGIN.name = "Area fix"
 PLUGIN.author = "STEAM_0:1:29606990"
-PLUGIN.description = ""
+PLUGIN.description = "Fixes correct receiving of information on the client side."
 
 if (CLIENT) then
 	local nextThink = 0
