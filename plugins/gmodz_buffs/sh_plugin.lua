@@ -59,11 +59,36 @@ end
 
 if (CLIENT) then
 	net.Receive("ixBuffAdd", function()
+		local client = LocalPlayer()
+
 		local uniqueID = net.ReadString()
 		local value = net.ReadType()
 
-		LocalPlayer().buffs = LocalPlayer().buffs or {}
-		LocalPlayer().buffs[uniqueID] = value
+		client.buffs = client.buffs or {}
+		client.buffs[uniqueID] = value
+
+		timer.Create("ixBuff", 1, 0, function()
+			if (!IsValid(client)) then
+				timer.Remove("ixBuff")
+				return
+			end
+
+			for id, v in pairs(client.buffs) do
+				if (isnumber(v)) then
+					if (v < CurTime()) then
+						client.buffs[id] = nil
+						ix.buff.list[id]:OnRemove(self)
+					else
+						ix.buff.list[id]:OnRun(self)
+					end
+				end
+			end
+
+			if (table.IsEmpty(client.buffs) or !client:Alive() or client:Health() <= 0) then
+				timer.Remove("ixBuff")
+				client.buffs = {}
+			end
+		end)
 	end)
 
 	net.Receive("ixBuffRemove", function()
@@ -71,9 +96,14 @@ if (CLIENT) then
 
 		LocalPlayer().buffs = LocalPlayer().buffs or {}
 		LocalPlayer().buffs[uniqueID] = nil
+
+		if (table.IsEmpty(LocalPlayer().buffs)) then
+			timer.Remove("ixBuff")
+		end
 	end)
 
 	net.Receive("ixBuffClears", function()
 		LocalPlayer().buffs = {}
+		timer.Remove("ixBuff")
 	end)
 end

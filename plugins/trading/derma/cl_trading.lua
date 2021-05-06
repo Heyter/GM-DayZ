@@ -76,7 +76,7 @@ PANEL = {}
 AccessorFunc(PANEL, "fadeTime", "FadeTime", FORCE_NUMBER)
 AccessorFunc(PANEL, "frameMargin", "FrameMargin", FORCE_NUMBER)
 
-PANEL.cGray = Color(255,255,255,20)
+PANEL.cGray = ColorAlpha(color_white, 20)
 PANEL.cRed = Color(150, 50, 50, 200)
 PANEL.cGreen = Color(99,137,41)
 

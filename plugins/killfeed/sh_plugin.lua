@@ -19,7 +19,6 @@ if (CLIENT) then
 		self.DeathNotify = panel
 	end
 
-	local gray = Color(197, 197, 197)
 	local function KilledByWeapon(death_msg, ent_class, attacker, victim, color1, color2, pnl)
 		local text = "killed"
 
@@ -54,7 +53,7 @@ if (CLIENT) then
 		end
 
 		pnl:AddText(attacker, color1)
-		pnl:AddText("[" .. text .. "]", gray)
+		pnl:AddText("[" .. text .. "]", Color("light_gray"))
 		pnl:AddText(victim:GetName(), color2)
 	end
 

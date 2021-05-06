@@ -66,7 +66,7 @@ else
 	function PLUGIN:LoadFonts()
 		surface.CreateFont("ixDHUDNum", {
 			font = "Jura",
-			size = sscale(10),
+			size = sscale(10), -- n * (ScrH() / 480)
 			weight = 100,
 		})
 
@@ -321,9 +321,9 @@ else
 		local repDiff = net.ReadUInt(16)
 
 		if (bandit) then
-			addText(Format("Reputation -%d", repDiff), 4, Color(255, 0, 0))
+			addText(Format("Reputation -%d", repDiff), 4, Color("red"))
 		else
-			addText(Format("Reputation +%d", repDiff), 4, Color(55, 200, 50))
+			addText(Format("Reputation +%d", repDiff), 4, Color("dark_lime"))
 		end
 	end)
 
@@ -498,7 +498,7 @@ else
 				prefix = "AVERAGE" -- СРЕДНЕЕ
 			end
 
-			perc.textColor = LerpColorHSV(nil, nil, client:GetMaxHealth(), client:GetMaxHealth() - damage, 0) -- цвет серьёзности кровотечения
+			perc.textColor = ix.util.LerpColorHSV(nil, nil, client:GetMaxHealth(), client:GetMaxHealth() - damage, 0) -- цвет серьёзности кровотечения
 			perc.y = perc.y - perc.h - margin
 			hud:status(perc, prefix .. " BLOOD LOSS", "5") -- КРОВОТЕЧЕНИЕ
 		end
@@ -532,7 +532,7 @@ else
 		end
 
 		if (client:GetLocalVar("legBroken")) then
-			perc.textColor = Color(255, 0, 0) -- todo: сделать библиотеку цветов
+			perc.textColor = Color("red")
 			perc.y = perc.y - perc.h - margin
 			hud:status(perc, "BROKEN LEG") -- НОГА ПОВРЕЖДЕНА
 		end
@@ -540,7 +540,7 @@ else
 		-- Safezone
 		if (!client:CanEnterSafe()) then
 			perc.y = perc.y - perc.h - margin
-			perc.textColor = Color(255, 0, 0)
+			perc.textColor = Color("red")
 
 			local time = math.max(0, 0 - (CurTime() - client:GetLocalVar("penalty", 0)))
 			hud:status(perc, "CANNOT ENTER SAFEZONE " .. string.ToMinutesSeconds(time), "R")
@@ -565,17 +565,25 @@ else
 		local pvpTime = math.max(0, 0 - (CurTime() - client:GetPVPTime()))
 		if (pvpTime != 0) then
 			perc.y = perc.y - perc.h - margin
-			perc.textColor = Color(255, 0, 0)
+			perc.textColor = Color("red")
 
 			hud:status(perc, "COMBAT LOGGED " .. string.ToMinutesSeconds(pvpTime), "R") -- В БОЮ
 		end
 
 		if (hook.Run("CanPlayerRegenHealth", client) != false) then
 			if (getHunger >= 90 and getThirst >= 90) then
-				perc.textColor = Color(50, 200, 50)
+				perc.textColor = Color("light_lime")
 				perc.y = perc.y - perc.h - margin
 				hud:status(perc, "WELL FED", "j") -- СЫТ
 			end
+		end
+
+		local rad = client:GetRadiationTotal()
+
+		if (rad > 0) then
+			perc.textColor = Color("yellow")
+			perc.y = perc.y - perc.h - margin
+			hud:status(perc, "RADIATION: " .. math.Round(rad), "Z") -- СЫТ
 		end
 	end
 end

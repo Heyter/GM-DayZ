@@ -27,7 +27,7 @@ function PLUGIN:Move(client, mv)
 		additive = additive + 30
 	end
 
-	if (client:GetLocalVar("legBroken")) then
+	if (!client:HasBuff("morphine") and client:GetLocalVar("legBroken")) then
 		walkSpeed = (additive < 1 and client:GetWalkSpeed() * .8 or walkSpeed * .8) + additive
 	elseif (additive > 0) then
 		walkSpeed = walkSpeed + additive

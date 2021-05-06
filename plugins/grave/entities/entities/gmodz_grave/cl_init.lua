@@ -58,6 +58,21 @@ function ENT:DoDraw(alpha)
 	local lootTextX = surface.GetTextSize(to_loot)
 	local useTextX = surface.GetTextSize(useText)
 
-	draw.DrawText(useText, "GraveTitle", -lootTextX / 2, pos + 95, Color(50, 255, 50, alpha), TEXT_ALIGN_CENTER)
+	draw.DrawText(useText, "GraveTitle", -lootTextX / 2, pos + 95, Color("dark_lime", alpha), TEXT_ALIGN_CENTER)
 	draw.DrawText(to_loot, "GraveTitle", useTextX / 2 + 10, pos + 95, white, TEXT_ALIGN_CENTER)
+end
+
+ENT.PopulateEntityInfo = true
+
+function ENT:OnPopulateEntityInfo(container)
+	local ownerNick = self:GetStoredName()
+
+	if (ownerNick == "") then
+		ownerNick = "Unknown"
+	end
+
+	local name = container:AddRow("name")
+	name:SetImportant()
+	name:SetText(Format("%s - %s", L"here_lies", tostring(ownerNick)))
+	name:SizeToContents()
 end

@@ -7,7 +7,7 @@ BUFF.time = 30 -- сколько секунд длится бафф
 BUFF.time_max = 60
 BUFF.permanently = false -- постоянный ли бафф, пока не будет удален вручную.
 BUFF.isOnlyServer = false -- отправлять бафф на клиента
-BUFF.isFold = true -- Суммировать бафф ( CurTime() + ((PLAYER.buffs[uniqueID] or 0) + buff.time) )
+BUFF.isAdditive = true -- Суммировать бафф ( CurTime() + ((PLAYER.buffs[uniqueID] or 0) + buff.time) )
 
 function BUFF:__tostring()
 	return "buff["..self.uniqueID.."]"

@@ -12,7 +12,7 @@ local PANEL = {}
 function PANEL:Init()
 	self.Padding = 8
 	self.Spacing = 8
-	self.background_color = Color(0, 0, 0, 200)
+	self.background_color = ColorAlpha(color_black, 200)
 	self.Items = {}
 end 
 

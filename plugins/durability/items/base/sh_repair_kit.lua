@@ -37,7 +37,7 @@ if (CLIENT) then
 		local quantity = item:GetData("quantity", item.quantity or 1)
 
 		if (quantity > 0) then
-			draw.SimpleText(quantity, "ixMerchant.Num", 1, 5, Color(252, 177, 3), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleText(quantity, "ixMerchant.Num", 1, 5, Color('orange'), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 	end
 

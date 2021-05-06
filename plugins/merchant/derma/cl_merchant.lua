@@ -1,3 +1,5 @@
+local black_clr = ColorAlpha(color_black, 200)
+
 local PLUGIN = PLUGIN
 
 local PANEL = {}
@@ -45,7 +47,7 @@ function PANEL:SetItem(itemTable)
 	self.price:SetContentAlignment(5)
 	self.price:SetTextColor(color_white)
 	self.price:SetFont("ixSmallFont")
-	self.price:SetExpensiveShadow(1, Color(0, 0, 0, 200))
+	self.price:SetExpensiveShadow(1, black_clr)
 
 	self.name = self:Add("DLabel")
 	self.name:Dock(TOP)
@@ -53,7 +55,7 @@ function PANEL:SetItem(itemTable)
 	self.name:SetContentAlignment(5)
 	self.name:SetTextColor(color_white)
 	self.name:SetFont("ixSmallFont")
-	self.name:SetExpensiveShadow(1, Color(0, 0, 0, 200))
+	self.name:SetExpensiveShadow(1, black_clr)
 	self.name.Paint = function(this, w, h)
 		surface.SetDrawColor(0, 0, 0, 75)
 		surface.DrawRect(0, 0, w, h)

@@ -39,7 +39,7 @@ function Schema:InitializedPlugins()
 			for _, ITEM in pairs(ix.item.list) do
 				if (ITEM.base == "base_ammo") then
 					function ITEM:PaintOver(item, w, h)
-						draw.SimpleText(item.ammoAmount, "ixMerchant.Num", 1, 5, Color(100, 255, 100), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+						draw.SimpleText(item.ammoAmount, "ixMerchant.Num", 1, 5, Color("light_green"), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 					end
 				end
 			end
@@ -57,7 +57,8 @@ Schema.outlineItems = {
 	["ix_item"] = true,
 	["gmodz_grave"] = true,
 	["ix_money"] = true,
-	["ix_shipment"] = true
+	["ix_shipment"] = true,
+	["gmodz_npc_loot"] = true,
 }
 
 if (CLIENT) then

@@ -2,15 +2,27 @@ AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("shared.lua")
 include("shared.lua")
 
+ENT.RandomModels = {}
+
+for k = 1, 4 do
+	ENT.RandomModels[k] = Format("models/props_junk/cardboard_box00%da.mdl", k)
+end
+
 function ENT:Initialize()
-	self:SetModel("models/props_c17/gravestone004a.mdl")
-	self:PhysicsInit(6)
-	self:SetMoveType(MOVETYPE_NONE)
-	self:SetSolid(6)
+	self:SetModel(self.RandomModels[ math.random( #self.RandomModels ) ])
+	self:SetSolid(SOLID_VPHYSICS)
+	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 	self:SetUseType(SIMPLE_USE)
 
-	self:SetLifetime(CurTime() + ix.config.Get("GraveLifetime", 300))
+	local physObj = self:GetPhysicsObject()
+
+	if (IsValid(physObj)) then
+		physObj:EnableMotion(true)
+		physObj:Wake()
+	end
+
+	self:SetLifetime(CurTime() + ix.config.Get("npcBoxDecayTime", 60))
 end
 
 function ENT:Use(activator)
@@ -19,8 +31,8 @@ function ENT:Use(activator)
 	if (inventory and !ix.storage.InUse(inventory)) then
 		ix.storage.Open(activator, inventory, {
 			entity = self,
-			name = self:GetStoredName() or L"grave",
-			searchTime = 0.7,
+			name = "NPCBox",
+			searchTime = 0.5,
 			data = {money = self:GetMoney()}
 		})
 	end
@@ -30,7 +42,7 @@ function ENT:Think()
 	if (self.DoNextThink or 0) > CurTime() then return end
 
 	if (!self:IsInWorld()) then
-		MsgC(Color("yellow"), "Grave - Removed, Outside Map!\n") 
+		MsgC(Color("yellow"), "NPCBox - Removed, Outside Map!\n") 
 		self:Remove()
 
 		return

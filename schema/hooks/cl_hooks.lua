@@ -45,7 +45,7 @@ end
 --end
 
 function Schema:PopulateImportantCharacterInfo(client, character, container)
-	local health_color = util.GetInjuredColor(client)
+	local health_color = ix.util.GetInjuredColor(client)
 
 	container:SetArrowColor(ix.config.Get("color"))
 

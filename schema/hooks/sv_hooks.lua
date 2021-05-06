@@ -36,7 +36,7 @@ end
 function Schema:ShutDown()
 	-- save DB space, mate.
 	for _, v in ipairs(ents.GetAll()) do
-		if (v:GetClass() == "ix_item" or v:GetClass() == "gmodz_grave") then
+		if (v:GetClass() == "ix_item" or v:GetClass() == "gmodz_grave" or v:GetClass() == "gmodz_npc_loot") then
 			v:Remove()
 		end
 

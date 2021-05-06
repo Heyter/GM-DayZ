@@ -125,7 +125,7 @@ function playerMeta:SetBleeding(damage, bForce, inflictor)
 		delay = math.max(0.5, math.floor(delay * dmgPerc))
 		loss = math.min(32, math.floor(loss / dmgPerc)) -- сколько хп отнимаем каждый круг
 
-		self:ScreenFade(SCREENFADE.IN, Color(255, 0, 0, 128), 0.3, 0)
+		self:ScreenFade(SCREENFADE.IN, Color("red", 128), 0.3, 0)
 		self:SetNetVar("bleeding", damage)
 
 		local uniqueID = "ixBleeding" .. self:EntIndex()
@@ -163,6 +163,6 @@ function playerMeta:HealBleeding(amount)
 
 	if (amount) then
 		self:SetHealth(math.min(self:GetMaxHealth(), self:Health() + amount))
-		self:ScreenFade(SCREENFADE.IN, Color(0, 255, 0, 128), 0.3, 0)
+		self:ScreenFade(SCREENFADE.IN, Color("lime", 128), 0.3, 0)
 	end
 end

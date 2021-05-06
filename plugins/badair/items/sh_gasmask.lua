@@ -10,7 +10,7 @@ ITEM.iconCam = {
 	ang = Angle(25, 220, 0),
 	fov = 4.5012266396634,
 	outline = true,
-	outlineColor = Color(255, 255, 255)
+	outlineColor = color_white
 }
 ITEM.exRender = true
 ITEM.pacData = {
@@ -98,7 +98,7 @@ function ITEM:Equip(client, bSound)
 
 	if (bSound) then
 		client:EmitSound("gasmaskon.wav", 80)
-		client:ScreenFade(1, Color(0, 0, 0, 255), 1, 0)
+		client:ScreenFade(1, color_black, 1, 0)
 	end
 end
 
@@ -116,7 +116,7 @@ function ITEM:Unequip(client, bSound)
 
 	if (bSound) then
 		client:EmitSound("gasmaskoff.wav", 80)
-		client:ScreenFade(1, Color(0, 0, 0, 255), 1, 0)
+		client:ScreenFade(1, color_black, 1, 0)
 	end
 end
 

@@ -43,7 +43,7 @@ if (CLIENT) then
 			surface.DrawRect(x, y, 8, 8)
 		end
 
-		draw.SimpleText(itemObj:GetData("ammo", 0), "ixMerchant.Num", 1, 5, Color(252, 177, 3), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+		draw.SimpleText(itemObj:GetData("ammo", 0), "ixMerchant.Num", 1, 5, Color("orange"), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 
 		local durability = math.max(0, itemObj:GetData("durability", 100))
 		-- 2.55 = (255 / 100)

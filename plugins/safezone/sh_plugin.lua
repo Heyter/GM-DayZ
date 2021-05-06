@@ -21,7 +21,7 @@ if (CLIENT) then
 		category = "performance"
 	})
 
-	ix.option.Add("colorSafezones", ix.type.color, Color(0, 255, 0), {
+	ix.option.Add("colorSafezones", ix.type.color, Color("lime"), {
 		category = "colors"
 	})
 
@@ -31,7 +31,7 @@ if (CLIENT) then
 
 	do
 		local sizeRing, center, min, max, alpha, dist
-		local safezoneColor = Color(0, 255, 0)
+		local safezoneColor = Color("lime")
 
 		hook.Add("PostDrawTranslucentRenderables", "PostDrawTranslucentRenderables.drawSafezones", function(bDepth, bSkybox)
 			if (ix.option.Get("drawSafezones", false)) then return end

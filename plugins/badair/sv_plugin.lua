@@ -15,51 +15,54 @@ util.AddNetworkString("ixMaskOn")
 
 local PLUGIN = PLUGIN
 
-function PLUGIN:PlayerTick(client)
-	if (!IsValid(client) or !client:Alive()) then return end
-	
-	local faction = ix.faction.Get(client:Team())
+--- plugins\radiation\sv_plugin.lua
+-- local white = ColorAlpha(color_white, 150)
 
-	if (faction and faction.noGas) then
-		return
-	end
+-- function PLUGIN:PlayerTick(client)
+	-- if (!IsValid(client) or !client:Alive()) then return end
 	
-	local area = ix.area.stored[client:GetArea()]
-	
-	if ((!client.gasTick or client.gasTick <= CurTime()) and client.ixInArea) then
-		if (area["type"] == "gas") then
-			local item = client:GetGasMask()
-			local bool
-			
-			if (item and item.isGasMask) then
-				if (item:GetHealth() <= 0) then
-					bool = false
-				else
-					if (item:GetFilter() <= 0) then
-						bool = false
-					else
-						bool = true
-					end
-				end
-			else
-				bool = false
-			end
+	-- local faction = ix.faction.Get(client:Team())
 
-			if (bool) then
-				item:DamageFilter(ix.config.Get("gasmask_damage", 1))
-			else
-				client:TakeDamage(ix.config.Get("gasDamage", 3))
-				client:ScreenFade(1, ColorAlpha(color_white, 150), .5, 0)
-			end
+	-- if (faction and faction.noGas) then
+		-- return
+	-- end
 
-			if (bool) then
-				client.gasTick = CurTime() + ix.config.Get("gasDelay", 2)
-			else
-				client.gasTick = CurTime() + ix.config.Get("gasDelayBad", 1.3)
-			end
-		end
-	end
-end
+	-- local area = ix.area.stored[client:GetArea()]
+
+	-- if ((!client.gasTick or client.gasTick <= CurTime()) and client.ixInArea) then
+		-- if (area and area["type"] == "gas") then
+			-- local item = client:GetGasMask()
+			-- local bool
+
+			-- if (item and item.isGasMask) then
+				-- if (item:GetHealth() <= 0) then
+					-- bool = nil
+				-- else
+					-- if (item:GetFilter() <= 0) then
+						-- bool = nil
+					-- else
+						-- bool = true
+					-- end
+				-- end
+			-- else
+				-- bool = nil
+			-- end
+
+			-- if (bool) then
+				-- item:DamageFilter(ix.config.Get("gasmask_damage", 1))
+			-- else
+				-- client:TakeDamage(ix.config.Get("gasDamage", 3))
+				-- client:ScreenFade(1, white, .5, 0)
+			-- end
+
+			-- if (bool) then
+				-- client.gasTick = CurTime() + ix.config.Get("gasDelay", 2)
+			-- else
+				-- client.gasTick = CurTime() + ix.config.Get("gasDelayBad", 1.3)
+			-- end
+		-- end
+	-- end
+-- end
 
 function PLUGIN:PlayerLoadedCharacter(client, curChar)
 	if (curChar) then

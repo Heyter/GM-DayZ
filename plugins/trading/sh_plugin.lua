@@ -72,8 +72,8 @@ if (CLIENT) then
 
 	local InvitePanel
 	local Col = {
-		Main = Color(100,100,100, 100),
-		Text = Color(255,255,255),
+		Main = Color(100,100,100,100),
+		Text = color_white,
 		Accept = Color(150,255,150),
 		Decline = Color(255,150,150)
 	}

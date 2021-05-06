@@ -2,7 +2,7 @@
 //Code borrowed from Raubana. Thanks raub <3
 
 -- World Sphere took from https://www.youtube.com/watch?v=w4tt5pvbr6A
-local color_mask2 = Color(0,0,0,0)
+local color_mask2 = color_black
 local render = render
 
 local function drawStencilSphere( pos, ref, compare_func, radius, color, detail )
