@@ -39,6 +39,7 @@ function PLUGIN:PlayerSpawn(client)
 	end
 end
 
+-- Возможно стоит перекинуть на EntityTakeDamage т.к урон от взрыва не определяется (он по хитгруппе 0)
 function PLUGIN:PlayerHurt(client, attacker, health, damage)
 	if (damage > 0 and health > 0 and (attacker:IsPlayer() or attacker:IsNPC())) then
 		if (attacker:IsPlayer() and hook.Run("PlayerShouldTakeDamage", client, attacker) == false) then return end

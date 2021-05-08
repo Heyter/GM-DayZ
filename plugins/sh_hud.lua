@@ -405,12 +405,65 @@ else
 	end)
 
 	function PLUGIN:Think()
+		local client = LocalPlayer()
+		local playedHeartbeatSound = false
+
+		if (client:Alive()) then
+			local health = client:Health()
+			local maxHealth = client:GetMaxHealth()
+
+			if (health < maxHealth) then
+				if (!self.HeartbeatSound) then
+					self.HeartbeatSound = CreateSound(client, "player/heartbeat1.wav")
+				end
+				
+				if (CurTime() >= (self.NextHeartbeat or 0)) then
+					self.NextHeartbeat = CurTime() + ( 0.75 + ( (1.25 / maxHealth) * health ) )
+					self.HeartbeatSound:PlayEx(0.75 - ( (0.7 / maxHealth) * health ), 100)
+				end
+
+				playedHeartbeatSound = true
+			end
+		end
+
+		if (!playedHeartbeatSound and self.HeartbeatSound) then
+			self.HeartbeatSound:Stop()
+		end
+
 		for _, v in ipairs(player.GetAll()) do
 			if !v:GetNetVar("brth") then continue end
 
 			if (!v.breath_cooldown or v.breath_cooldown < CurTime()) then  
 				v.breath_cooldown = CurTime() + 6
 				v:EmitSound("gmodz/breath.wav")
+			end
+		end
+	end
+
+	do
+		local ColorModify = {
+			[ "$pp_colour_addr" ] = 0,
+			[ "$pp_colour_addg" ] = 0,
+			[ "$pp_colour_addb" ] = 0,
+			[ "$pp_colour_brightness" ] = 0,
+			[ "$pp_colour_contrast" ] = 1,
+			[ "$pp_colour_colour" ] = 1,
+			[ "$pp_colour_mulr" ] = 0,
+			[ "$pp_colour_mulg" ] = 0,
+			[ "$pp_colour_mulb" ] = 0
+		}
+
+		local color = 0
+		function PLUGIN:RenderScreenspaceEffects()
+			if (LocalPlayer():Alive()) then
+				color = 1 - (LocalPlayer():Health() / LocalPlayer():GetMaxHealth())
+				-- color = math.Approach(color, math.Clamp(1 - math.Clamp(LocalPlayer():Health() / LocalPlayer():GetMaxHealth(), 0, 1), 0, 1), FrameTime() * 3)
+
+				if (color > 0) then
+					ColorModify["$pp_colour_colour"] = math.Clamp(1 - color, 0, 1)
+
+					DrawColorModify(ColorModify)
+				end
 			end
 		end
 	end
