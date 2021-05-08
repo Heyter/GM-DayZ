@@ -43,17 +43,11 @@ function PLUGIN:PlayerSpawn(client)
 	end
 end
 
-function PLUGIN:EntityTakeDamage(victim, dmgInfo)
-	local attacker = dmgInfo:GetAttacker()
-	local amount = dmgInfo:GetDamage()
-
-	if (amount > 0 and victim:IsPlayer() and attacker:IsPlayer()) then
-		if (attacker == victim) then return end
-		if (victim:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.OUTSIDE) then return end
-		if (attacker:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.OUTSIDE) then return end
+function PLUGIN:PlayerHurt(victim, attacker, _, damage)
+	if (damage > 0 and victim:IsPlayer() and attacker:IsPlayer()) then
+		if (attacker == victim or hook.Run("PlayerShouldTakeDamage", victim, attacker) == false) then return end
 
 		local tag = ix.config.Get("tagPVP", 120)
-
 		attacker:AddPVPTime(tag)
 		victim:AddPVPTime(tag)
 	end
