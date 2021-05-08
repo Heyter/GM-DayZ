@@ -1,6 +1,8 @@
 -- TODO: сделать сохранение кровотечение, перелома ног
 -- timer.TimeLeft и timer.RepsLeft
 
+util.AddNetworkString("ixHitmarker")
+
 function PLUGIN:GetFallDamage(client, speed)
 	local damage = speed / 10
 
@@ -9,6 +11,7 @@ function PLUGIN:GetFallDamage(client, speed)
 		client:EmitSound("Flesh.Break")
 
 		if (math.random() >= 0.8) then -- почему бы и нет.
+			--damage = damage / 0.8
 			client:SetBleeding(damage)
 		end
 	end
@@ -36,28 +39,31 @@ function PLUGIN:PlayerSpawn(client)
 	end
 end
 
-function PLUGIN:EntityTakeDamage(victim, dmg_info)
-	local damage = dmg_info:GetDamage()
+function PLUGIN:PlayerHurt(client, attacker, health, damage)
+	if (damage > 0 and health > 0 and (attacker:IsPlayer() or attacker:IsNPC())) then
+		if (attacker:IsPlayer() and hook.Run("PlayerShouldTakeDamage", client, attacker) == false) then return end
 
-	if (damage > 0 and IsValid(victim) and victim:IsPlayer()) then
-		local attacker = dmg_info:GetAttacker()
+		local hit_group = client:LastHitGroup()
+		if (hit_group == 0) then return end -- урон от кулаков, падения (свой хук)
 
-		if (attacker:IsPlayer() and hook.Run("PlayerShouldTakeDamage", victim, attacker) == false) then
-			return
+		if ((client.ixNextHurt or 0) < CurTime()) then
+			net.Start("ixHitmarker")
+				net.WriteBool(hit_group == HITGROUP_HEAD)
+			net.Send(client)
+
+			client.ixNextHurt = CurTime() + 0.33
 		end
 
-		local hit_group = victim:LastHitGroup()
+		client:SetBleeding(damage, nil, attacker)
 
-		if (dmg_info:IsBulletDamage() or dmg_info:IsExplosionDamage()) then
-			victim:SetBleeding(damage, nil, attacker)
-
-			if ((hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) and damage > victim:Health() / 2 and damage < victim:Health()) then
-				victim:BreakLeg()
-			end
+		if ((hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) and damage > client:Health() / 2 and damage < client:Health()) then
+			client:BreakLeg()
 		end
-
-		Schema:PlayerEmitPainSound(victim, hit_group)
 	end
+end
+
+function PLUGIN:GetPlayerDeathSound()
+	return false
 end
 
 -- PLAYER META
@@ -98,8 +104,6 @@ function playerMeta:SetBleeding(damage, bForce, inflictor)
 
 	local amt_bleeding = self:GetNetVar("bleeding")
 	if (amt_bleeding and amt_bleeding > damage) then return end -- не перезаписываем более лучшее кровотечение
-
-	damage = damage / 0.8
 
 	if (damage >= 15) then
 		if (inflictor and inflictor != self) then

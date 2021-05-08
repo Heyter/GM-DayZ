@@ -1,3 +1,5 @@
+local GM = GM or GAMEMODE
+
 -- Restrict character name
 function Schema:AdjustCreationPayload(client, payload, newPayload)
 	newPayload.name = client:Name()
@@ -79,37 +81,16 @@ function Schema:PlayerSpawnVehicle(client)
 	return client:IsSuperAdmin()
 end
 
-do
-	local Hit_Sounds = {head = {}, body = {}, death = {}}
+function GM:PlayerHurt(client, attacker, health, damage)
+	if ((client.ixNextPain or 0) < CurTime() and health > 0) then
+		local painSound = hook.Run("GetPlayerPainSound", client) or false --Schema:GetPainSound(client:IsFemale() and "female" or "male", client:LastHitGroup())
 
-	for i = 1, 4 do
-		Hit_Sounds.head[#Hit_Sounds.head + 1] = "gmodz/player/headshot" .. i .. ".ogg"
-	end
-
-	for i = 1, 16 do
-		Hit_Sounds.body[#Hit_Sounds.body + 1] = "gmodz/player/hit" .. i .. ".wav"
-	end
-
-	for i = 1, 10 do
-		Hit_Sounds.death[#Hit_Sounds.death + 1] = "gmodz/player/death" .. i .. ".wav"
-	end
-
-	function Schema:EntityTakeDamage(target, dmg_info)
-		if (dmg_info:GetDamage() > 0 and IsValid(target) and (target:IsNPC() or target:IsPlayer()) and dmg_info:IsBulletDamage()) then
-			if (target:LastHitGroup() == HITGROUP_HEAD) then
-				--target:EmitSound(Hit_Sounds.head[ math.random(1, #Hit_Sounds.head ) ])
-				sound.Play(Hit_Sounds.head[ math.random(1, #Hit_Sounds.head) ], target:GetShootPos(), 90, 100)
-				-- vol = 40 + math.min(90, dmg_info:GetDamage())
-				-- ply:ViewPunch(Angle(math.random(-40, 40), math.random(-40, 40), 0))
-			else
-				--target:EmitSound(Hit_Sounds.body[ math.random(1, #Hit_Sounds.body ) ])
-				sound.Play(Hit_Sounds.body[ math.random(1, #Hit_Sounds.body) ], target:GetShootPos(), 90, 100)
-			end
+		if (painSound != false) then
+			client:EmitSound(painSound)
 		end
+
+		client.ixNextPain = CurTime() + 0.33
 	end
 
-	function Schema:GetPlayerDeathSound(client)
-		client:EmitSound(Hit_Sounds.death[ math.random(1, #Hit_Sounds.death) ])
-		return false
-	end
+	ix.log.Add(client, "playerHurt", damage, attacker:GetName() ~= "" and attacker:GetName() or attacker:GetClass())
 end

@@ -146,7 +146,7 @@ if (CLIENT) then
 
 	local sounds_geiger = {}
 	for k = 1, PLUGIN.radLevel do
-		sounds_geiger[k] = Format("gmodz/radiation/radiation%d.ogg", k)
+		sounds_geiger[k] = Sound(Format("gmodz/radiation/radiation%d.ogg", k))
 	end
 
 	local nextGeiger = 0

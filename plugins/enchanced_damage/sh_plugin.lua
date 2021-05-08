@@ -38,6 +38,67 @@ function PLUGIN:Move(client, mv)
 end
 
 if (CLIENT) then
+	local PLUGIN = PLUGIN
+
+	do
+		PLUGIN.EmitSounds = {}
+		PLUGIN.EmitSounds["Hurt"] = { head = {}, body = {} }
+
+		for i = 1, 4 do
+			PLUGIN.EmitSounds["Hurt"].head[#PLUGIN.EmitSounds["Hurt"].head + 1] = Sound("gmodz/player/headshot" .. i .. ".ogg")
+		end
+
+		for i = 1, 16 do
+			PLUGIN.EmitSounds["Hurt"].body[#PLUGIN.EmitSounds["Hurt"].body + 1] = Sound("gmodz/player/hit" .. i .. ".wav")
+		end
+
+		PLUGIN.EmitSounds["Death"] = {
+			female = {
+				Sound("vo/npc/female01/no01.wav"),
+				Sound("vo/npc/female01/ow01.wav"),
+				Sound("vo/npc/female01/ow02.wav"),
+				Sound("vo/npc/female01/pain07.wav"),
+				Sound("vo/npc/female01/pain08.wav"),
+				Sound("vo/npc/female01/pain09.wav"),
+				Sound("vo/coast/odessa/female01/nlo_cubdeath02.wav")
+			},
+
+			male = {
+				Sound("vo/npc/male01/pain07.wav"),
+				Sound("vo/npc/male01/pain08.wav"),
+				Sound("vo/npc/male01/pain09.wav"),
+				Sound("vo/npc/male01/ow01.wav"),
+				Sound("vo/npc/male01/ow02.wav"),
+				Sound("vo/npc/male01/no02.wav"),
+				Sound("vo/npc/Barney/ba_ohshit03.wav"),
+				Sound("vo/npc/Barney/ba_ohshit03.wav"),
+				Sound("vo/npc/Barney/ba_no01.wav"),
+				Sound("vo/npc/Barney/ba_no02.wav"),
+				Sound("vo/coast/odessa/male01/nlo_cubdeath02.wav")
+			}
+		}
+
+		gameevent.Listen("entity_killed")
+		function PLUGIN:entity_killed(data)
+			local victim = Entity(data.entindex_killed)
+
+			if (IsValid(victim) and victim:IsPlayer()) then
+				local deathSounds = victim:IsFemale() and "female" or "male"
+				deathSounds = self.EmitSounds["Death"][deathSounds]
+
+				victim:EmitSound(deathSounds[math.random(1, #deathSounds)])
+				-- sound.Play(deathSounds[math.random(1, #deathSounds)], victim:GetShootPos(), 90, 100)
+			end
+		end
+
+		net.Receive("ixHitmarker", function()
+			local hurtSounds = net.ReadBool() and "head" or "body"
+			hurtSounds = PLUGIN.EmitSounds["Hurt"][hurtSounds]
+
+			LocalPlayer():EmitSound(hurtSounds[math.random(1, #hurtSounds)], 500)
+		end)
+	end
+
 	FindMetaTable("Player").BreakLeg = function(self)
 		self:SetJumpPower(80)
 	end

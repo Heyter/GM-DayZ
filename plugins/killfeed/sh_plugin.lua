@@ -49,9 +49,8 @@ if (CLIENT) then
 			if (!attacker) then
 				attacker = copy_attacker
 
-				if (list.Get( "NPC" )[attacker]) then
-					attacker = list.Get( "NPC" )[attacker].Name
-					text = "killed"
+				if (list.Get("NPC")[attacker]) then
+					attacker = list.Get("NPC")[attacker].Name
 				end
 			end
 		else

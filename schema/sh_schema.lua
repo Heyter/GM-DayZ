@@ -75,8 +75,8 @@ if (CLIENT) then
 	end
 end
 
-function Schema:GetPainSound(gender, hit_group)
-	if (math.random() <= 0.5) then
+function Schema:GetPainSound(gender, hit_group, bNotRandom, bNotDefaultHit)
+	if (bNotRandom or math.random() <= 0.5) then
 		if (hit_group == HITGROUP_HEAD) then
 			return "vo/npc/"..gender.."01/ow0"..math.random(1, 2)..".wav"
 		elseif (hit_group == HITGROUP_CHEST or hit_group == HITGROUP_GENERIC) then
@@ -90,13 +90,13 @@ function Schema:GetPainSound(gender, hit_group)
 		end
 	end
 
-	return "vo/npc/"..gender.."01/pain0"..math.random(1, 9)..".wav"
+	return !bNotDefaultHit and "vo/npc/"..gender.."01/pain0"..math.random(1, 9)..".wav"
 end
 
-function Schema:PlayerEmitPainSound(client, hit_group)
-	local sound_path = self:GetPainSound(client:IsFemale() and "female" or "male", hit_group)
+function Schema:PlayerEmitPainSound(client, hit_group, bNotRandom, bNotDefaultHit)
+	local sound_path = self:GetPainSound(client:IsFemale() and "female" or "male", hit_group, bNotRandom, bNotDefaultHit)
 
-	if (sound_path) then
+	if (sound_path != false) then
 		timer.Simple(FrameTime(), function()
 			if (IsValid(client)) then
 				client:EmitSound(sound_path)
