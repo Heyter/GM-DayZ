@@ -9,6 +9,22 @@ if (CLIENT) then
 	PLUGIN.DeathNotify = PLUGIN.DeathNotify or nil
 	PLUGIN.WeaponsList = PLUGIN.WeaponsList or {}
 
+	PLUGIN.DeathMsg = {
+		["bledout"] = "bled out", -- истек кровью
+		["radiation"] = "radiation sickness", -- лучевая болезнь. Можно оставить просто radiation - радиация
+		["drowned"] = "drowned"
+	}
+
+	for k in pairs(PLUGIN.DeathMsg) do
+		local phrase = L2("killfeed.death." .. k)
+
+		if (phrase) then
+			PLUGIN.DeathMsg[k] = phrase
+		end
+
+		phrase = nil
+	end
+
 	function PLUGIN:InitPostEntity()
 		self.WeaponsList = list.Get("Weapon")
 		self.WeaponsList['rpg_missile'] = 'RPG Missile'
@@ -28,8 +44,8 @@ if (CLIENT) then
 	local function KilledByWeapon(death_msg, ent_class, attacker, victim, color1, color2, pnl)
 		local text = "killed"
 
-		if (death_msg == "bledout") then
-			text = "bled out"
+		if (PLUGIN.DeathMsg[death_msg]) then
+			text = PLUGIN.DeathMsg[death_msg]
 		elseif (ent_class) then
 			text = weapons.Get(ent_class) or scripted_ents.Get(ent_class) or PLUGIN.WeaponsList[ent_class] or ent_class
 
@@ -81,8 +97,8 @@ if (CLIENT) then
 			if (attacker == victim) then
 				pnl:AddText(victim:GetName(), clrVic)
 
-				if (death_msg == "bledout") then
-					text = "bled out"
+				if (PLUGIN.DeathMsg[death_msg]) then
+					text = PLUGIN.DeathMsg[death_msg]
 				else -- неизвестная причина
 					text = "suicide"
 				end

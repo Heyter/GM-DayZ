@@ -47,7 +47,7 @@ function PLUGIN:PlayerTick(client)
 				client:SetRadiation(newRadiation, false)
 			end
 		end
-	elseif (!client.ixInArea and client.radiation and client.radiation.addictive) then
+	elseif (!client.ixInArea and client:Alive() and client.radiation and client.radiation.addictive) then
 		client:SetRadiation(CurTime() + client.radiation.addictive, true)
 		client.radiation.addictive = nil
 	end
@@ -68,6 +68,7 @@ function PLUGIN:Tick()
 				local newHealth = v:Health() - radDamage[1]
 
 				if (newHealth <= 0) then
+					v.DeathMsg = "radiation"
 					v:Kill()
 				else
 					v:SetHealth(newHealth)
@@ -93,14 +94,20 @@ function PLUGIN:PlayerSpawn(client)
 end
 
 function PLUGIN:CharacterPreSave(character)
-	character:SetData("radiation", character:GetPlayer():GetRadiationTotal())
+	local rad = character:GetPlayer():GetRadiationTotal()
+
+	if (rad < 10) then
+		rad = nil
+	end
+
+	character:SetData("radiation", rad)
 end
 
 function PLUGIN:PlayerLoadedCharacter(client, character)
-	local getRadiation = character:GetData("radiation")
+	local rad = character:GetData("radiation")
 
-	if (getRadiation) then
-		client:SetRadiation(CurTime() + getRadiation, true)
+	if (rad) then
+		client:SetRadiation(CurTime() + rad, true)
 	else
 		client:ClearRadiation()
 	end
