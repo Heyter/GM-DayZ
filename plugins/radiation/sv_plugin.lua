@@ -1,5 +1,8 @@
 local PLUGIN = PLUGIN
 
+util.AddNetworkString("ixSetRadiation")
+util.AddNetworkString('ixClearRadiation')
+
 function PLUGIN:PlayerTick(client)
 	if (client.ixInArea and client:Alive() and (!client.nextRadCheck or client.nextRadCheck <= CurTime())) then
 		local area = ix.area.stored[client:GetArea()]
@@ -7,7 +10,9 @@ function PLUGIN:PlayerTick(client)
 		if (area and area["type"] == "gas") then
 			client.nextRadCheck = CurTime() + 1
 
-			local oldRadiation = client:GetRadiationTotal()
+			client.radiation = client.radiation or {}
+			client.radiation.addictive = client.radiation.addictive or client:GetRadiationTotal()
+
 			local radiationResistance = 0
 			local radsIncrease = math.random(4, 20)
 
@@ -32,16 +37,19 @@ function PLUGIN:PlayerTick(client)
 				radiationResistance = radiationResistance * 0.8
 			end
 
-			local newRadiation = math.ceil(math.min(self.maxRads, oldRadiation + (radsIncrease * math.max(0, radiationResistance))))
+			local newRadiation = math.ceil(math.min(self.maxRads, client.radiation.addictive + (radsIncrease * math.max(0, radiationResistance))))
 
 			if (newRadiation >= self.maxRads) then
 				client:Kill()
 				client.nextRadCheck = CurTime() + 5
 			elseif (newRadiation > 0) then
-				newRadiation = CurTime() + newRadiation
-				client:SetLocalVar("radiation", newRadiation)
+				client.radiation.addictive = newRadiation
+				client:SetRadiation(newRadiation, false)
 			end
 		end
+	elseif (!client.ixInArea and client.radiation and client.radiation.addictive) then
+		client:SetRadiation(CurTime() + client.radiation.addictive, true)
+		client.radiation.addictive = nil
 	end
 end
 
@@ -79,7 +87,7 @@ end
 
 function PLUGIN:PlayerSpawn(client)
 	if (client.resetRadiation) then
-		client:SetLocalVar("radiation", nil)
+		client:ClearRadiation()
 		client.resetRadiation = nil
 	end
 end
@@ -92,8 +100,35 @@ function PLUGIN:PlayerLoadedCharacter(client, character)
 	local getRadiation = character:GetData("radiation")
 
 	if (getRadiation) then
-		getRadiation = CurTime() + getRadiation
+		client:SetRadiation(CurTime() + getRadiation, true)
+	else
+		client:ClearRadiation()
+	end
+end
+
+do
+	local playerMeta = FindMetaTable("Player")
+
+	function playerMeta:SetRadiation(amount, bReal)
+		self.radiation = self.radiation or {real = 0}
+
+		if (!bReal) then
+			self.radiation.fake = amount
+		else
+			self.radiation.real = amount
+			self.radiation.fake = nil
+		end
+
+		net.Start("ixSetRadiation")
+			net.WriteUInt(amount, 32)
+			net.WriteBool(bReal)
+		net.Send(self)
 	end
 
-	client:SetLocalVar("radiation", getRadiation or nil)
+	function playerMeta:ClearRadiation()
+		self.radiation = {real = 0}
+
+		net.Start("ixClearRadiation")
+		net.Send(self)
+	end
 end

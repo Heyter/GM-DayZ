@@ -169,7 +169,7 @@ else
 
 		surface.SetDrawColor(192, 57, 43)
 		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen * math.min(maxHP, self.awto) / maxHP, h - sscale(6))
-		ix.util.DrawText(math.Clamp(math.Round(self.awto), 0, maxHP) .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 0, TEXT_ALIGN_CENTER, "ixDHUDNum")
+		ix.util.DrawText(math.Clamp(math.Round(self.awto), 0, maxHP) .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
 	end
 
 	function hud:drawText(wok, title, font)
@@ -378,31 +378,33 @@ else
 		end
 	end
 
-	-- ix_item toScreen
-	local rangeSize, angleCos = 80, math.cos(math.rad(45))
-	local shadowColor = Color(66, 66, 66)
-	hook.Add("PostDrawTranslucentRenderables", "PostDrawTranslucentRenderables.ix_item", function(bDepth, bSkybox)
-		if (bDepth or bSkybox or !LocalPlayer():GetCharacter()) then return end
+	do
+		-- ix_item toScreen
+		local rangeSize, angleCos = 80, math.cos(math.rad(45))
+		local shadowColor = Color(66, 66, 66)
+		hook.Add("PostDrawTranslucentRenderables", "PostDrawTranslucentRenderables.ix_item", function(bDepth, bSkybox)
+			if (bDepth or bSkybox or !LocalPlayer():GetCharacter()) then return end
 
-		local startPos = LocalPlayer():EyePos()
-		local dir = LocalPlayer():GetAimVector()
+			local startPos = LocalPlayer():EyePos()
+			local dir = LocalPlayer():GetAimVector()
 
-		local entities = ents.FindInCone(startPos, dir, rangeSize, angleCos)
+			local entities = ents.FindInCone(startPos, dir, rangeSize, angleCos)
 
-		for _, ent in ipairs(entities) do
-			if (IsValid(ent) and ent:GetClass() == "ix_item") then
-				if (IsValid(ix.gui.entityInfo) and ix.gui.entityInfo.entity == ent) then continue end
+			for _, ent in ipairs(entities) do
+				if (IsValid(ent) and ent:GetClass() == "ix_item") then
+					if (IsValid(ix.gui.entityInfo) and ix.gui.entityInfo.entity == ent) then continue end
 
-				local item = ent:GetItemTable()
-				cam.Start2D()
-					local centerScreen = ent:GetPos():ToScreen()
-					draw.SimpleTextOutlined(item:GetName(), "ixNoticeFont",
-						centerScreen.x, centerScreen.y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, shadowColor
-					)
-				cam.End2D()
+					local item = ent:GetItemTable()
+					cam.Start2D()
+						local centerScreen = ent:GetPos():ToScreen()
+						draw.SimpleTextOutlined(item:GetName(), "ixNoticeFont",
+							centerScreen.x, centerScreen.y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, shadowColor
+						)
+					cam.End2D()
+				end
 			end
-		end
-	end)
+		end)
+	end
 
 	function PLUGIN:Think()
 		local client = LocalPlayer()
@@ -431,9 +433,7 @@ else
 		end
 
 		for _, v in ipairs(player.GetAll()) do
-			if !v:GetNetVar("brth") then continue end
-
-			if (!v.breath_cooldown or v.breath_cooldown < CurTime()) then  
+			if (v:GetNetVar("brth") and (v.breath_cooldown or 0) < CurTime()) then  
 				v.breath_cooldown = CurTime() + 6
 				v:EmitSound("gmodz/breath.wav")
 			end

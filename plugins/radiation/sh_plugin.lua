@@ -21,10 +21,22 @@ do
 	local playerMeta = FindMetaTable("Player")
 
 	function playerMeta:GetRadiation()
-		return self:GetLocalVar("radiation", CurTime())
+		self.radiation = self.radiation or {real = 0}
+
+		if (self.radiation.fake) then
+			return self.radiation.fake
+		end
+
+		return self.radiation.real or CurTime()
 	end
 
 	function playerMeta:GetRadiationTotal()
+		self.radiation = self.radiation or {real = 0}
+
+		if (self.radiation.fake) then
+			return self.radiation.fake
+		end
+
 		return math.max(0, self:GetRadiation() - CurTime())
 	end
 
@@ -144,34 +156,85 @@ if (CLIENT) then
 		DrawColorModify(RADIATION_COLOR_MOD)
 	end
 
-	local sounds_geiger = {}
-	for k = 1, PLUGIN.radLevel do
-		sounds_geiger[k] = Sound(Format("gmodz/radiation/radiation%d.ogg", k))
-	end
+	do
+		local sounds_geiger = {}
+		for k = 1, PLUGIN.radLevel do
+			sounds_geiger[k] = {sound = Sound(Format("gmodz/radiation/radiation%d.ogg", k))}
 
-	local nextGeiger = 0
-	local client
-	function PLUGIN:Think()
-		client = LocalPlayer()
-
-		if (!client:Alive() or !client:GetCharacter() or CurTime() < nextGeiger) then return end
-		nextGeiger = CurTime() + 0.06
-
-		local radiation = client:GetRadiationTotal()
-		if (radiation <= 0) then return end
-
-		local percent = client:GetRadiationPercent()
-		local pct = (radiation < self.radsScale and 0 or 127)
-
-		if (pct > 0) then
-			pct = pct * (percent / 22)
+			if (k == 1) then -- SoundDuration сломан
+				sounds_geiger[k].len = 0.5
+			elseif (k == 2) then
+				sounds_geiger[k].len = 0.55
+			elseif (k == 3) then
+				sounds_geiger[k].len = 0.6
+			elseif (k == 4) then
+				sounds_geiger[k].len = 1.25
+			end
 		end
 
-		if (math.random(0, 127) < pct) then
-			local vol = 0.2 + (percent >= 0.6 and percent * 2 or percent)
-			vol = (vol * (math.random(0, 127) / 255)) + 0.5
+		local nextGeiger = 0
+		local client
+		local geigerAreaDelay = 0
 
-			client:EmitSound(sounds_geiger[math.random(#sounds_geiger)], 75, 100, vol, CHAN_BODY)
+		function PLUGIN:Think()
+			client = LocalPlayer()
+
+			if (!client:Alive() or !client:GetCharacter() or CurTime() < nextGeiger) then return end
+			nextGeiger = CurTime() + 0.06
+
+			local radiation = client:GetRadiationTotal()
+
+			if (client.ixInArea) then
+				local area = ix.area.stored[client:GetArea()]
+
+				if (area and area["type"] == "gas") then
+					if (geigerAreaDelay < CurTime() and math.random(0, 127) < 24) then
+						local snd = sounds_geiger[math.random(1, #sounds_geiger)]
+						client:EmitSound(snd.sound, 75, 100, 1)
+						geigerAreaDelay = CurTime() + snd.len
+					end
+
+					return
+				elseif (radiation <= 0) then
+					return
+				end
+			elseif (radiation <= 0) then
+				return
+			end
+
+			local percent = client:GetRadiationPercent()
+			local pct = (radiation < self.radsScale and 0 or 127)
+
+			if (pct > 0) then
+				pct = pct * (percent / 22)
+			end
+
+			if (math.random(0, 127) < pct) then
+				local vol = 0.2 + (percent >= 0.6 and percent * 2 or percent)
+				vol = (vol * (math.random(0, 127) / 255)) + 0.5
+
+				client:EmitSound(sounds_geiger[math.random(#sounds_geiger)].sound, 75, 100, vol)
+			end
 		end
 	end
+
+	net.Receive("ixSetRadiation", function()
+		local client = LocalPlayer()
+
+		local amount = net.ReadUInt(32)
+		local bReal = net.ReadBool()
+
+		client.radiation = client.radiation or {real = 0}
+
+		if (!bReal) then
+			client.radiation.fake = amount
+		else
+			client.radiation.real = amount
+			client.radiation.fake = nil
+		end
+	end)
+
+	net.Receive("ixClearRadiation", function()
+		LocalPlayer().radiation = {real = 0}
+	end)
 end

@@ -91,11 +91,17 @@ if (CLIENT) then
 			end
 		end
 
+		function PLUGIN:EntityEmitSound(data)
+			if (data.Entity and data.Entity == LocalPlayer() and data.OriginalSoundName == "Flesh.BulletImpact") then
+				return false
+			end
+		end
+
 		net.Receive("ixHitmarker", function()
 			local hurtSounds = net.ReadBool() and "head" or "body"
 			hurtSounds = PLUGIN.EmitSounds["Hurt"][hurtSounds]
 
-			LocalPlayer():EmitSound(hurtSounds[math.random(1, #hurtSounds)], 500)
+			LocalPlayer():EmitSound(hurtSounds[math.random(1, #hurtSounds)], 500, 100, 1)
 		end)
 	end
 

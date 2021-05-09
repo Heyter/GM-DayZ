@@ -4,7 +4,8 @@
 util.AddNetworkString("ixHitmarker")
 
 function PLUGIN:GetFallDamage(client, speed)
-	local damage = speed / 10
+	local damage = math.max(0, math.ceil(0.2418 * speed - 141.75))
+	-- local damage = speed / 10
 
 	if (damage > client:Health() / 2 and damage < client:Health()) then
 		client:BreakLeg()
@@ -52,7 +53,7 @@ function PLUGIN:PlayerHurt(client, attacker, health, damage)
 				net.WriteBool(hit_group == HITGROUP_HEAD)
 			net.Send(client)
 
-			client.ixNextHurt = CurTime() + 0.33
+			client.ixNextHurt = CurTime() + 0.25
 		end
 
 		client:SetBleeding(damage, nil, attacker)
@@ -107,6 +108,8 @@ function playerMeta:SetBleeding(damage, bForce, inflictor)
 	if (amt_bleeding and amt_bleeding > damage) then return end -- не перезаписываем более лучшее кровотечение
 
 	if (damage >= 15) then
+		self:SetNetVar("bleeding", damage)
+
 		if (inflictor and inflictor != self) then
 			self.bleeding_att = inflictor
 		end
@@ -131,7 +134,6 @@ function playerMeta:SetBleeding(damage, bForce, inflictor)
 		loss = math.min(32, math.floor(loss / dmgPerc)) -- сколько хп отнимаем каждый круг
 
 		self:ScreenFade(SCREENFADE.IN, Color("red", 128), 0.3, 0)
-		self:SetNetVar("bleeding", damage)
 
 		local uniqueID = "ixBleeding" .. self:EntIndex()
 
