@@ -32,19 +32,3 @@ end
 function Schema:CanPlayerUseBusiness(client, id)
 	return false
 end
-
-function Schema:KeyPress(client, key)
-	if (key == IN_JUMP and client:OnGround() and client:GetMoveType() == MOVETYPE_WALK) then
-		local staminaUse = ix.config.Get("jumpStamina")
-
-		if (staminaUse > 0) then
-			local value = client:GetLocalVar("stm", 0) - staminaUse
-
-			if (value < 0) then
-				client:SetVelocity(Vector(0, 0, -client:GetJumpPower()))
-			elseif (SERVER) then
-				client:ConsumeStamina(staminaUse)
-			end
-		end
-	end
-end

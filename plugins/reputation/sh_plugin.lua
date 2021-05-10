@@ -33,22 +33,22 @@ do
 		russian = "★ Элитный Бандит ★"
 	})
 
-	Schema.AddReputationRank(-4, "bandit", Color(255, 50, 0), {
+	Schema.AddReputationRank(-4, "bandit", Color(255, 0, 0), {
 		english = "Bandit",
 		russian = "Бандит"
 	})
 
-	Schema.AddReputationRank(-3, "villain", Color(255, 100, 0), {
+	Schema.AddReputationRank(-3, "villain", Color(255, 0, 0), {
 		english = "Villain",
 		russian = "Злодей"
 	})
 
-	Schema.AddReputationRank(-2, "thug", Color(255, 150, 0), {
+	Schema.AddReputationRank(-2, "thug", Color(255, 0, 0), {
 		english = "Thug",
 		russian = "Головорез"
 	})
 
-	Schema.AddReputationRank(-1, "outlaw", Color(255, 200, 0), {
+	Schema.AddReputationRank(-1, "outlaw", Color(255, 0, 0), {
 		english = "Outlaw",
 		russian = "Вне Закона"
 	})

@@ -3,7 +3,7 @@
 -- function BUFF:Move(client, mv)
 	-- if (client:GetMoveType() != MOVETYPE_WALK) then return end
 
-	-- if (client:HasBuff(self.uniqueID) and !client:GetLocalVar("legBroken")) then
+	-- if (client:HasBuff(self.uniqueID) and !client:IsBrokenLeg()) then
 		-- local speed = mv:GetMaxSpeed() * 1.5
 		-- mv:SetMaxSpeed(speed)
 		-- mv:SetMaxClientSpeed(speed)

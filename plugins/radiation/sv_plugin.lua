@@ -10,7 +10,7 @@ function PLUGIN:PlayerTick(client)
 		if (area and area["type"] == "gas") then
 			client.nextRadCheck = CurTime() + 1
 
-			client.radiation = client.radiation or {}
+			client.radiation = client.radiation or {real = 0}
 			client.radiation.addictive = client.radiation.addictive or client:GetRadiationTotal()
 
 			local radiationResistance = 0
@@ -48,7 +48,7 @@ function PLUGIN:PlayerTick(client)
 			end
 		end
 	elseif (!client.ixInArea and client:Alive() and client.radiation and client.radiation.addictive) then
-		client:SetRadiation(CurTime() + client.radiation.addictive, true)
+		client:SetRadiation(client.radiation.addictive, true)
 		client.radiation.addictive = nil
 	end
 end
@@ -107,7 +107,7 @@ function PLUGIN:PlayerLoadedCharacter(client, character)
 	local rad = character:GetData("radiation")
 
 	if (rad) then
-		client:SetRadiation(CurTime() + rad, true)
+		client:SetRadiation(rad, true)
 	else
 		client:ClearRadiation()
 	end
@@ -122,6 +122,8 @@ do
 		if (!bReal) then
 			self.radiation.fake = amount
 		else
+			amount = CurTime() + amount
+
 			self.radiation.real = amount
 			self.radiation.fake = nil
 		end
@@ -130,6 +132,25 @@ do
 			net.WriteUInt(amount, 32)
 			net.WriteBool(bReal)
 		net.Send(self)
+	end
+
+	-- Отрицательные значения выводят радиацию
+	function playerMeta:AddRadiation(amount)
+		if (!isnumber(amount)) then return end
+		self.radiation = self.radiation or {real = 0}
+
+		if (self.radiation.addictive) then
+			self.radiation.addictive = self.radiation.addictive + amount
+			return
+		end
+
+		local newRadiation = self:GetRadiationTotal() + amount
+
+		if (newRadiation < 1) then
+			self:ClearRadiation()
+		else
+			self:SetRadiation(newRadiation, true)
+		end
 	end
 
 	function playerMeta:ClearRadiation()

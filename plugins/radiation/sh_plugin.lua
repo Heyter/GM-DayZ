@@ -159,17 +159,24 @@ if (CLIENT) then
 	do
 		local sounds_geiger = {}
 		for k = 1, PLUGIN.radLevel do
-			sounds_geiger[k] = {sound = Sound(Format("gmodz/radiation/radiation%d.ogg", k))}
+			local snd = Sound(Format("gmodz/radiation/radiation%d.ogg", k))
 
-			if (k == 1) then -- SoundDuration сломан
-				sounds_geiger[k].len = 0.5
-			elseif (k == 2) then
-				sounds_geiger[k].len = 0.55
-			elseif (k == 3) then
-				sounds_geiger[k].len = 0.6
-			elseif (k == 4) then
-				sounds_geiger[k].len = 1.25
-			end
+			sounds_geiger[k] = {
+				sound = snd,
+				len = SoundDuration(snd) + 0.1
+			}
+
+			snd = nil
+
+			-- if (k == 1) then -- SoundDuration сломан
+				-- sounds_geiger[k].len = 0.5
+			-- elseif (k == 2) then
+				-- sounds_geiger[k].len = 0.55
+			-- elseif (k == 3) then
+				-- sounds_geiger[k].len = 0.6
+			-- elseif (k == 4) then
+				-- sounds_geiger[k].len = 1.25
+			-- end
 		end
 
 		local nextGeiger = 0
