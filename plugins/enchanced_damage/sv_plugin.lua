@@ -4,14 +4,13 @@
 util.AddNetworkString("ixHitmarker")
 
 function PLUGIN:GetFallDamage(client, speed)
-	local damage = math.max(0, math.ceil(0.2418 * speed - 141.75))
-	-- local damage = speed / 10
+	local damage = speed / 10
 
 	if (damage > client:Health() / 2 and damage < client:Health()) then
 		client:BreakLeg()
 		client:EmitSound("Flesh.Break")
 
-		if (math.random() >= 0.8) then -- почему бы и нет.
+		if (math.random() >= 0.8) then
 			--damage = damage / 0.8
 			client:SetBleeding(damage)
 		end

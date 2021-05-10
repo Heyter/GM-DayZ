@@ -52,7 +52,7 @@ function PLUGIN:DoPlayerDeath(client)
 		return
 	end
 
-	hook.Run("OnPlayerGraveCreated", client, money, inventory:GetID())
+	hook.Run("OnPlayerGraveCreate", client, money, inventory:GetID())
 end
 
 function PLUGIN:InventoryItemAdded(_, newInv, item)
@@ -64,23 +64,21 @@ function PLUGIN:InventoryItemAdded(_, newInv, item)
 	end
 end
 
-function PLUGIN:OnPlayerGraveCreated(client, money, inventoryID)
+local v1 = Vector(0, 0, 5000)
+function PLUGIN:OnPlayerGraveCreate(client, money, inventoryID)
 	local pos = client:GetPos()
-
-	local trace = {}
-	trace.start = pos
-	trace.endpos = pos - Vector(0, 0, 5000)
-	local hitPos = util.TraceLine(trace).HitPos
+	local trace = util.TraceLine({
+		start = pos,
+		endpos = pos - v1
+	})
 
 	local entity = ents.Create("gmodz_grave")
 	entity:Spawn()
-	entity:SetPos(pos + Vector(0, 0, 16))
-	-- entity:SetPos(position + (entity:GetPos() - entity:NearestPoint(position - (normal * 512))));
+	entity:SetPos(trace.HitPos - trace.HitNormal * entity:OBBMins().z)
 	entity:SetAngles(client:GetAngles())
 	entity:SetStoredName(client:Nick())
 	entity:SetStoredID(client:SteamID64())
 	entity:SetReputation(client:GetReputationLevel())
-	entity.MinZ = entity:OBBMins().z
 
 	if (money > 0) then
 		entity:SetMoney(money)
@@ -88,14 +86,5 @@ function PLUGIN:OnPlayerGraveCreated(client, money, inventoryID)
 
 	entity:SetID(inventoryID)
 
-	hook.Add("Tick", entity, function(this)
-		local dist = hitPos:Distance(this:GetPos())
-		local speed = dist / 30
-
-		if (dist <= (this.MinZ * -1)) then
-			hook.Remove("Tick", this)
-		else
-			this:SetPos(this:GetPos() - Vector(0, 0, 1 * speed))
-		end
-	end)
+	trace = nil
 end
