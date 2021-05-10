@@ -418,7 +418,7 @@ else
 				if (!self.HeartbeatSound) then
 					self.HeartbeatSound = CreateSound(client, "player/heartbeat1.wav")
 				end
-				
+
 				if (CurTime() >= (self.NextHeartbeat or 0)) then
 					self.NextHeartbeat = CurTime() + ( 0.75 + ( (1.25 / maxHealth) * health ) )
 					self.HeartbeatSound:PlayEx(0.75 - ( (0.7 / maxHealth) * health ), 100)
@@ -584,7 +584,7 @@ else
 			end
 		end
 
-		if (client:GetLocalVar("legBroken")) then
+		if (client:IsBrokenLeg()) then
 			perc.textColor = Color("red")
 			perc.y = perc.y - perc.h - margin
 			hud:status(perc, "BROKEN LEG") -- НОГА ПОВРЕЖДЕНА

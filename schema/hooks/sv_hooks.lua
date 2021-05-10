@@ -11,6 +11,7 @@ end
 
 function Schema:PostPlayerLoadout(client, reload)
 	client:AllowFlashlight(true)
+	client:SetJumpPower(ix.config.Get("jumpPower", 200))
 end
 
 function Schema:CanPlayerJoinClass(client, class, classData)

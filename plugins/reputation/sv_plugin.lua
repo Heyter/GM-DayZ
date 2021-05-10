@@ -32,15 +32,9 @@ function PLUGIN:PlayerDeath(victim, _, attacker)
 		attacker:SafePenalty()
 	end
 
-	victim:ResetPenalty()
-	victim.resetPenalty = true -- bugfix: если умереть вместе с целью, например от взрыва, то вешается пенльти.
-end
-
-function PLUGIN:PlayerSpawn(client)
-	if (client.resetPenalty) then
-		client:ResetPenalty()
-		client.resetPenalty = nil
-	end
+	timer.Simple(0, function()
+		if (IsValid(victim)) then victim:ResetPenalty() end
+	end)
 end
 
 function PLUGIN:PlayerHurt(victim, attacker, _, damage)

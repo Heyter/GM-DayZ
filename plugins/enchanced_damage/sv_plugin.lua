@@ -21,7 +21,6 @@ function PLUGIN:GetFallDamage(client, speed)
 end
 
 function PLUGIN:OnCharacterDisconnect(client)
-	client:HealLeg(true)
 	client:HealBleeding()
 end
 
@@ -68,6 +67,26 @@ function PLUGIN:GetPlayerDeathSound()
 	return false
 end
 
+function PLUGIN:CharacterPreSave(character)
+	local time = math.max(0, character:GetPlayer():GetLocalVar("legBroken", 0) - CurTime())
+
+	if (time < 10) then
+		time = nil
+	end
+
+	character:SetData("legBroken", time)
+end
+
+function PLUGIN:PlayerLoadedCharacter(client, character)
+	local time = character:GetData("legBroken")
+
+	if (time) then
+		client:BreakLeg(time, true)
+	else
+		client:HealLeg()
+	end
+end
+
 -- PLAYER META
 
 local playerMeta = FindMetaTable("Player")
@@ -75,26 +94,11 @@ local playerMeta = FindMetaTable("Player")
 function playerMeta:BreakLeg(duration, bForce)
 	if (!bForce and hook.Run("PlayerShouldTakeDamage", self, self) == false) then return end
 
-	duration = duration or 300
-
-	self:SetLocalVar("legBroken", true)
-	self:SetJumpPower(80)
-
-	timer.Create("ixBreakLeg" .. self:EntIndex(), duration, 1, function()
-		if (IsValid(self)) then
-			self:SetLocalVar("legBroken", nil)
-			self:SetJumpPower(200)
-		end
-	end)
+	self:SetLocalVar("legBroken", CurTime() + (duration or 300))
 end
 
-function playerMeta:HealLeg(bSetOnlyTimer)
-	timer.Remove("ixBreakLeg" .. self:EntIndex())
-
-	if (!bSetOnlyTimer) then
-		self:SetLocalVar("legBroken", nil)
-		self:SetJumpPower(200)
-	end
+function playerMeta:HealLeg()
+	self:SetLocalVar("legBroken", nil)
 end
 
 function playerMeta:SetBleeding(damage, bForce, inflictor)

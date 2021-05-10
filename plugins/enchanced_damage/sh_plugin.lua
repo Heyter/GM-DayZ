@@ -27,7 +27,7 @@ function PLUGIN:Move(client, mv)
 		additive = additive + 30
 	end
 
-	if (!client:HasBuff("morphine") and client:GetLocalVar("legBroken")) then
+	if (!client:HasBuff("morphine") and client:IsBrokenLeg()) then
 		walkSpeed = (additive < 1 and client:GetWalkSpeed() * .8 or walkSpeed * .8) + additive
 	elseif (additive > 0) then
 		walkSpeed = walkSpeed + additive
@@ -35,6 +35,19 @@ function PLUGIN:Move(client, mv)
 
 	mv:SetMaxSpeed(walkSpeed)
 	mv:SetMaxClientSpeed(walkSpeed)
+
+	local jumpPower = ix.config.Get("jumpPower", 200)
+	jumpPower = hook.Run("PlayerStaminaJumpPower", client, jumpPower, client:GetNetVar("brth", false)) or jumpPower
+
+	if (client:GetJumpPower() != jumpPower) then
+		client:SetJumpPower(jumpPower)
+	end
+end
+
+function PLUGIN:PlayerStaminaJumpPower(client, jumpPower, brth)
+	if (client:IsBrokenLeg() and !brth) then
+		return jumpPower * 0.4
+	end
 end
 
 if (CLIENT) then
@@ -104,8 +117,10 @@ if (CLIENT) then
 			LocalPlayer():EmitSound(hurtSounds[math.random(1, #hurtSounds)], 500, 100, 1)
 		end)
 	end
+end
 
-	FindMetaTable("Player").BreakLeg = function(self)
-		self:SetJumpPower(80)
+do
+	FindMetaTable("Player").IsBrokenLeg = function(self)
+		return self:GetLocalVar("legBroken", 0) > CurTime()
 	end
 end

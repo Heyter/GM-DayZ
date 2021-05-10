@@ -13,8 +13,12 @@ ix.config.Set("weaponAlwaysRaised", true)
 ix.config.SetDefault("color", Color(75, 119, 190, 255))
 ix.config.Set("thirdperson", true)
 
-ix.config.Add("jumpStamina", 10, "How much stamina jumpes use up.", nil, {
-	data = {min = 0, max = 100},
+ix.config.Add("jumpPower", 200, "How high player jumps by default.", function(oldValue, newValue)
+	for _, v in ipairs(player.GetAll())	do
+		v:SetJumpPower(newValue)
+	end
+end, {
+	data = {min = 0, max = 1024},
 	category = "characters"
 })
 
@@ -22,7 +26,8 @@ ix.config.Add("jumpStamina", 10, "How much stamina jumpes use up.", nil, {
 local noLoad = {
 	saveitems = true,
 	recognition = true,
-	wepselect = true
+	wepselect = true,
+	stamina = true
 }
 
 function Schema:InitializedPlugins()
