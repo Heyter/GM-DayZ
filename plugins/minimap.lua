@@ -80,6 +80,12 @@ function map.Generate()
 	collectgarbage()
 end
 
+function map.Save()
+	timer.Create("ixGlobalMap", 5, 1, function()
+		ix.data.Set("global_map", objects)
+	end)
+end
+
 function map.ToScreen(pos, w, h)
 	local x = (map.SizeW > 0 and pos.x + map.SizeE or pos.x - map.SizeW)
 	local y = (map.SizeS > 0 and pos.y + map.SizeN or pos.y - map.SizeS)
@@ -169,6 +175,7 @@ concommand.Add("show_map", function()
 
 			if (current_index) then
 				objects[current_index][3] = map.ToWorld(mx, my, w, h)
+				map.Save()
 			end
 		end
 	end
@@ -199,7 +206,8 @@ concommand.Add("show_map", function()
 					frame_label:SetData(data[1], data[2], current_index)
 
 					function frame_label:DoneClick(text, color, index)
-						objects[index] = {text, color, map.ToWorld(x, y, w, h)} 
+						objects[index] = {text, color, map.ToWorld(x, y, w, h)}
+						map.Save()
 					end
 
 					frame_label = nil
@@ -213,7 +221,8 @@ concommand.Add("show_map", function()
 				dmenu:AddOption("Label", function()
 					frame_label = vgui.Create("ixMapSetLabel")
 					function frame_label:DoneClick(text, color)
-						objects[#objects+1] = {text, color, map.ToWorld(x, y, w, h)} 
+						objects[#objects+1] = {text, color, map.ToWorld(x, y, w, h)}
+						map.Save()
 					end
 					frame_label = nil
 				end):SetImage("icon16/attach.png")
@@ -227,17 +236,14 @@ end)
 function PLUGIN:LoadFonts()
 	surface.CreateFont("MapFont", {
 		font = "Jura",
-		size = ScrW()*0.012,
+		size = ScrW()*0.012, -- todo
 		weight = 500,
 	})
+end
 
+function PLUGIN:InitPostEntity()
 	map.Generate()
-
 	objects = ix.data.Get("global_map", {})
-
-	timer.Create("ixGlobalMap", 300, 0, function()
-		ix.data.Set("global_map", objects)
-	end)
 end
 
 local PANEL = {}
