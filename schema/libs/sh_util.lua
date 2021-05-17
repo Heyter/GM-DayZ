@@ -15,4 +15,9 @@ if (CLIENT) then
 
 		return health_color
 	end
+
+    function ix.util.ScreenScaleH(n)
+        return n * (ScrH() / 480)
+    end
+	--ScreenScale = Width scale
 end

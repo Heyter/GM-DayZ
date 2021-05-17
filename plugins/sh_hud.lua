@@ -66,14 +66,15 @@ else
 	function PLUGIN:LoadFonts()
 		surface.CreateFont("ixDHUDNum", {
 			font = "Jura",
-			size = sscale(10), -- todo: rescale
+			extended = true,
+			size = ix.util.ScreenScaleH(12),
 			weight = 100,
 		})
 
 		surface.CreateFont("nutDHUDIcon", {
 			font = "fontello",
 			extended = true, 
-			size = sscale(12), 
+			size = sscale(12),
 			weight = 1500, 
 		})
 

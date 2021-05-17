@@ -104,3 +104,5 @@ function Schema:PlayerEmitPainSound(client, hit_group, bNotRandom, bNotDefaultHi
 		end)
 	end
 end
+
+collectgarbage()

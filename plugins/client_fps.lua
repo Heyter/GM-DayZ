@@ -73,3 +73,11 @@ if (CLIENT) then
 		end)
 	end
 end
+
+if (SERVER) then
+	hook.Add("PropBreak", "RPGM.AntiConstraintCrash", function(attacker, ent)
+		if IsValid(ent) and ent:GetPhysicsObject():IsValid() then
+			constraint.RemoveAll(ent)
+		end
+	end)
+end

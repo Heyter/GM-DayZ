@@ -95,3 +95,16 @@ function GM:PlayerHurt(client, attacker, health, damage)
 
 	ix.log.Add(client, "playerHurt", damage, attacker:GetName() ~= "" and attacker:GetName() or attacker:GetClass())
 end
+
+function Schema:InitPostEntity()
+    local physData = physenv.GetPerformanceSettings()
+    physData.MaxVelocity = 2000
+    physData.MaxAngularVelocity = 3636
+    physenv.SetPerformanceSettings(physData)
+
+    game.ConsoleCommand("sv_allowcslua 0\n")
+    game.ConsoleCommand("physgun_DampingFactor 0.9\n")
+    game.ConsoleCommand("sv_sticktoground 0\n")
+    game.ConsoleCommand("sv_airaccelerate 1000\n")
+    game.ConsoleCommand("sv_alltalk 0\n")
+end

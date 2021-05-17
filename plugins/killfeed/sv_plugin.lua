@@ -26,3 +26,8 @@ function PLUGIN:DoPlayerDeath(victim, attacker, dmg_info)
 		net.WriteString(victim.DeathMsg or "")
 	net.Broadcast()
 end
+
+FindMetaTable("Player").KillFeed = function(self, reason)
+	self.DeathMsg = reason
+	self:Kill()
+end

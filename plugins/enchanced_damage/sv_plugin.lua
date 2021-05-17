@@ -154,8 +154,7 @@ function playerMeta:SetBleeding(damage, bForce, inflictor)
 
 				if (amt <= 0) then
 					timer.Remove(uniqueID)
-					self.DeathMsg = "bledout"
-					self:Kill()
+					self:KillFeed("bledout")
 					return
 				end
 

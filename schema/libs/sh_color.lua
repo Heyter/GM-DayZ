@@ -8,6 +8,15 @@ do
 	function colorMeta:Fluctuate(c) -- used for flashing colors
 		return (math.cos(CurTime() * c) + 1) / 2
 	end
+
+	function colorMeta:Darken(amt)
+		return Color(
+			math.Clamp(self.r - amt, 0, 255),
+			math.Clamp(self.g - amt, 0, 255),
+			math.Clamp(self.b - amt, 0, 255),
+			self.a
+		)
+	end
 end
 
 function Color(r, g, b, a)
