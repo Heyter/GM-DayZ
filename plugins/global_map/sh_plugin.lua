@@ -6,6 +6,28 @@ if (SERVER) then return end
 
 local draw, surface, TEXT_ALIGN_CENTER = draw, surface, TEXT_ALIGN_CENTER
 
+do
+	ix.lang.AddTable("russian", {
+		globalMapDeleteLabelsConfirm = "Вы уверены, что хотите удалить все метки?",
+		globalMapDeleteLabels = "Удалить все метки",
+		globalMapLabel = "Метка",
+		globalMapPlaceholderLabel = "Введите имя метки",
+		globalMapLabelName = "Имя метки",
+		globalMap = "Карта",
+		globalMapYOU = "ВЫ",
+	})
+
+	ix.lang.AddTable("english", {
+		globalMapDeleteLabelsConfirm = "Are you sure you want to remove all labels?",
+		globalMapDeleteLabels = "Remove all labels",
+		globalMapLabel = "Label",
+		globalMapPlaceholderLabel = "Enter the label name",
+		globalMapLabelName = "Label Name",
+		globalMap = "Map",
+		globalMapYOU = "YOU",
+	})
+end
+
 ix.map = ix.map or {
 	texture = Material("gmodz/global_map/rp_stalker_v2.png"),
 	objects = {},
@@ -69,6 +91,7 @@ function map.Generate()
 	map.SizeY = math.abs(map.SizeN + math.abs(map.SizeS))
 
 	ix.map.iconSize = math.Round((tonumber(32) / 2160) * ScrH(), 0)
+	ix.map.ringSize = math.Round((tonumber(74) / 2160) * ScrH(), 0)
 
 	-- pre-cache
 	surface.SetFont("MapFont")
@@ -110,6 +133,7 @@ end
 
 function map.Open()
 	if (!map.SizeX) then map.Generate() end
+	if (!LocalPlayer():GetCharacter() or !LocalPlayer():Alive()) then return end
 	if (IsValid(ix.map.gui.map)) then ix.map.gui.map:Remove() end
 
 	local clr = nil
@@ -119,7 +143,7 @@ function map.Open()
 
 	frame:SetSize(ScrH(), ScrH())
 	frame:Center()
-	frame:SetTitle("MAP")
+	frame:SetTitle(L("globalMap"))
 	frame:MakePopup()
 
 	frame.OnKeyCodeReleased = function(t, keyCode)
@@ -131,7 +155,9 @@ function map.Open()
 
 	frame.map = frame:Add("EditablePanel")
 	frame.map:Dock(FILL)
-	frame.map.Paint = function( self, w, h )
+	frame.map.Paint = function(self, w, h)
+		self:SetCursor("arrow")
+
 		--local mx, my = self:CursorPos()
 
 		surface.SetMaterial(ix.map.texture)
@@ -147,21 +173,45 @@ function map.Open()
 
 		--frame:SetTitle(math.Clamp(mx, 0, w) .. ", " .. math.Clamp(my, 0, h))
 
-		draw.SimpleTextOutlined("YOU", "MapFont", x, y - ix.map.iconSize, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+		draw.SimpleTextOutlined(L("globalMapYOU"), "MapFont", x, y - ix.map.iconSize, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
 		draw.SimpleTextOutlined(ix.map.signs[1], "MapFont", x, y, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
 
-		for k, v in ipairs(ix.map.objects) do
+		for _, v in ipairs(ix.map.objects) do
 			clr = v[2]
 			x, y = map.ToScreen(v[3], w, h)
+
 			if (self:MouseInRect(x, y, ix.map.signSize[1], ix.map.signSize[2])) then
+				if (self.current_index) then
+					self:SetCursor("blank")
+				else
+					self:SetCursor("hand")
+				end
+
 				clr = Color(clr.r, clr.g, clr.b):Darken(25)
 			end
+
 			--local x1, y1 = map.ToScreen(LocalPlayer():GetPos(), w, h)
 			--local dist = math.Round(math.Distance(x, y, x1, y1), 2)
 			--if dist < 35 then
 				draw.SimpleTextOutlined(v[1], "MapFont", x, y - ix.map.iconSize, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
 				draw.SimpleTextOutlined(ix.map.signs[1], "MapFont", x, y, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
 			--end
+		end
+
+		if (!SH_SZ or !SH_SZ.SafeZones or #SH_SZ.SafeZones == 0) then return end
+
+		for _, sz in ipairs(SH_SZ.SafeZones) do
+			local center = SH_SZ:GetLocalZonePosition(sz.points[1], sz.points[2], sz.shape, sz.size)
+			x, y = map.ToScreen(center, w, h)
+
+			clr = Color("green")
+
+			if (sz.shape == 1) then -- cube
+
+			elseif (sz.shape == 2) then -- ring
+				draw.SimpleTextOutlined("Safe Zone", "MapFont1", x, y - (ix.map.iconSize/2), clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+				surface.DrawCircle(x, y, (sz.size/1024)*ix.map.ringSize, clr)
+			end
 		end
 	end
 
@@ -173,26 +223,33 @@ function map.Open()
 	function frame.map:OnCursorMoved(mx, my)
 		if (input.IsMouseDown(MOUSE_LEFT)) then
 			local w, h = self:GetSize()
-			local current_index
+			self.current_index = self.current_index or nil
 
-			for k, v in ipairs(ix.map.objects) do
-				x, y = map.ToScreen(v[3], w, h)
-				if (self:MouseInRect(x, y, ix.map.signSize[1], ix.map.signSize[2])) then
-					current_index = k
-					break
+			if (!self.current_index) then
+				for k, v in ipairs(ix.map.objects) do
+					x, y = map.ToScreen(v[3], w, h)
+
+					if (self:MouseInRect(x, y, ix.map.signSize[1], ix.map.signSize[2])) then
+						self.current_index = k
+						break
+					end
 				end
-			end
-
-			if (current_index) then
-				ix.map.objects[current_index][3] = map.ToWorld(mx, my, w, h)
+			else
+				ix.map.objects[self.current_index][3] = map.ToWorld(mx, my, w, h)
 				map.Save()
 			end
 		end
 	end
 
+	function frame.map:OnMouseReleased()
+		self.current_index = nil
+	end
+
 	function frame.map:OnMousePressed(code)
 		if (code == MOUSE_RIGHT) then
 			local w, h = self:GetSize()
+			local x, y = 0, 0
+
 			local current_index
 
 			for k, v in ipairs(ix.map.objects) do
@@ -204,10 +261,10 @@ function map.Open()
 			end
 
 			local dmenu = DermaMenu()
-			local x, y = self:CursorPos()
+			x, y = self:CursorPos()
 
 			if (current_index) then
-				dmenu:AddOption("Edit", function()
+				dmenu:AddOption(L("option_edit"), function()
 					if (IsValid(ix.map.gui.label)) then ix.map.gui.label:Remove() end
 					local data = ix.map.objects[current_index]
 
@@ -221,15 +278,14 @@ function map.Open()
 
 					ix.map.gui.label = nil
 				end):SetImage("icon16/wand.png")
-
 				dmenu:AddSpacer()
 
-				dmenu:AddOption("Remove", function()
+				dmenu:AddOption(L("option_remove"), function()
 					table.remove(ix.map.objects, current_index)
 					current_index = nil
 				end):SetImage("icon16/exclamation.png")
 			elseif (!IsValid(ix.map.gui.label)) then
-				dmenu:AddOption("Label", function()
+				dmenu:AddOption(L("globalMapLabel"), function()
 					ix.map.gui.label = vgui.Create("ixMapSetLabel")
 
 					function ix.map.gui.label:DoneClick(text, color)
@@ -239,6 +295,20 @@ function map.Open()
 
 					ix.map.gui.label = nil
 				end):SetImage("icon16/attach.png")
+
+				if (#ix.map.objects > 0) then
+					dmenu:AddSpacer()
+
+					dmenu:AddOption(L("globalMapDeleteLabels"), function()
+						Derma_Query(L("globalMapDeleteLabelsConfirm", id), L("globalMapDeleteLabels"),
+							L("no"), nil,
+							L("yes"), function()
+								ix.map.objects = {}
+								map.Save()
+							end
+						)
+					end):SetImage("icon16/bomb.png")
+				end
 			end
 
 			dmenu:Open()
@@ -256,6 +326,12 @@ function PLUGIN:LoadFonts()
 		font = "Jura",
 		size = ix.util.ScreenScaleH(10),
 		weight = 500,
+	})
+
+	surface.CreateFont("MapFont1", {
+		font = "Jura",
+		size = ix.util.ScreenScaleH(9),
+		weight = 100,
 	})
 end
 

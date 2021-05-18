@@ -7,7 +7,7 @@ ix.config.Add("hungrySeconds", 3500, "Через сколько секунд н�
 	category = PLUGIN.name
 })
 
-ix.config.Add("thirstySeconds", 2000, "Через сколько секунд наступит жажда", nil, {
+ix.config.Add("thirstySeconds", 3000, "Через сколько секунд наступит жажда", nil, {
 	data = {min = 100, max = 10000},
 	category = PLUGIN.name
 })

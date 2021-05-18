@@ -2,7 +2,7 @@ local PANEL = {}
 
 function PANEL:Init()
 	self.color_label = color_white
-	self.text_label = "Label Name"
+	self.text_label = L("globalMapLabelName")
 
 	self:SetSize(ScrW() * 0.5, ScrH() * 0.5)
 	self:Center()
@@ -24,7 +24,7 @@ function PANEL:Init()
 
 	for k, v in ipairs(ix.map.signs) do
 		if (k != 1) then
-			local btn = self.scroll:Add( "DButton" )
+			local btn = self.scroll:Add("DButton")
 			btn:SetText(v)
 			btn:Dock(TOP)
 			btn:DockMargin(0, 0, 5, 5)
@@ -39,14 +39,14 @@ function PANEL:Init()
 	end
 
 	self.button_done = self:Add("DButton")
-	self.button_done:SetText("Done")
+	self.button_done:SetText(L("option_done"))
 	self.button_done:SetIcon("icon16/accept.png")
 	self.button_done:Dock(BOTTOM)
 
 	self.button_done.DoClick = function()
 		local text = self.textEntry:GetValue()
 
-		if (#text < 1 or text == "Label Name") then
+		if (#text < 1 or text == L("globalMapLabelName")) then
 			return
 		end
 
@@ -71,13 +71,13 @@ function PANEL:Init()
 	end
 
 	self.textEntry = self:Add("DTextEntry")
-	self.textEntry:SetPlaceholderText("Enter the label name")
+	self.textEntry:SetPlaceholderText(L("globalMapPlaceholderLabel"))
 	self.textEntry:Dock(BOTTOM)
 	self.textEntry.OnChange = function(this)
 		local text = this:GetValue()
 
 		if (#text < 1) then
-			text = "Label Name"
+			text = L("globalMapLabelName")
 		end
 
 		self.text_label = text
