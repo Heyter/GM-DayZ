@@ -335,6 +335,10 @@ function PLUGIN:LoadFonts()
 	})
 end
 
+function PLUGIN:ScreenResolutionChanged()
+	map.SizeX = nil
+end
+
 function PLUGIN:InitPostEntity()
 	map.Generate()
 	ix.map.objects = ix.data.Get("global_map", {})

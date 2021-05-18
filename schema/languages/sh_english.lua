@@ -12,4 +12,8 @@ LANGUAGE = {
 	optToggleEffects = "First Person Effects",
 
 	colors = "Colors",
+
+	option_remove = "Remove",
+	option_edit = "Edit",
+	option_done = "Done"
 }

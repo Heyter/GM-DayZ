@@ -12,4 +12,8 @@ LANGUAGE = {
 	optToggleEffects = "Эффекты от первого лица",
 
 	colors = "Цвета",
+
+	option_remove = "Удалить",
+	option_edit = "Изменить",
+	option_done = "Готово"
 }
