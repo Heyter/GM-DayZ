@@ -5,28 +5,7 @@ PLUGIN.description = ""
 if (SERVER) then return end
 
 local draw, surface, TEXT_ALIGN_CENTER = draw, surface, TEXT_ALIGN_CENTER
-
-do
-	ix.lang.AddTable("russian", {
-		globalMapDeleteLabelsConfirm = "Вы уверены, что хотите удалить все метки?",
-		globalMapDeleteLabels = "Удалить все метки",
-		globalMapLabel = "Метка",
-		globalMapPlaceholderLabel = "Введите имя метки",
-		globalMapLabelName = "Имя метки",
-		globalMap = "Карта",
-		globalMapYOU = "ВЫ",
-	})
-
-	ix.lang.AddTable("english", {
-		globalMapDeleteLabelsConfirm = "Are you sure you want to remove all labels?",
-		globalMapDeleteLabels = "Remove all labels",
-		globalMapLabel = "Label",
-		globalMapPlaceholderLabel = "Enter the label name",
-		globalMapLabelName = "Label Name",
-		globalMap = "Map",
-		globalMapYOU = "YOU",
-	})
-end
+local SH_SZ = SH_SZ
 
 ix.map = ix.map or {
 	texture = Material("gmodz/global_map/rp_stalker_v2.png"),
@@ -131,20 +110,47 @@ function map.ToWorld(x, y, w, h)
 	return Vector(x, -y, 0)
 end
 
+local function PrintRainbowText( frequency, str )
+
+	local text = {}
+	local len = #text
+
+	for i = 1, #str do
+		text[len + 1] = HSVToColor( i * frequency % 360, 1, 1 )
+		len = len + 1
+	end
+
+	-- Print to chat, also prints to console
+	return text
+
+	-- Uncomment this to print to console only, works serverside too
+	-- MsgC( unpack( text ) )
+
+end
+
 function map.Open()
 	if (!map.SizeX) then map.Generate() end
 	if (!LocalPlayer():GetCharacter() or !LocalPlayer():Alive()) then return end
 	if (IsValid(ix.map.gui.map)) then ix.map.gui.map:Remove() end
 
 	local clr = nil
+	local useText = "[ALT]"
 
 	local frame = vgui.Create('DFrame')
 	ix.map.gui.map = frame
 
 	frame:SetSize(ScrH(), ScrH())
 	frame:Center()
-	frame:SetTitle(L("globalMap"))
+	frame:SetTitle(L("globalMapCursor", useText, L'globalMapCursorEnable'))
+
 	frame:MakePopup()
+	frame:SetMouseInputEnabled(false)
+	frame:SetKeyboardInputEnabled(false)
+
+	frame.lblTitle:SetFont("MapFont")
+	frame.lblTitle.UpdateColours = function(label)
+		return label:SetTextStyleColor(color_white)
+	end
 
 	frame.OnKeyCodeReleased = function(t, keyCode)
 		if (keyCode == KEY_F2) then
@@ -153,25 +159,40 @@ function map.Open()
 		end
 	end
 
+	frame.Think = function(t)
+		if (input.IsKeyDown(81) or input.IsKeyDown(82)) then
+			if (!t.ctrl_pressed) then
+				if (IsValid(t.dmenu)) then t.dmenu:Remove() t.dmenu = nil end
+
+				t:SetMouseInputEnabled(!t:IsMouseInputEnabled())
+				--t:SetKeyboardInputEnabled(!t:IsKeyboardInputEnabled())
+				t.map:SetMouseInputEnabled(!t.map:IsMouseInputEnabled())
+				t.map:SetKeyboardInputEnabled(!t.map:IsKeyboardInputEnabled())
+
+				t:SetTitle(L("globalMapCursor", useText,
+					t:IsMouseInputEnabled() and L'globalMapCursorDisable' or L'globalMapCursorEnable'))
+
+				t.ctrl_pressed = true
+			end
+		elseif t.ctrl_pressed then
+			t.ctrl_pressed = nil
+		end
+	end
+
 	frame.map = frame:Add("EditablePanel")
 	frame.map:Dock(FILL)
 	frame.map.Paint = function(self, w, h)
-		self:SetCursor("arrow")
-
-		--local mx, my = self:CursorPos()
+		if (!self.current_index) then self:SetCursor("arrow") end
 
 		surface.SetMaterial(ix.map.texture)
 		surface.SetDrawColor(color_white)
 		surface.DrawTexturedRect(0, 0, w, h)
 
+		--draw.SimpleTextOutlined("Press ctrl to enable the mouse cursor", "MapFont", 5, 5, ColorAlpha(Color("gray"), 150), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+
 		x, y = map.ToScreen(LocalPlayer():GetPos(), w, h)
 
-		-- hs = ix.map.iconSize/2
-		--draw.RoundedBoxEx( 0, mx-hs, my-hs, s, s, color_white, false, true, false, true )
-
 		clr = ix.map.default_color
-
-		--frame:SetTitle(math.Clamp(mx, 0, w) .. ", " .. math.Clamp(my, 0, h))
 
 		draw.SimpleTextOutlined(L("globalMapYOU"), "MapFont", x, y - ix.map.iconSize, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
 		draw.SimpleTextOutlined(ix.map.signs[1], "MapFont", x, y, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
@@ -181,11 +202,7 @@ function map.Open()
 			x, y = map.ToScreen(v[3], w, h)
 
 			if (self:MouseInRect(x, y, ix.map.signSize[1], ix.map.signSize[2])) then
-				if (self.current_index) then
-					self:SetCursor("blank")
-				else
-					self:SetCursor("hand")
-				end
+				self:SetCursor(self.current_index and "blank" or "hand")
 
 				clr = Color(clr.r, clr.g, clr.b):Darken(25)
 			end
@@ -200,7 +217,7 @@ function map.Open()
 
 		if (!SH_SZ or !SH_SZ.SafeZones or #SH_SZ.SafeZones == 0) then return end
 
-		for _, sz in ipairs(SH_SZ.SafeZones) do
+		for k, sz in ipairs(SH_SZ.SafeZones) do
 			local center = SH_SZ:GetLocalZonePosition(sz.points[1], sz.points[2], sz.shape, sz.size)
 			x, y = map.ToScreen(center, w, h)
 
@@ -261,6 +278,8 @@ function map.Open()
 			end
 
 			local dmenu = DermaMenu()
+			frame.dmenu = dmenu
+
 			x, y = self:CursorPos()
 
 			if (current_index) then
@@ -346,7 +365,12 @@ end
 
 function PLUGIN:PlayerBindPress(_, bind, pressed)
 	if (bind:find("gm_showteam") and pressed) then
-		map.Open()
+		if (!IsValid(ix.map.gui.map)) then
+			map.Open()
+		else
+			ix.map.gui.map:Remove()
+		end
+
 		return true
 	end
 end

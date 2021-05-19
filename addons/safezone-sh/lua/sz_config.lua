@@ -54,7 +54,7 @@ SH_SZ.DefaultOptions = {
 	leavemsg = "",
 }
 
-SH_SZ.MaximumSize = 1024
+SH_SZ.MaximumSize = 2048
 
 SH_SZ.DataDirName = "sh_safezones"
 
