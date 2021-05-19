@@ -110,24 +110,6 @@ function map.ToWorld(x, y, w, h)
 	return Vector(x, -y, 0)
 end
 
-local function PrintRainbowText( frequency, str )
-
-	local text = {}
-	local len = #text
-
-	for i = 1, #str do
-		text[len + 1] = HSVToColor( i * frequency % 360, 1, 1 )
-		len = len + 1
-	end
-
-	-- Print to chat, also prints to console
-	return text
-
-	-- Uncomment this to print to console only, works serverside too
-	-- MsgC( unpack( text ) )
-
-end
-
 function map.Open()
 	if (!map.SizeX) then map.Generate() end
 	if (!LocalPlayer():GetCharacter() or !LocalPlayer():Alive()) then return end
@@ -217,7 +199,7 @@ function map.Open()
 
 		if (!SH_SZ or !SH_SZ.SafeZones or #SH_SZ.SafeZones == 0) then return end
 
-		for k, sz in ipairs(SH_SZ.SafeZones) do
+		for _, sz in ipairs(SH_SZ.SafeZones) do
 			local center = SH_SZ:GetLocalZonePosition(sz.points[1], sz.points[2], sz.shape, sz.size)
 			x, y = map.ToScreen(center, w, h)
 
