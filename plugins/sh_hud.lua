@@ -407,12 +407,7 @@ else
 		end)
 	end
 
-	local breath = {
-		sound_delay = SoundDuration("player/breathe1.wav"),
-		distance = math.pow(512, 2),
-		cache = {}
-	}
-
+	local breathSound = Sound("gmodz/player/stamina.wav")
 	function PLUGIN:Think()
 		local client = LocalPlayer()
 		local playedHeartbeatSound = false
@@ -445,35 +440,23 @@ else
 
 		for _, v in ipairs(player.GetAll()) do
 			if (v:GetCharacter() and v:Alive() and v:GetNetVar("brth")) then
-				local distVolume = v == LocalPlayer() and 0.5 or math.Clamp(0.6 - (client:GetPos():DistToSqr(v:GetPos()) / breath.distance), 0, 0.6)
-
-				if (CurTime() >= (v.NextBreath or 0)) then
-					v.BreathSound = v.BreathSound or CreateSound(v, "player/breathe1.wav")
-					v.BreathSound:Play()
-					v.BreathSound:ChangeVolume(distVolume, 0)
-
-					v.NextBreath = CurTime() + breath.sound_delay
-
-					breath.cache[v] = v.BreathSound
-				elseif (v.BreathSound) then
-					v.BreathSound:ChangeVolume(distVolume, 0)
-				end
+				v.BreathSound = v:StartLoopingSound(breathSound)
 			elseif (v.BreathSound) then
-				v.BreathSound:FadeOut(10)
+				v:StopLoopingSound(v.BreathSound)
 				v.BreathSound = nil
-
-				breath.cache[v] = nil
-			end
-		end
-
-		-- Sound looping bug.
-		for ply, snd in pairs(breath.cache) do
-			if (!IsValid(ply)) then
-				snd:Stop()
-				breath.cache[ply] = nil
 			end
 		end
 	end
+
+	gameevent.Listen("player_disconnect")
+	hook.Add("player_disconnect", "HUD.player_disconnect", function(data)
+		local client = Player(data.userid)
+
+		if (client.BreathSound) then
+			client:StopLoopingSound(client.BreathSound)
+			client.BreathSound = nil
+		end
+	end)
 
 	do
 		local ColorModify = {
