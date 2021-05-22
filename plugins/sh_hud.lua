@@ -407,6 +407,12 @@ else
 		end)
 	end
 
+	local breath = {
+		sound_delay = SoundDuration("player/breathe1.wav"),
+		distance = math.pow(512, 2),
+		cache = {}
+	}
+
 	function PLUGIN:Think()
 		local client = LocalPlayer()
 		local playedHeartbeatSound = false
@@ -430,13 +436,41 @@ else
 		end
 
 		if (!playedHeartbeatSound and self.HeartbeatSound) then
-			self.HeartbeatSound:Stop()
+			if (client:Alive()) then
+				self.HeartbeatSound:FadeOut(10)
+			else
+				self.HeartbeatSound:Stop()
+			end
 		end
 
 		for _, v in ipairs(player.GetAll()) do
-			if (v:GetNetVar("brth") and (v.breath_cooldown or 0) < CurTime()) then  
-				v.breath_cooldown = CurTime() + 6
-				v:EmitSound("gmodz/breath.wav")
+			if (v:GetCharacter() and v:Alive() and v:GetNetVar("brth")) then
+				local distVolume = math.Clamp(0.6 - (client:GetPos():DistToSqr(v:GetPos()) / breath.distance), 0, 0.6)
+
+				if (CurTime() >= (v.NextBreath or 0)) then
+					v.BreathSound = v.BreathSound or CreateSound(v, "player/breathe1.wav")
+					v.BreathSound:Play()
+					v.BreathSound:ChangeVolume(distVolume, 0)
+
+					v.NextBreath = CurTime() + breath.sound_delay
+
+					breath.cache[v] = v.BreathSound
+				elseif (v.BreathSound) then
+					v.BreathSound:ChangeVolume(distVolume, 0)
+				end
+			elseif (v.BreathSound) then
+				v.BreathSound:FadeOut(10)
+				v.BreathSound = nil
+
+				breath.cache[v] = nil
+			end
+		end
+
+		-- Sound looping bug.
+		for ply, snd in pairs(breath.cache) do
+			if (!IsValid(ply)) then
+				snd:Stop()
+				breath.cache[ply] = nil
 			end
 		end
 	end
