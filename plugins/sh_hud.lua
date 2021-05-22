@@ -445,7 +445,7 @@ else
 
 		for _, v in ipairs(player.GetAll()) do
 			if (v:GetCharacter() and v:Alive() and v:GetNetVar("brth")) then
-				local distVolume = math.Clamp(0.6 - (client:GetPos():DistToSqr(v:GetPos()) / breath.distance), 0, 0.6)
+				local distVolume = v == LocalPlayer() and 0.5 or math.Clamp(0.6 - (client:GetPos():DistToSqr(v:GetPos()) / breath.distance), 0, 0.6)
 
 				if (CurTime() >= (v.NextBreath or 0)) then
 					v.BreathSound = v.BreathSound or CreateSound(v, "player/breathe1.wav")
