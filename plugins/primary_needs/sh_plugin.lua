@@ -2,7 +2,7 @@ PLUGIN.name = "Primary needs"
 PLUGIN.author = "STEAM_0:1:29606990"
 PLUGIN.description = "Adds thirst, hunger."
 
-ix.config.Add("hungrySeconds", 3500, "Через сколько секунд наступит голод", nil, {
+ix.config.Add("hungrySeconds", 3600, "Через сколько секунд наступит голод", nil, {
 	data = {min = 100, max = 10000},
 	category = PLUGIN.name
 })

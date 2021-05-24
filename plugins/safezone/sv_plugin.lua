@@ -18,16 +18,8 @@ end
 
 function PLUGIN:CanPlayerEnterSafeZone(entity, activator)
 	if (!activator:CanEnterSafe() or activator:GetPVPTime() > CurTime()) then
-		local vel = activator:GetVelocity() * -4
-		--vel[3] = math.Clamp(vel[3], 0, 10)
-		vel.z = 0
-		activator:SetVelocity(vel)
-
-		-- local dir = entity:GetPos() - activator:GetPos()
-		-- dir:Normalize()
-		-- dir.z = 0
-
-		-- activator:SetPos(activator:GetPos() - dir * 10)
+		local dir = (entity:GetPos() - activator:GetPos()):GetNormalized()
+		activator:SetVelocity(dir * -100)
 
 		return false
 	end
