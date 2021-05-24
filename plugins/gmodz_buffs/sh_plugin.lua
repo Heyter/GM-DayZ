@@ -18,6 +18,17 @@ function ix.buff.Register(uniqueID, path, isSingleFile)
 		return
 	end
 
+	uniqueID = uniqueID:lower()
+
+	if (isSingleFile) then
+		uniqueID = uniqueID:match("sh_([_%w]+)%.lua")
+
+		if (!uniqueID) then
+			ErrorNoHalt("[GMODZ::Buffs] Item at '"..path.."' follows invalid naming convention!\n")
+			return
+		end
+	end
+
 	BUFF = ix.buff.list[uniqueID] or setmetatable({}, ix.buff.meta)
 	BUFF.uniqueID = uniqueID
 
@@ -38,6 +49,12 @@ function ix.buff.Register(uniqueID, path, isSingleFile)
 	return ix.buff.list[uniqueID]
 end
 
+function ix.buff.Get(uniqueID)
+	uniqueID = uniqueID:lower()
+
+	return ix.buff.list[uniqueID]
+end
+
 function PLUGIN:InitializedPlugins()
 	local directory = self.folder .. "/buffs"
 
@@ -48,7 +65,7 @@ function PLUGIN:InitializedPlugins()
 	end
 
 	for _, v in ipairs(files) do
-		ix.buff.Register(string.StripExtension(v), directory.."/"..v, true)
+		ix.buff.Register(v, directory.."/"..v, true)
 	end
 end
 

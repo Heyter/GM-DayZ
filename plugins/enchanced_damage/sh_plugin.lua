@@ -27,7 +27,7 @@ function PLUGIN:Move(client, mv)
 		additive = additive + 30
 	end
 
-	if (!client:HasBuff("morphine") and client:IsBrokenLeg()) then
+	if (client:IsBrokenLeg()) then
 		walkSpeed = (additive < 1 and client:GetWalkSpeed() * .8 or walkSpeed * .8) + additive
 	elseif (additive > 0) then
 		walkSpeed = walkSpeed + additive
@@ -121,6 +121,8 @@ end
 
 do
 	FindMetaTable("Player").IsBrokenLeg = function(self)
+		if (self:HasBuff("morphine")) then return false end
+
 		return self:GetLocalVar("legBroken", 0) > CurTime()
 	end
 end

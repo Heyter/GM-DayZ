@@ -12,8 +12,8 @@ timer.Create("ixRadiation", 1, 0, function()
 			local radiation = client:GetRadiationTotal()
 
 			if ((client.next_tick_rad or 0) < CurTime()) then
-				radLevel = math.min(PLUGIN.radLevel, radiation)
-				radDamage = PLUGIN.rad_damage[radLevel] or {1, 3}
+				radLevel = math.min(PLUGIN.radLevel, math.floor(radiation / PLUGIN.radsScale))
+				radDamage = PLUGIN.rad_damage[radLevel] or {2, 3}
 
 				client.next_tick_rad = CurTime() + radDamage[2]
 
@@ -49,7 +49,7 @@ timer.Create("ixRadiation", 1, 0, function()
 
 					radiationResistance = 1 - radiationResistance
 
-					if ((client:HasBuff("radX") or 0) > CurTime()) then
+					if ((client:HasBuff("radx") or 0) > CurTime()) then
 						-- 0.6 = 1 - Rad-X Radiation Protection (40% resistance)
 						radiationResistance = radiationResistance * 0.6
 					end
@@ -59,9 +59,9 @@ timer.Create("ixRadiation", 1, 0, function()
 						radiationResistance = radiationResistance * 0.8
 					end
 
-					local newRadiation = math.ceil(math.min(self.maxRads, client.radiation.addictive + (radsIncrease * math.max(0, radiationResistance))))
+					local newRadiation = math.ceil(math.min(PLUGIN.maxRads, client.radiation.addictive + (radsIncrease * math.max(0, radiationResistance))))
 
-					if (newRadiation >= self.maxRads) then
+					if (newRadiation >= PLUGIN.maxRads) then
 						client:KillFeed("radiation")
 					elseif (newRadiation > 0) then
 						client.radiation.addictive = newRadiation

@@ -5,11 +5,12 @@ ITEM.height = 1
 ITEM.description = "This is base a food."
 ITEM.category = "Food"
 
--- -0.3; 0.3
+// -0.3; 0.3
 ITEM.hungerAmount = 0.3 -- процент
 ITEM.thirstAmount = 0.3 -- процент
 ITEM.healthAmount = 0
 ITEM.staminaAmount = 0
+ITEM.radiationAmount = 0
 
 ITEM.isDrink = false
 
@@ -45,22 +46,26 @@ if (CLIENT) then
 		local text = {}
 
 		if (self.healthAmount != 0) then
-			text[#text + 1] = Format("%s: %s%d", "Health", self.healthAmount < 0 and "-" or "+", math.abs(self.healthAmount))
+			text[#text + 1] = Format("%s: %s%d", L"Health", self.healthAmount < 0 and "-" or "+", math.abs(self.healthAmount))
 		end
 
 		if (self.staminaAmount != 0) then
 			text[#text + 1] = Format("%s: %s%d", L"Endurance", self.staminaAmount < 0 and "-" or "+", math.abs(self.staminaAmount))
 		end
 
+		if (self.radiationAmount != 0) then
+			text[#text + 1] = Format("%s: %s%d", L"Radiation", self.radiationAmount < 0 and "-" or "+", math.abs(self.radiationAmount))
+		end
+
 		if (self.hungerAmount != 0) then
-			text[#text + 1] = Format("%s: %s%d%%", "Hunger",
+			text[#text + 1] = Format("%s: %s%d%%", L"needs_hunger",
 				self.hungerAmount < 0 and "-" or "+",
 				math.abs(self.hungerAmount * 100)
 			)
 		end
 
 		if (self.thirstAmount != 0) then
-			text[#text + 1] = Format("%s: %s%d%%", "Thirst",
+			text[#text + 1] = Format("%s: %s%d%%", L"needs_thirst",
 				self.thirstAmount < 0 and "-" or "+",
 				math.abs(self.thirstAmount * 100)
 			)
@@ -147,7 +152,7 @@ ITEM.functions.use = {
     OnRun = function(item)
         return item:ConsumeFood(item.player)
 	end,
-	
+
 	OnCanRun = function(item)
 		if (item.isDrink) then
 			return item.slurpAmount > 0
@@ -165,7 +170,7 @@ ITEM.functions.combine = {
 
 		if (CLIENT) then
 			local combineItem = ix.item.instances[data[1]]
-			if (!combineItem or combineItem.isDrink) then
+			if (!combineItem or combineItem.isDrink or combineItem:GetData("quantity", combineItem.quantity or 1) >= 99) then
 				return false
 			end
 		end

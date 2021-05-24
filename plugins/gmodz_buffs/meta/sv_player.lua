@@ -38,7 +38,14 @@ function playerMeta:AddBuff(uniqueID)
 		-- постоянные баффы, не требуют таймера.
 		if (buff.permanently) then return end
 
-		timer.Create("ixBuff_" .. self:EntIndex(), 1, 0, function()
+		local timerID = "ixBuff_" .. self:EntIndex()
+
+		timer.Create(timerID, 1, 0, function()
+			if (!IsValid(self)) then
+				timer.Remove(timerID)
+				return
+			end
+
 			if (!self:Alive()) then
 				self:ClearBuffs()
 			end

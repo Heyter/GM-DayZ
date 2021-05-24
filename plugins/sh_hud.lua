@@ -63,6 +63,8 @@ else
 	local sscale = ScreenScale
 	local dbox = draw.RoundedBox
 
+	hud.lang = {}
+
 	function PLUGIN:LoadFonts()
 		surface.CreateFont("ixDHUDNum", {
 			font = "Jura",
@@ -105,6 +107,15 @@ else
 			size = sscale(11), 
 			weight = 400, 
 		})
+
+		hud.lang = {
+			radiation = L("Radiation"):utf8upper(),
+			well_fed = L("well_fed"):utf8upper(),
+			safezone = L("safezone_title"):utf8upper(),
+			hunger = L("needs_hunger"):utf8upper(),
+			thirst = L("needs_thirst"):utf8upper(),
+			stamina = L("Endurance"):utf8upper()
+		}
 	end
 
 	local percHistories = {}
@@ -322,9 +333,9 @@ else
 		local repDiff = net.ReadUInt(16)
 
 		if (bandit) then
-			addText(Format("Reputation -%d", repDiff), 4, Color("red"))
+			addText(Format("%s -%d", L"reputation", repDiff), 4, Color("red"))
 		else
-			addText(Format("Reputation +%d", repDiff), 4, Color("dark_lime"))
+			addText(Format("%s +%d", L"reputation", repDiff), 4, Color("dark_lime"))
 		end
 	end)
 
@@ -543,11 +554,11 @@ else
 		perc.h = sscale(25)
 		perc.x = oldX
 		perc.y = perc.y - perc.h - margin
-		hud:percDisp(perc, "HUNGER", getHunger)
+		hud:percDisp(perc, hud.lang.hunger, getHunger)
 		perc.x = perc.x + perc.w + margin
-		hud:percDisp(perc, "THIRST", getThirst)
+		hud:percDisp(perc, hud.lang.thirst, getThirst)
 		perc.x = perc.x + perc.w + margin
-		hud:percDisp(perc, "STAMINA", math.Round(client:GetLocalVar("stm", 0)))
+		hud:percDisp(perc, hud.lang.stamina, math.Round(client:GetLocalVar("stm", 0)))
 
 		perc.w = sscale(50)
 		perc.h = sscale(15)
@@ -555,23 +566,23 @@ else
 
 		if (client:GetNetVar("bleeding")) then
 			local damage = client:GetNetVar("bleeding")
-			local prefix = "MILD" -- ЛЕГКОЕ
+			local prefix = L"bleeding_type_mild" -- ЛЕГКОЕ
 
 			if (damage >= 50) then
-				prefix = "SERIOUS" -- СЕРЬЁЗНОЕ
+				prefix = L"bleeding_type_serious" -- СЕРЬЁЗНОЕ
 
 				if (damage >= 65) then
-					prefix = "HEAVY" -- ТЯЖЕЛОЕ
+					prefix = L"bleeding_type_heavy" -- ТЯЖЕЛОЕ
 
 					damage = damage * 2
 				end
 			elseif (damage >= 30) then
-				prefix = "AVERAGE" -- СРЕДНЕЕ
+				prefix = L"bleeding_type_average" -- СРЕДНЕЕ
 			end
 
 			perc.textColor = ix.util.LerpColorHSV(nil, nil, client:GetMaxHealth(), client:GetMaxHealth() - damage, 0) -- цвет серьёзности кровотечения
 			perc.y = perc.y - perc.h - margin
-			hud:status(perc, prefix .. " BLOOD LOSS", "5") -- КРОВОТЕЧЕНИЕ
+			hud:status(perc, prefix .. " " .. L"bleeding_blood_loss", "5") -- КРОВОТЕЧЕНИЕ
 		end
 
 		-- blood loss effect
@@ -605,7 +616,7 @@ else
 		if (client:IsBrokenLeg()) then
 			perc.textColor = Color("red")
 			perc.y = perc.y - perc.h - margin
-			hud:status(perc, "BROKEN LEG") -- НОГА ПОВРЕЖДЕНА
+			hud:status(perc, L("broken_leg")) -- НОГА ПОВРЕЖДЕНА
 		end
 
 		-- Safezone
@@ -614,12 +625,12 @@ else
 			perc.textColor = Color("red")
 
 			local time = math.max(0, 0 - (CurTime() - client:GetLocalVar("penalty", 0)))
-			hud:status(perc, "CANNOT ENTER SAFEZONE " .. string.ToMinutesSeconds(time), "R")
+			hud:status(perc, L"cannot_enter_safezone" .. " " .. string.ToMinutesSeconds(time), "R")
 		elseif (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) == SH_SZ.PROTECTED) then
 			perc.y = perc.y - perc.h - margin
 			perc.textColor = Color(50, 200, 50)
 
-			hud:status(perc, "SAFEZONE", "R")
+			hud:status(perc, hud.lang.safezone, "R")
 		elseif (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) == SH_SZ.ENTERING) then
 			local sz = SH_SZ.m_Safe
 
@@ -628,7 +639,7 @@ else
 				perc.textColor = Color(200, 200, 50)
 
 				local time = math.max(math.ceil(sz.enter + sz.opts.ptime - CurTime()), 0)
-				hud:status(perc, "SAFEZONE " .. string.ToMinutesSeconds(math.max(0, time - 1)), "R")
+				hud:status(perc, hud.lang.safezone .. " " .. string.ToMinutesSeconds(math.max(0, time - 1)), "R")
 			end
 		end
 
@@ -638,14 +649,14 @@ else
 			perc.y = perc.y - perc.h - margin
 			perc.textColor = Color("red")
 
-			hud:status(perc, "COMBAT LOGGED " .. string.ToMinutesSeconds(pvpTime), "R") -- В БОЮ
+			hud:status(perc, L"combat_logged" .. " " .. string.ToMinutesSeconds(pvpTime), "R") -- В БОЮ
 		end
 
 		if (hook.Run("CanPlayerRegenHealth", client) != false) then
 			if (getHunger >= 90 and getThirst >= 90) then
 				perc.textColor = Color("light_lime")
 				perc.y = perc.y - perc.h - margin
-				hud:status(perc, "WELL FED", "j") -- СЫТ
+				hud:status(perc, hud.lang.well_fed, "j") -- СЫТ
 			end
 		end
 
@@ -654,7 +665,7 @@ else
 		if (rad > 0) then
 			perc.textColor = Color("yellow")
 			perc.y = perc.y - perc.h - margin
-			hud:status(perc, "RADIATION: " .. math.Round(rad), "Z") -- СЫТ
+			hud:status(perc, hud.lang.radiation .. ": " .. math.Round(rad), "Z") -- СЫТ
 		end
 	end
 end

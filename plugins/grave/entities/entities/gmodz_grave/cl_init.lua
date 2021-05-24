@@ -66,6 +66,7 @@ ENT.PopulateEntityInfo = true
 
 function ENT:OnPopulateEntityInfo(container)
 	local ownerNick = self:GetStoredName()
+	local repData = Schema.ranks[self:GetReputation()] or Schema.ranks[0]
 
 	if (ownerNick == "") then
 		ownerNick = "Unknown"
@@ -74,5 +75,6 @@ function ENT:OnPopulateEntityInfo(container)
 	local name = container:AddRow("name")
 	name:SetImportant()
 	name:SetText(Format("%s - %s", L"here_lies", tostring(ownerNick)))
+	name:SetBackgroundColor(repData[2])
 	name:SizeToContents()
 end

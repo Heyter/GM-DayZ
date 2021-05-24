@@ -15,5 +15,35 @@ LANGUAGE = {
 
 	option_remove = "Удалить",
 	option_edit = "Изменить",
-	option_done = "Готово"
+	option_done = "Готово",
+	option_use = "Использовать",
+
+	Health = "Здоровье",
+
+	// primary_needs
+	well_fed = "Сыт",
+	needs_hunger = "Голод",
+	needs_thirst = "Жажда",
+
+	// stamina
+	Stamina = "Бег",
+
+	// radiation
+	Radiation = "Радиация",
+
+	// enchanced_damage
+	broken_leg = "НОГА ПОВРЕЖДЕНА",
+	bleeding_type_mild = "ЛЕГКОЕ",
+	bleeding_type_average = "СРЕДНЕЕ",
+	bleeding_type_serious = "СЕРЬЁЗНОЕ",
+	bleeding_type_heavy = "ТЯЖЕЛОЕ",
+	bleeding_blood_loss = "КРОВОТЕЧЕНИЕ",
+
+	// safezone
+	safezone_title = "Безопасная зона",
+
+	// Reputation
+	reputation = "Репутация",
+	combat_logged = "В БОЮ",
+	cannot_enter_safezone = "НЕЛЬЗЯ ВОЙТИ В БЕЗОПАСНУЮ ЗОНУ",
 }
