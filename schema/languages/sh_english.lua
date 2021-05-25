@@ -48,10 +48,12 @@ LANGUAGE = {
 	cannot_enter_safezone = "CANNOT ENTER SAFEZONE",
 
 	// chat_channels
-	tradeChatDelay = "You must wait %s more seconds before using OOC again!",
+	tradeChatDelay = "You must wait %s more seconds before using trade again!",
 	tradeChatPrefix = "[Trade] ",
 	globalChatPrefix = "[Global] ",
 	localChatPrefix = "[Local] ",
 	onlyEnglishLetters = "Only english is allowed in global chat.",
 	cmdTradeChat = "Sends a message in trade chat.",
+
+	cmdOOC = "Sends a message in global chat.",
 }

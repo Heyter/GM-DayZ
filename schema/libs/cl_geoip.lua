@@ -9,7 +9,7 @@ hook.Add("CharacterLoaded", "GeoIP", function()
 	end
 end)
 
-function ix.geoip:GetMaterial(client)
+function ix.geoip:GetMaterial(client, pngParameters)
 	if (!IsValid(client)) then return false end
 
 	local id = client:SteamID64()
@@ -21,6 +21,11 @@ function ix.geoip:GetMaterial(client)
 	id = client:GetNetVar("country_code")
 	if (!id) then return false end
 
-	self.cache[id] = Material("flags16/" .. id .. ".png", "noclamp smooth")
+	if (pngParameters == false) then
+		self.cache[id] = Material("flags16/" .. id .. ".png")
+	else
+		self.cache[id] = Material("flags16/" .. id .. ".png", pngParameters or "noclamp smooth")
+	end
+
 	return self.cache[id]
 end

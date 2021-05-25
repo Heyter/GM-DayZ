@@ -33,13 +33,15 @@ function ix.geoip:Query(ip, callback)
 					ix.geoip.cache[ip] = {
 						country_name = data.country_name,
 						country_code = data.country_code,
-						region_name = data.region_name,
-						city = data.city
+						-- region_name = data.region_name,
+						-- city = data.city
 					}
 
 					if (callback) then
 						callback(ix.geoip.cache[ip])
 					end
+				else
+					error('[GeoIP] Failed to lookup ip: ' .. ip)
 				end
 			else
 				error('[GeoIP] Failed to lookup ip: ' .. ip)
@@ -63,6 +65,19 @@ end)
 hook.Add("SaveData", "GeoIP", function()
 	ix.data.Set("geoipcache", ix.geoip.cache, true, true)
 end)
+
+-- gameevent.Listen("player_connect")
+-- hook.Add("player_connect", "GeoIP", function(data)
+	-- local id = data.userid // Same as Player:UserID()
+
+	-- if (!data.bot) then
+		-- ix.geoip:Query(data.address, function(data)
+			-- if (istable(data)) then
+				-- Player(id):SetNetVar("country_code", data.country_code:lower())
+			-- end
+		-- end)
+	-- end
+-- end)
 
 hook.Add("PlayerLoadedCharacter", "GeoIP", function(client, character)
 	if (client:IsBot()) then return end
