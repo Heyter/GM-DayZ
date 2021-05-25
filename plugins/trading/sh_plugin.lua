@@ -8,7 +8,7 @@ ix.trade = ix.trade or {}
 
 ix.util.Include("sv_plugin.lua")
 
-ix.command.Add("trade", {
+ix.command.Add("offer", {
 	description = "Offer a trade.",
 	arguments = ix.type.character,
 	OnRun = function(self, client, target)

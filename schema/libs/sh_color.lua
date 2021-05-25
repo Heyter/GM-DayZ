@@ -49,6 +49,8 @@ do
 		if (isstring(r)) then
 			if (colors[r:lower()]) then
 				return ColorAlpha(colors[r:lower()], g or 255)
+			elseif (isstring(g) and isstring(b)) then
+				return old_color(r, g, b, a or 255)
 			else
 				return color_white
 			end

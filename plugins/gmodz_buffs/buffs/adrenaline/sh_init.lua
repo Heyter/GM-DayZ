@@ -10,6 +10,9 @@
 	-- end
 -- end
 
+BUFF.time = 60
+BUFF.time_max = 360
+
 ix.util.Include("sv_init.lua", "server")
 
 if (CLIENT) then

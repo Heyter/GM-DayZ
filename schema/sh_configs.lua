@@ -27,7 +27,8 @@ local noLoad = {
 	saveitems = true,
 	recognition = true,
 	wepselect = true,
-	stamina = true
+	stamina = true,
+	doors = true
 }
 
 function Schema:InitializedPlugins()

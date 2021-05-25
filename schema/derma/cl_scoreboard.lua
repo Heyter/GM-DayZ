@@ -108,14 +108,14 @@ function PANEL:Init()
 			surface.SetDrawColor(self.cPlayerOutline)
 			surface.DrawOutlinedRect(0, 0, w, h)
 
-			local repData = Schema.ranks[client:GetReputationLevel()] or Schema.ranks[0]
 			local countryIcon = ix.geoip:GetMaterial(client)
 
 			-- Name
 			local name = client:Name()
 			name = (name:utf8len() > 34 and string.format("%s...", name:utf8sub(1, 34)) or name)
 
-			local tx = ix.util.DrawText(name, 40, h / 2, repData[2], TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, self.fTitle)
+			local name_color = hook.Run("GetPlayerColorSB", client) or color_white
+			local tx = ix.util.DrawText(name, 40, h / 2, name_color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, self.fTitle)
 
 			-- Usergroup icon
 			local icon

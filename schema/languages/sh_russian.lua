@@ -46,4 +46,12 @@ LANGUAGE = {
 	reputation = "Репутация",
 	combat_logged = "В БОЮ",
 	cannot_enter_safezone = "НЕЛЬЗЯ ВОЙТИ В БЕЗОПАСНУЮ ЗОНУ",
+
+	// chat_channels
+	tradeChatDelay = "Подождите %s секунд чтобы снова написать в OOC чат!",
+	tradeChatPrefix = "[Торговля] ",
+	globalChatPrefix = "[Глобальный] ",
+	localChatPrefix = "[Локальный] ",
+	onlyEnglishLetters = "Только английский язык разрешен в глобальном чате.",
+	cmdTradeChat = "Отправить сообщение в торговый чат.",
 }
