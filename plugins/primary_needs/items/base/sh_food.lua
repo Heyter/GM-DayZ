@@ -170,19 +170,24 @@ ITEM.functions.combine = {
 
 		if (CLIENT) then
 			local combineItem = ix.item.instances[data[1]]
-			if (!combineItem or combineItem.isDrink or combineItem:GetData("quantity", combineItem.quantity or 1) >= 99) then
+			if (!combineItem or 
+				combineItem.isDrink or 
+				combineItem:GetData("quantity", combineItem.quantity or 1) >= 99 or
+				combineItem.uniqueID != item.uniqueID) then
 				return false
 			end
 		end
 
-		return (!IsValid(item.entity) and item.base == "base_food" and !item.isDrink)
+		return (!item.isDrink)
 	end,
+
 	OnRun = function(item, data)
 		if (!istable(data) or !data[1]) then return false end
-		local combineItem = ix.item.instances[data[1]]
-		if (!combineItem) then return false end
 
-		if (combineItem.base == "base_food" and !combineItem.isDrink) then
+		local combineItem = ix.item.instances[data[1]]
+		if (!combineItem or combineItem.isDrink) then return false end
+
+		if (combineItem.uniqueID == item.uniqueID) then
 			-- TODO: Более точный стак, через перебор в цикле
 			local oldQuantity = combineItem:GetData("quantity", item.quantity or 1)
 			combineItem:Remove()
@@ -192,5 +197,5 @@ ITEM.functions.combine = {
 		end
 
 		return false
-	end,
+	end
 }

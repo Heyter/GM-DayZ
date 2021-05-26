@@ -100,7 +100,7 @@ function ix.hud.PopulateItemTooltip(tooltip, item)
 	if (!IsValid(item.entity)) then
 		panel = tooltip:AddRow("description")
 		panel:SetBackgroundColor(color_black)
-		panel:SetText(item:GetDescription() or "")
+		panel:SetText(item and item:GetDescription() or "")
 		panel:SizeToContents()
 	end
 
