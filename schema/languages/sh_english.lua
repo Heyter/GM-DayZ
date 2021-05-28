@@ -56,4 +56,27 @@ LANGUAGE = {
 	cmdTradeChat = "Sends a message in trade chat.",
 
 	cmdOOC = "Sends a message in global chat.",
+
+	// Durability
+	['RepairKitWrong'] = 'You do not have a repair kit!',
+	['DurabilityUnusableTip'] = "This weapon is broken.",
+	conditionDesc = "Durability: %s (%s%%)",
+	txtCond0 = "Factory New",
+	txtCond1 = "Almost New",
+	txtCond2 = "Visibly Wornout",
+	txtCond3 = "Barely Functional",
+	txtCond4 = "Broken",
+	weaponJammed = "Your weapon has jammed! Press the RELOAD key.",
+
+	// Grave
+	here_lies = "Here lies",
+	to_loot = "to loot",
+	grave = "Grave",
+
+	// Merchant
+	merchant_title = "Merchant",
+
+	// Stash
+	stash_title = "Stash",
+	stash_desc = "Store your items and money here",
 }

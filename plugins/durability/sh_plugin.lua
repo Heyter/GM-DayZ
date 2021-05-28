@@ -2,35 +2,6 @@ PLUGIN.name = "Durability"
 PLUGIN.author = "STEAM_0:1:29606990"
 PLUGIN.description = "Adds durability to the weapon."
 
-if (CLIENT) then
-	do
-		ix.lang.AddTable("russian", {
-			['Repair'] = "Починить",
-			['RepairKitWrong'] = 'У вас нет ремкомплекта!',
-			['DurabilityUnusableTip'] = 'Оружие сломано.',
-			conditionDesc = "Состояние: %s (%s%%)",
-			txtCond0 = "Прямо с завода",
-			txtCond1 = "Почти новый",
-			txtCond2 = "Заметно изношенный",
-			txtCond3 = "Изношенный",
-			txtCond4 = "Сломанный",
-			weaponJammed = "Ваше оружие заклинило! ПЕРЕЗАРЯДИТЕ оружие."
-		})
-
-		ix.lang.AddTable("english", {
-			['RepairKitWrong'] = 'You do not have a repair kit!',
-			['DurabilityUnusableTip'] = "This weapon is broken.",
-			conditionDesc = "Durability: %s (%s%%)",
-			txtCond0 = "Factory New",
-			txtCond1 = "Almost New",
-			txtCond2 = "Visibly Wornout",
-			txtCond3 = "Barely Functional",
-			txtCond4 = "Broken",
-			weaponJammed = "Your weapon has jammed! Press the RELOAD key."
-		})
-	end
-end
-
 ix.util.Include("sv_plugin.lua")
 
 if (CLIENT) then

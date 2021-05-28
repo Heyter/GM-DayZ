@@ -11,19 +11,6 @@ ix.config.Add("merchantSellPerc", 0.7, "Множитель процента пр
 	category = PLUGIN.name
 })
 
--- LANGUAGE
-if (CLIENT) then
-	do
-		ix.lang.AddTable("russian", {
-			merchant_title = "Торговец"
-		})
-
-		ix.lang.AddTable("english", {
-			merchant_title = "Merchant"
-		})
-	end
-end
-
 function PLUGIN:CalculatePrice(item, isSellingToVendor, client)
 	local price = ix.item.list[item.uniqueID].price or 0
 	local scale = ix.config.Get("merchantSellPerc", 0.7)

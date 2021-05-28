@@ -10,16 +10,6 @@ ix.config.Add("maxStash", 100, "Макс. размер хранилища по �
 ix.util.Include("sv_plugin.lua", "server")
 
 if (CLIENT) then
-	ix.lang.AddTable("russian", {
-		stash_title = "Хранилище",
-		stash_desc = "Храните ваши вещи и деньги здесь",
-	})
-
-	ix.lang.AddTable("english", {
-		stash_title = "Stash",
-		stash_desc = "Store your items and money here ",
-	})
-
 	function PLUGIN:LoadFonts()
 		surface.CreateFont("StashTextSmall",
 		{

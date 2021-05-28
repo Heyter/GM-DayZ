@@ -56,4 +56,28 @@ LANGUAGE = {
 	cmdTradeChat = "Отправить сообщение в торговый чат.",
 
 	cmdOOC = "Отправить сообщение в глобальный чат.",
+
+	// Durability
+	['Repair'] = "Починить",
+	['RepairKitWrong'] = 'У вас нет ремкомплекта!',
+	['DurabilityUnusableTip'] = 'Оружие сломано.',
+	conditionDesc = "Состояние: %s (%s%%)",
+	txtCond0 = "Прямо с завода",
+	txtCond1 = "Почти новый",
+	txtCond2 = "Заметно изношенный",
+	txtCond3 = "Изношенный",
+	txtCond4 = "Сломанный",
+	weaponJammed = "Ваше оружие заклинило! ПЕРЕЗАРЯДИТЕ оружие.",
+
+	// Grave
+	here_lies = "Здесь покоится",
+	to_loot = "чтобы обокрасть",
+	grave = "Могила",
+
+	// Merchant
+	merchant_title = "Торговец",
+
+	// Stash
+	stash_title = "Хранилище",
+	stash_desc = "Храните ваши вещи и деньги здесь",
 }
