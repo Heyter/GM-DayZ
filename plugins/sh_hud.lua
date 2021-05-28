@@ -39,7 +39,7 @@ else
 	-- OUTLINE ITEMS --
 	do
 		local color
-		ix.option.Add("colorOutlineItems", ix.type.color, Color(0, 255, 255), {
+		ix.option.Add("colorOutlineItems", ix.type.color, Color("sky_blue"), {
 			category = "colors"
 		})
 

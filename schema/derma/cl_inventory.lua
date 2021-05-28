@@ -99,10 +99,6 @@ function PANEL:BuildSlots()
 
 	self.slots = self.slots or {}
 
-	local function PaintSlot(slot, w, h)
-		draw_tile(w, h)
-	end
-
 	for _, v in ipairs(self.slots) do
 		for _, v2 in ipairs(v) do
 			v2:Remove()
@@ -121,7 +117,9 @@ function PANEL:BuildSlots()
 			slot.gridY = y
 			slot:SetPos((x - 1) * iconSize + 4, (y - 1) * iconSize + self:GetPadding(2))
 			slot:SetSize(iconSize, iconSize)
-			slot.Paint = PaintSlot
+			slot.Paint = function(panel, width, height)
+				draw_tile(width, height)
+			end
 
 			self.slots[x][y] = slot
 		end

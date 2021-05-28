@@ -15,7 +15,7 @@ ix.map = ix.map or {
 		label = nil
 	},
 	signs = { "➕", "☢" },
-	default_color = Color(0, 255, 255, 255)
+	default_color = Color("sky_blue")
 }
 
 local map = {}

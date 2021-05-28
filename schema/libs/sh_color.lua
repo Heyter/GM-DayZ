@@ -31,6 +31,7 @@ end
 do
 	local colors = {
 		blue = Color(0, 0, 255),
+		sky_blue = Color(0, 255, 255),
 		red = Color(255, 0, 0),
 		orange = Color(252, 177, 3),
 		lime = Color(0, 255, 0),

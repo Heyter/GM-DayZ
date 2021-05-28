@@ -1,0 +1,9 @@
+ENT.Base = "base_entity"
+ENT.Type = "anim"
+ENT.Category = "DayZ"
+ENT.PrintName = "Storage"
+ENT.Author = "STEAM_0:1:29606990"
+ENT.Spawnable = true
+ENT.AdminOnly = true
+ENT.bNoPersist = true
+ENT.RenderGroup = RENDERGROUP_BOTH

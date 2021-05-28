@@ -110,10 +110,10 @@ if (CLIENT) then
 			ix.util.DrawText("You have been invited to trade with", w, 15, Col.Text, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, "TradeArial20")
 			ix.util.DrawText(this.whoInvite, w, 40, team.GetColor(LocalPlayer():Team()), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, "TradeArial25")
 
-			local str = Format("%s to accept", (input.LookupBinding("gm_showhelp") or "[ShowHelp"))
+			local str = Format("%s to accept", (input.LookupBinding("gm_showhelp") or "None"))
 			ix.util.DrawText(str, w - 5, 70, Col.Accept, TEXT_ALIGN_RIGHT, TEXT_ALIGN_TOP)
 
-			str = Format("%s to decline", (input.LookupBinding("gm_showteam") or "[ShowTeam"))
+			str = Format("%s to decline", (input.LookupBinding("gm_showteam") or "None"))
 			ix.util.DrawText(str, w + 5, 70, Col.Decline, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
 		end
 

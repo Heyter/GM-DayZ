@@ -1,0 +1,23 @@
+﻿include("shared.lua")
+
+ENT.MaxRenderDistance = 500000
+
+function ENT:Draw()
+	--self:DrawModel()
+
+	local dist = EyePos():DistToSqr(self:GetPos())
+	if (dist > (500000)) then return end
+
+	surface.SetAlphaMultiplier(math.Clamp(5 - (dist / 100000), 0, 1))
+
+		local ang = self:GetAngles()
+		ang:RotateAroundAxis(ang:Up(), 90)
+		ang:RotateAroundAxis(ang:Forward(), 90)
+
+		cam.Start3D2D(self:GetPos() + ang:Up() * 4.8, ang, 0.2)
+			draw.SimpleTextOutlined(L"stash_title", "StashTextLarge", 0, -150 - 10, Color("sky_blue"), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined(L"stash_desc", "StashTextSmall", 0, -150 + 65, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+		cam.End3D2D()
+
+	surface.SetAlphaMultiplier(1)
+end

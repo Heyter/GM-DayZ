@@ -28,16 +28,23 @@ local noLoad = {
 	recognition = true,
 	wepselect = true,
 	stamina = true,
-	doors = true
+	doors = true,
+	spawnsaver = true
 }
 
 function Schema:InitializedPlugins()
 	local unloaded = ix.data.Get("unloaded", {}, true, true)
+	local bRestart = nil
 
 	for uniqueID in pairs(noLoad) do
 		if (!unloaded[uniqueID]) then
 			ix.plugin.SetUnloaded(uniqueID, true)
+			bRestart = true
 		end
+	end
+
+	if (SERVER and bRestart) then
+		RunConsoleCommand("changelevel", game.GetMap())
 	end
 
 	do
