@@ -58,9 +58,9 @@ LANGUAGE = {
 	cmdOOC = "Отправить сообщение в глобальный чат.",
 
 	// Durability
-	['Repair'] = "Починить",
-	['RepairKitWrong'] = 'У вас нет ремкомплекта!',
-	['DurabilityUnusableTip'] = 'Оружие сломано.',
+	Repair = "Починить",
+	RepairKitWrong = 'У вас нет ремкомплекта!',
+	DurabilityUnusableTip = 'Оружие сломано.',
 	conditionDesc = "Состояние: %s (%s%%)",
 	txtCond0 = "Прямо с завода",
 	txtCond1 = "Почти новый",
@@ -79,5 +79,10 @@ LANGUAGE = {
 
 	// Stash
 	stash_title = "Хранилище",
+	stash_title_count = "Хранилище %d/%d",
 	stash_desc = "Храните ваши вещи и деньги здесь",
+	stash_far = "Слишком далеко от хранилища.",
+	stash_full = "В хранилище нет места для этого предмета!",
+
+	derma_request_cancel = "Отмена",
 }

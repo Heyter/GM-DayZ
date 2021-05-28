@@ -112,13 +112,13 @@ net.Receive("ixMerchantTrade", function(len, client)
 			return client:NotifyLocalized("canNotAfford")
 		end
 
-		local name = L(ix.item.list[itemData.uniqueID].name, client)
-
 		if (!character:GetInventory():Add(itemData.uniqueID, 1, itemData.data)) then
 			--ix.item.Spawn(itemData.uniqueID, client, nil, nil, itemData.data)
 			client:NotifyLocalized("noFit")
 			return
 		end
+
+		local name = L(ix.item.list[itemData.uniqueID].name, client)
 
 		character:TakeMoney(price)
 		client:NotifyLocalized("businessPurchase", name, ix.currency.Get(price))

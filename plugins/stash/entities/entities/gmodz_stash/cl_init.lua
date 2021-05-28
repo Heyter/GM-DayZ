@@ -1,14 +1,15 @@
 ﻿include("shared.lua")
 
 ENT.MaxRenderDistance = 500000
+ENT.MaxAlphaDistance = 100000
 
 function ENT:Draw()
 	--self:DrawModel()
 
 	local dist = EyePos():DistToSqr(self:GetPos())
-	if (dist > (500000)) then return end
+	if (dist > (self.MaxRenderDistance)) then return end
 
-	surface.SetAlphaMultiplier(math.Clamp(5 - (dist / 100000), 0, 1))
+	surface.SetAlphaMultiplier(math.Clamp(5 - (dist / self.MaxAlphaDistance), 0, 1))
 
 		local ang = self:GetAngles()
 		ang:RotateAroundAxis(ang:Up(), 90)

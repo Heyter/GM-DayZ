@@ -55,10 +55,14 @@ if (CLIENT) then
 			end
 		end
 
-		local icon = backGround:Add('ixSpawnIcon')
+		local icon = backGround:Add('SpawnIcon')
 		backGround.icon = icon
 
+		icon:SetSize(92, 92 * 1.4)
+		icon:SetZPos(1)
 		icon:Dock(FILL)
+		icon:DockMargin(5, 5, 5, 10)
+		icon:InvalidateLayout(true)
 		icon:SetModel(data.model)
 
 		icon:SetHelixTooltip(function(tooltip)

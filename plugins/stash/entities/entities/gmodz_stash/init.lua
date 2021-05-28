@@ -35,7 +35,16 @@ function ENT:Initialize()
 end
 
 function ENT:Use(activator)
+	local character = activator:GetCharacter()
 
+	if (!character) then
+		return
+	end
+
+	character:GetInventory():HalfSync(activator)
+
+	net.Start("ixStashSync")
+	net.Send(activator)
 end
 
 function ENT:UpdateTransmitState()

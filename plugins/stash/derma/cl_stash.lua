@@ -1,6 +1,51 @@
 local black_clr = ColorAlpha(color_black, 200)
-
 local PLUGIN = PLUGIN
+
+local PANEL = {}
+
+AccessorFunc(PANEL, "money", "Money", FORCE_NUMBER)
+
+function PANEL:Init()
+	self:DockPadding(1, 1, 1, 1)
+	self:SetTall(24)
+	self:Dock(BOTTOM)
+
+	self.moneyBtn = self:Add("DButton")
+	self.moneyBtn:Dock(TOP)
+	self.moneyBtn:SetFont("ixGenericFont")
+	self.moneyBtn:SetText("")
+	self.moneyBtn:SetTextInset(2, 0)
+	self.moneyBtn:SizeToContents()
+	self.moneyBtn.Paint = function(panel, width, height)
+		derma.SkinFunc("DrawImportantBackground", 0, 0, width, height, ix.config.Get("color"))
+	end
+
+	self.moneyBtn.DoClick = function()
+		Derma_NumericRequest(L"stash_title", "Enter the amount" , self.money, function(text)
+			local amount = math.max(0, math.Round(tonumber(text) or 0))
+
+			if (amount != 0) then
+				self:OnTransfer(amount)
+			end
+		end)
+	end
+
+	self.bNoBackgroundBlur = true
+end
+
+function PANEL:SetMoney(money)
+	self.money = math.max(math.Round(tonumber(money) or 0), 0)
+	self.moneyBtn:SetText(ix.currency.Get(money))
+end
+
+function PANEL:OnTransfer(amount)
+end
+
+function PANEL:Paint(width, height)
+	derma.SkinFunc("PaintBaseFrame", self, width, height)
+end
+
+vgui.Register("ixStashMoney", PANEL, "EditablePanel")
 
 local PANEL = {}
 PANEL.itemSize = 92
@@ -18,12 +63,12 @@ end
 function PANEL:DecStack()
 	self.stack = math.max(0, self.stack - 1)
 
-	if (IsValid(ix.gui.merchant)) then
+	if (IsValid(ix.gui.stash)) then
 		if (self.stack <= 0) then
 			self:Remove()
 			return true
 		else
-			ix.gui.merchant:GetStackKey(self.itemTable.uniqueID)
+			ix.gui.stash:GetStackKey(self.itemTable.uniqueID)
 		end
 	end
 
@@ -31,23 +76,8 @@ function PANEL:DecStack()
 end
 
 function PANEL:SetItem(itemTable)
-	self.calc_price = PLUGIN:CalculatePrice(itemTable, false, LocalPlayer())
 	self.itemTable = itemTable
 	self.key = 0
-
-	self.price = self:Add("DLabel")
-	self.price:Dock(BOTTOM)
-
-	if (!self.calc_price or self.calc_price <= 0) then
-		self.price:SetText(L"free":utf8upper())
-	else
-		self.price:SetText(ix.currency.Get(self.calc_price))
-	end
-
-	self.price:SetContentAlignment(5)
-	self.price:SetTextColor(color_white)
-	self.price:SetFont("ixSmallFont")
-	self.price:SetExpensiveShadow(1, black_clr)
 
 	self.name = self:Add("DLabel")
 	self.name:Dock(TOP)
@@ -62,6 +92,7 @@ function PANEL:SetItem(itemTable)
 	end
 
 	self.icon = self:Add("SpawnIcon")
+	--self.icon:Droppable("ixStashItem")
 	self.icon:SetZPos(1)
 	self.icon:SetSize(self:GetWide(), self:GetWide())
 	self.icon:Dock(FILL)
@@ -74,20 +105,37 @@ function PANEL:SetItem(itemTable)
 		end
 	end)
 	self.icon.DoClick = function(this)
-		if (isnumber(self.calc_price) and !LocalPlayer():GetCharacter():HasMoney(self.calc_price)) then
-			return LocalPlayer():NotifyLocalized("canNotAfford")
-		end
-
-		if ((LocalPlayer().next_merchant_click or 0) < CurTime()) then
-			LocalPlayer().next_merchant_click = CurTime() + 0.5
+		if ((LocalPlayer().next_stash_click or 0) < CurTime()) then
+			LocalPlayer().next_stash_click = CurTime() + 0.5
 		else
 			return
 		end
 
-		net.Start("ixMerchantTrade")
+		if (!IsValid(ix.gui.inv1)) then return end
+
+		local w, h = self.itemTable.width, self.itemTable.height
+		local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
+		local x2, y2
+
+		for x = 1, invW do
+			for y = 1, invH do
+				if (ix.gui.inv1:IsAllEmpty(x, y, w, h)) then
+					x2 = x
+					y2 = y
+				end
+			end
+		end
+
+		if !(x2 and y2) then
+			LocalPlayer():NotifyLocalized("noFit")
+			return
+		end
+
+		net.Start("ixStashWithdrawItem")
 			net.WriteUInt(self.key, 32)
-			net.WriteBool(false)
 		net.SendToServer()
+
+		ix.gui.stash:TakeItem(self.key, self.itemTable)
 	end
 	self.icon.PaintOver = function(t, w, h)
 		if (self.stack > 1 and table.IsEmpty(itemTable.data)) then
@@ -116,7 +164,7 @@ function PANEL:SetItem(itemTable)
 	end
 end
 
-vgui.Register("ixMerchantItem", PANEL, "DPanel")
+vgui.Register("ixStashItem", PANEL, "DPanel")
 
 DEFINE_BASECLASS("Panel")
 PANEL = {}
@@ -128,11 +176,11 @@ AccessorFunc(PANEL, "fadeTime", "FadeTime", FORCE_NUMBER)
 AccessorFunc(PANEL, "frameMargin", "FrameMargin", FORCE_NUMBER)
 
 function PANEL:Init()
-	if (IsValid(ix.gui.merchant)) then
-		ix.gui.merchant:Remove()
+	if (IsValid(ix.gui.stash)) then
+		ix.gui.stash:Remove()
 	end
 
-	ix.gui.merchant = self
+	ix.gui.stash = self
 
 	self.character = LocalPlayer():GetCharacter()
 
@@ -149,27 +197,70 @@ function PANEL:Init()
 		self:Remove()
 	end
 
+	-- TODO: Позже прикрутить и PaintDragPreview
+--[[ 	ix.gui.inv1:Receiver("ixStashItem", function(this, panels, dropped)
+		if (dropped and panels[1]) then
+			local hoveredPanel = vgui.GetHoveredPanel()
+			local itemPanel = panels[1]:GetParent()
+
+			if (IsValid(hoveredPanel) and hoveredPanel != itemPanel) then
+				net.Start("ixStashWithdrawItem")
+					net.WriteUInt(itemPanel.key, 32)
+				net.SendToServer()
+
+				ix.gui.stash:TakeItem(itemPanel.key, itemPanel.itemTable)
+			end
+		end
+	end) ]]
+
 	-- Inventory label -> money
-	self.invMoney = ix.gui.inv1:Add("ixTradeMoney")
-	self.invMoney:ViewOnly()
+	self.invMoney = ix.gui.inv1:Add("ixStashMoney")
+	self.invMoney.OnTransfer = function(_, amount)
+		if (self.character:GetMoney() > 0) then
+			net.Start("ixStashDepositMoney")
+				net.WriteUInt(amount, 32)
+			net.SendToServer()
+		end
+	end
 	self.invMoney:SetVisible(false)
 
-	-- Merchant
-	self.invMerchant = self:Add("DFrame")
-	self.invMerchant:SetTitle(L'merchant_title')
-	self.invMerchant:SetSize(ScrW() / 3, ScrH() / 1.25)
-	self.invMerchant:ShowCloseButton(true)
-	self.invMerchant:SetDraggable(true)
-	self.invMerchant:SetSizable(false)
-	self.invMerchant.bNoBackgroundBlur = true
-	self.invMerchant.Close = function(t)
+	-- Stash
+	self.invStash = self:Add("DFrame")
+	self.invStash:SetTitle(L'stash_title')
+	self.invStash:SetSize(ScrW() / 3, ScrH() / 1.25)
+	self.invStash:ShowCloseButton(true)
+	self.invStash:SetDraggable(true)
+	self.invStash:SetSizable(false)
+	self.invStash.bNoBackgroundBlur = true
+	self.invStash.Close = function(t)
 		self:Remove()
 	end
 
-	self.categories = self.invMerchant:Add("DScrollPanel")
+	self.invStash.lblTitle:SetFont("MapFont")
+	self.invStash.lblTitle.UpdateColours = function(label)
+		return label:SetTextStyleColor(color_white)
+	end
+
+	self.invStashMoney = self.invStash:Add("ixStashMoney")
+	self.invStashMoney.OnTransfer = function(_, amount)
+		if (self.character:GetStashMoney() > 0) then
+			net.Start("ixStashWithdrawMoney")
+				net.WriteUInt(amount, 32)
+			net.SendToServer()
+		end
+	end
+	self.invStashMoney:SetVisible(false)
+
+	self.categories = self.invStash:Add("DScrollPanel")
 	self.categories:Dock(FILL)
 	self.categories:DockMargin(0, 2, 4, 0)
 	self.categories:SetPaintBackground(true)
+
+	self.categories:Receiver("ixInventoryItem", function(this, panels, dropped)
+		if (dropped) then
+			PLUGIN:DepositItem(self.character, panels[1], panels[1].itemTable)
+		end
+	end)
 
 	self.categoryPanels = {}
 	self.items = {}
@@ -177,7 +268,7 @@ function PANEL:Init()
 	self:SetAlpha(0)
 	self:AlphaTo(255, self:GetFadeTime())
 
-	self.invMerchant:MakePopup()
+	self.invStash:MakePopup()
 	ix.gui.inv1:MakePopup()
 end
 
@@ -224,7 +315,6 @@ end
 function PANEL:AddItem(key, itemTable)
 	local item = PLUGIN:MakeVirtualItem(itemTable.uniqueID, key)
 	item.data = itemTable.data or {}
-	item.price = itemTable.price or nil
 
 	self:AddCategory(item)
 
@@ -235,7 +325,7 @@ function PANEL:AddItem(key, itemTable)
 	end
 
 	if (!IsValid(self.items[text])) then
-		local itemSlot = self.categoryPanels[item.category][1]:Add("ixMerchantItem")
+		local itemSlot = self.categoryPanels[item.category][1]:Add("ixStashItem")
 		itemSlot:SetItem(item)
 		itemSlot.key = key
 
@@ -279,9 +369,8 @@ function PANEL:AddCategory(item)
 	end
 end
 
-function PANEL:SetupMerchant(items, entity)
-	self.invMerchant:SetPos(self:GetWide() / 2 + self:GetFrameMargin() / 2, self:GetTall() / 2 - self.invMerchant:GetTall() / 2)
-	self.ixMerchant = entity
+function PANEL:SetStash(items)
+	self.invStash:SetPos(self:GetWide() / 2 + self:GetFrameMargin() / 2, self:GetTall() / 2 - self.invStash:GetTall() / 2)
 
 	if (!table.IsEmpty(self.categoryPanels)) then
 		for _, panels in pairs(self.categoryPanels) do
@@ -294,7 +383,14 @@ function PANEL:SetupMerchant(items, entity)
 
 	-- init items
 	for k, data in SortedPairs(items) do
+		if k == 0 then continue end
+
 		self:AddItem(k, data)
+	end
+
+	if (!self.invStashMoney:IsVisible()) then
+		self.invStashMoney:SetVisible(true)
+		self.invStash:SetTall(self.invStash:GetTall() + self.invStashMoney:GetTall() + 2)
 	end
 
 	self.loaded = true
@@ -316,21 +412,25 @@ function PANEL:Remove()
 	end)
 end
 
-function PANEL:OnRemove()
-	net.Start("ixMerchantClose")
-	net.SendToServer()
-end
-
 function PANEL:Think()
 	if (self.loaded) then
-		if (!IsValid(self.ixMerchant)) then
-			self:Remove()
-			return
-		end
-
 		if ((self.nextThink or 0) < CurTime()) then
-			if (IsValid(LocalPlayer()) and self.character and self.invMoney.money != self.character:GetMoney()) then
-				self.invMoney:SetMoney(self.character:GetMoney())
+			if (self.character) then
+				if (self.invMoney.money != self.character:GetMoney()) then
+					self.invMoney:SetMoney(self.character:GetMoney())
+				end
+
+				if (self.invStashMoney.money != self.character:GetStashMoney()) then
+					self.invStashMoney:SetMoney(self.character:GetStashMoney())
+				end
+
+				-- Resync
+				local count = self.character:GetStashCount()
+				if (table.IsEmpty(self.categoryPanels) and count > 0) then
+					self:SetStash(self.character:GetStash())
+				end
+
+				self.invStash:SetTitle(L("stash_title_count", count, self.character:GetStashMax()))
 			end
 
 			self.nextThink = CurTime() + 0.25
@@ -338,4 +438,4 @@ function PANEL:Think()
 	end
 end
 
-vgui.Register("ixMerchant", PANEL, "Panel")
+vgui.Register("ixStashView", PANEL, "Panel")

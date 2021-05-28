@@ -58,8 +58,9 @@ LANGUAGE = {
 	cmdOOC = "Sends a message in global chat.",
 
 	// Durability
-	['RepairKitWrong'] = 'You do not have a repair kit!',
-	['DurabilityUnusableTip'] = "This weapon is broken.",
+	Repair = "Repair",
+	RepairKitWrong = 'You do not have a repair kit!',
+	DurabilityUnusableTip = "This weapon is broken.",
 	conditionDesc = "Durability: %s (%s%%)",
 	txtCond0 = "Factory New",
 	txtCond1 = "Almost New",
@@ -78,5 +79,10 @@ LANGUAGE = {
 
 	// Stash
 	stash_title = "Stash",
+	stash_title_count = "Stash %d/%d",
 	stash_desc = "Store your items and money here",
+	stash_far = "It is too far from the stash.",
+	stash_full = "There is no room in the stash for this item!",
+
+	derma_request_cancel = "Cancel",
 }

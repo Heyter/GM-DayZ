@@ -31,10 +31,14 @@ function PANEL:Init()
 		local amount = math.max(0, math.Round(tonumber(self.amountEntry:GetValue()) or 0))
 		self.amountEntry:SetValue("0")
 
-		if (amount != 0 and self:GetMoney() > 0) then
-			net.Start("ixTradeMoneyGive")
-				net.WriteUInt(amount, 32)
-			net.SendToServer()
+		if (self.takeButton.TakeButton) then
+			self.takeButton:TakeButton(amount)
+		else
+			if (amount != 0 and self:GetMoney() > 0) then
+				net.Start("ixTradeMoneyGive")
+					net.WriteUInt(amount, 32)
+				net.SendToServer()
+			end
 		end
 	end
 
@@ -46,12 +50,19 @@ function PANEL:Init()
 		local amount = math.max(0, math.Round(tonumber(self.amountEntry:GetValue()) or 0))
 		self.amountEntry:SetValue("0")
 
-		if (amount != 0 and LocalPlayer():GetCharacter():GetMoney() > 0) then
-			net.Start("ixTradeMoneyTake")
-				net.WriteUInt(amount, 32)
-			net.SendToServer()
+		if (self.giveButton.GiveButton) then
+			self.giveButton:GiveButton(amount)
+		else
+			if (amount != 0 and LocalPlayer():GetCharacter():GetMoney() > 0) then
+				net.Start("ixTradeMoneyTake")
+					net.WriteUInt(amount, 32)
+				net.SendToServer()
+			end
 		end
 	end
+
+	self.giveButton:SetTooltip("Deposit")
+	self.takeButton:SetTooltip("Withdraw")
 
 	self.bNoBackgroundBlur = true
 end
@@ -66,6 +77,14 @@ end
 
 function PANEL:Paint(width, height)
 	derma.SkinFunc("PaintBaseFrame", self, width, height)
+end
+
+function PANEL:ViewOnly()
+	self.giveButton:Remove()
+	self.takeButton:Remove()
+	self.amountEntry:Remove()
+	self:SetTall(24)
+	self.moneyLabel:Dock(FILL)
 end
 
 vgui.Register("ixTradeMoney", PANEL, "EditablePanel")
@@ -121,11 +140,7 @@ function PANEL:Init()
 	end
 
 	self.storageMoney = self.storageInventory:Add("ixTradeMoney")
-	self.storageMoney.giveButton:Remove()
-	self.storageMoney.takeButton:Remove()
-	self.storageMoney.amountEntry:Remove()
-	self.storageMoney:SetTall(24)
-	self.storageMoney.moneyLabel:Dock(FILL)
+	self.storageMoney:ViewOnly()
 	self.storageMoney:SetVisible(false)
 
 	ix.gui.inv1 = self:Add("ixInventory")

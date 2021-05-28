@@ -1,6 +1,6 @@
 ENT.Type = "anim"
 ENT.PrintName = "Merchant"
-ENT.Category = "Helix"
+ENT.Category = "Gmodz"
 ENT.Spawnable = true
 ENT.AdminOnly = true
 ENT.isMerchant = true
