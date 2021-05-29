@@ -83,6 +83,10 @@ LANGUAGE = {
 	stash_desc = "Store your items and money here",
 	stash_far = "It is too far from the stash.",
 	stash_full = "There is no room in the stash for this item!",
+	stash_enter_money = "Enter the amount",
 
 	derma_request_cancel = "Cancel",
+
+	deposit = "Deposit",
+	withdraw = "Withdraw",
 }

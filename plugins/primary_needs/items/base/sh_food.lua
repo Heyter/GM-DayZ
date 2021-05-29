@@ -74,9 +74,9 @@ if (CLIENT) then
 		text = table.concat(text, "\n")
 
 		if (isstring(text)) then
-			local panel = tooltip:AddRowAfter("description", "needStats")
+			local panel = tooltip:AddRowAfter("description", "extendDesc")
 			panel:SetText(text)
-			panel:SetBackgroundColor(derma.GetColor("Info", panel))
+			panel:SetTextColor(Color("green"))
 			panel:SizeToContents()
 		end
 	end

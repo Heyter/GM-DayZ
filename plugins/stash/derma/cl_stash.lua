@@ -14,20 +14,35 @@ function PANEL:Init()
 	self.moneyBtn:Dock(TOP)
 	self.moneyBtn:SetFont("ixGenericFont")
 	self.moneyBtn:SetText("")
+	self.moneyBtn:SetIcon("icon16/money_dollar.png")
 	self.moneyBtn:SetTextInset(2, 0)
 	self.moneyBtn:SizeToContents()
 	self.moneyBtn.Paint = function(panel, width, height)
-		derma.SkinFunc("DrawImportantBackground", 0, 0, width, height, ix.config.Get("color"))
+		panel.set_color = ix.config.Get("color")
+
+		if (panel:IsHovered()) then
+			panel.set_color = panel.set_color:Darken(25)
+		end
+
+		derma.SkinFunc("DrawImportantBackground", 0, 0, width, height, panel.set_color)
 	end
 
-	self.moneyBtn.DoClick = function()
-		Derma_NumericRequest(L"stash_title", "Enter the amount" , self.money, function(text)
-			local amount = math.max(0, math.Round(tonumber(text) or 0))
+	self.moneyBtn.OnMousePressed = function(_, code)
+		if (code == MOUSE_LEFT) then
+			surface.PlaySound("ui/buttonclick.wav")
 
-			if (amount != 0) then
-				self:OnTransfer(amount)
-			end
-		end)
+			Derma_NumericRequest(L"stash_title", L"stash_enter_money", self.money, function(text)
+				local amount = math.max(0, math.Round(tonumber(text) or 0))
+
+				if (amount != 0) then
+					self:OnTransfer(amount)
+				end
+			end)
+		elseif (code == MOUSE_RIGHT) then
+			surface.PlaySound("ui/buttonclick.wav")
+
+			self:OnTransfer(0, MOUSE_RIGHT)
+		end
 	end
 
 	self.bNoBackgroundBlur = true
@@ -38,7 +53,7 @@ function PANEL:SetMoney(money)
 	self.moneyBtn:SetText(ix.currency.Get(money))
 end
 
-function PANEL:OnTransfer(amount)
+function PANEL:OnTransfer(amount, code)
 end
 
 function PANEL:Paint(width, height)
@@ -100,9 +115,7 @@ function PANEL:SetItem(itemTable)
 	self.icon:InvalidateLayout(true)
 	self.icon:SetModel(itemTable:GetModel(), itemTable:GetSkin())
 	self.icon:SetHelixTooltip(function(tooltip)
-		if (PLUGIN.virtual_items[self.key]) then
-			ix.hud.PopulateItemTooltip(tooltip, PLUGIN.virtual_items[self.key])
-		end
+		ix.hud.PopulateItemTooltip(tooltip, self.itemTable)
 	end)
 	self.icon.DoClick = function(this)
 		if ((LocalPlayer().next_stash_click or 0) < CurTime()) then
@@ -215,12 +228,18 @@ function PANEL:Init()
 
 	-- Inventory label -> money
 	self.invMoney = ix.gui.inv1:Add("ixStashMoney")
-	self.invMoney.OnTransfer = function(_, amount)
-		if (self.character:GetMoney() > 0) then
-			net.Start("ixStashDepositMoney")
-				net.WriteUInt(amount, 32)
-			net.SendToServer()
+	self.invMoney.OnTransfer = function(_, amount, keyCode)
+		if (self.character:GetMoney() <= 0) then
+			return
 		end
+
+		if (keyCode == MOUSE_RIGHT) then
+			amount = self.character:GetMoney()
+		end
+
+		net.Start("ixStashDepositMoney")
+			net.WriteUInt(amount, 32)
+		net.SendToServer()
 	end
 	self.invMoney:SetVisible(false)
 
@@ -242,12 +261,18 @@ function PANEL:Init()
 	end
 
 	self.invStashMoney = self.invStash:Add("ixStashMoney")
-	self.invStashMoney.OnTransfer = function(_, amount)
-		if (self.character:GetStashMoney() > 0) then
-			net.Start("ixStashWithdrawMoney")
-				net.WriteUInt(amount, 32)
-			net.SendToServer()
+	self.invStashMoney.OnTransfer = function(_, amount, keyCode)
+		if (self.character:GetStashMoney() <= 0) then
+			return
 		end
+
+		if (keyCode == MOUSE_RIGHT) then
+			amount = self.character:GetStashMoney()
+		end
+
+		net.Start("ixStashWithdrawMoney")
+			net.WriteUInt(amount, 32)
+		net.SendToServer()
 	end
 	self.invStashMoney:SetVisible(false)
 

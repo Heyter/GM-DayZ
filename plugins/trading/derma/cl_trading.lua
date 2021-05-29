@@ -61,8 +61,8 @@ function PANEL:Init()
 		end
 	end
 
-	self.giveButton:SetTooltip("Deposit")
-	self.takeButton:SetTooltip("Withdraw")
+	self.giveButton:SetTooltip(L"deposit")
+	self.takeButton:SetTooltip(L"withdraw")
 
 	self.bNoBackgroundBlur = true
 end

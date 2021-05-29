@@ -131,12 +131,14 @@ if (CLIENT) then
 		local character = LocalPlayer():GetCharacter()
 
 		if (IsValid(ix.gui.stash) and character:GetStashCount() < character:GetStashMax()) then
-			local inventory = LocalPlayer():GetCharacter():GetInventory()
+			local inventory = character:GetInventory()
 
 			if (inventory and inventory.slots) then
-				menu:AddOption("Deposit", function()
+				menu:AddOption(L"deposit", function()
 					PLUGIN:DepositItem(character, icon, item)
-				end):SetImage("icon16/basket_put.png")
+				end):SetImage("icon16/package_add.png")
+
+				menu:AddSpacer()
 			end
 		end
 	end
