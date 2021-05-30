@@ -1,0 +1,10 @@
+* text=auto
+
+*.[ch] code
+*.lua code
+*.md code
+*.scss code
+*.rockspec code linguist-language=Lua
+
+.gitattributes export-ignore
+.gitignore export-ignore
