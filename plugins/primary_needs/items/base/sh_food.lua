@@ -25,6 +25,10 @@ ITEM.eatSound = "gmodz/primary_needs/eating.wav"
 ITEM.quantity = 1 -- кол-во использований
 
 if (CLIENT) then
+	function ITEM:CanStack(combineItem)
+		return combineItem:GetData("quantity", self.quantity or 1) == self:GetData("quantity", self.quantity or 1)
+	end
+
 	function ITEM:PopulateTooltip(tooltip)
 		if (self.isDrink and self.slurpAmount > 0) then
 			local volume = self:GetData("volume", self.volume)

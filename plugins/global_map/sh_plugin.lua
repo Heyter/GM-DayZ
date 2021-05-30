@@ -317,7 +317,7 @@ function map.Open()
 	end
 end
 
-concommand.Add("show_map", function()
+concommand.Add("gmodz_map", function()
 	map.Open()
 end)
 

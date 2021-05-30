@@ -14,6 +14,10 @@ ITEM.staminaAmount = 0
 ITEM.radiationAmount = 0
 
 if (CLIENT) then
+	function ITEM:CanStack(combineItem)
+		return combineItem:GetData("quantity", item.quantity or 1) == self:GetData("quantity", self.quantity or 1)
+	end
+
 	function ITEM:PaintOver(item, w, h)
 		local quantity = item:GetData("quantity", item.quantity or 1)
 

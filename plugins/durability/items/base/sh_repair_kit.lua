@@ -44,4 +44,8 @@ if (CLIENT) then
 	function ITEM:GetDescription()
 		return Format(self.description, self.raiseDurability)
 	end
+
+	function ITEM:CanStack(combineItem)
+		return combineItem:GetData("quantity", self.quantity or 1) == self:GetData("quantity", self.quantity or 1)
+	end
 end

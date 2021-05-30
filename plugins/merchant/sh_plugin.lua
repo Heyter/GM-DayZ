@@ -60,7 +60,7 @@ if (CLIENT) then
 	function PLUGIN:LoadFonts(font, genericFont)
 		surface.CreateFont("ixMerchant.Num", {
 			font = font,
-			size = ScreenScale(9),
+			size = ScreenScale(8),
 			weight = 150
 		})
 

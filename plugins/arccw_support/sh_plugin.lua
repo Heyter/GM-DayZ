@@ -219,7 +219,7 @@ end
 
 PLUGIN:InitHooks()
 
-function PLUGIN:InitializedPlugins()
+function PLUGIN:InitPostEntity()
 	self:InitHooks()
 
 	do
@@ -285,6 +285,7 @@ function PLUGIN:InitializedPlugins()
 						for _, itemAmmo in pairs(ix.item.list) do
 							if ((itemAmmo.base == "base_ammo" or itemAmmo.base == "base_arccw_ammo") and itemAmmo.ammo == v.Primary.Ammo) then
 								item.ammo = itemAmmo.uniqueID
+								ix.item.list[item.ammo].maxRounds = v.Primary.ForceDefaultClip or v.Primary.ClipSize
 								break
 							end
 						end

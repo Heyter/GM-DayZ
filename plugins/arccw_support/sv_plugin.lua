@@ -159,24 +159,47 @@ function ix.arccw_support.InitWeapon(client, weapon)
 	end
 end
 
+function ix.arccw_support.StackAmmoQuantity(itemSelf, combineItem)
+	local maxQuantity = itemSelf.maxQuantity
+	local quantity = itemSelf:GetData("quantity", 1)
+	local combineQuantity = combineItem:GetData("quantity", 1)
+
+	if (combineQuantity >= maxQuantity or quantity >= maxQuantity) then return end
+	local totalQuantity = combineQuantity + quantity
+
+	if (totalQuantity > maxQuantity) then
+		itemSelf:SetData("quantity", maxQuantity)
+		combineItem:SetData("quantity", totalQuantity - maxQuantity)
+	else
+		combineItem:Remove()
+		itemSelf:SetData("quantity", quantity + combineQuantity)
+	end
+
+	maxQuantity, quantity, combineQuantity, totalQuantity = nil, nil, nil, nil
+end
+
 function ix.arccw_support.StackAmmo(itemSelf, combineItem)
-	local maxStacks = itemSelf.maxStacks
+	local maxRounds = itemSelf.maxRounds
 	local rounds = itemSelf:GetData("rounds", itemSelf.ammoAmount)
 	local combineRounds = combineItem:GetData("rounds", combineItem.ammoAmount)
 
-	if (combineRounds >= maxStacks or rounds >= maxStacks) then return end
+	if (combineRounds == rounds and rounds == maxRounds) then
+		ix.arccw_support.StackAmmoQuantity(itemSelf, combineItem)
+		return
+	end
 
+	if (combineRounds >= maxRounds or rounds >= maxRounds) then return end
 	local totalRounds = combineRounds + rounds
 
-	if (totalRounds > maxStacks) then
-		itemSelf:SetData("rounds", maxStacks)
-		combineItem:SetData("rounds", totalRounds - maxStacks)
+	if (totalRounds > maxRounds) then
+		itemSelf:SetData("rounds", maxRounds)
+		combineItem:SetData("rounds", totalRounds - maxRounds)
 	else
 		combineItem:Remove()
 		itemSelf:SetData("rounds", rounds + combineRounds)
 	end
 
-	rounds, combineRounds, totalRounds, maxStacks = nil, nil, nil, nil
+	rounds, combineRounds, totalRounds, maxRounds = nil, nil, nil, nil
 end
 
 function ix.arccw_support.EmptyClip(itemSelf)
@@ -218,18 +241,6 @@ function ix.arccw_support.EmptyClip(itemSelf)
 		client:EmitSound("weapons/clipempty_rifle.wav")
 	end
 end
-
-concommand.Add('cl_weapons', function(client)
-	client = client or Entity(1)
-
-	local weapon = client:GetActiveWeapon()
-
-	if (IsValid(weapon)) then
-		print(weapon:GetPrimaryAmmoType(), weapon:GetSecondaryAmmoType())
-		print(game.GetAmmoName(weapon:GetPrimaryAmmoType()), game.GetAmmoName(weapon:GetSecondaryAmmoType()))
-		print(game.GetAmmoName(game.GetAmmoID(weapon.ClassName)))
-	end
-end)
 
 -- HOOKS --
 function PLUGIN:ArcCW_PlayerCanAttach(client, weapon, attID, slot, detach)
