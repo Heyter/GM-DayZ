@@ -161,23 +161,18 @@ if (CLIENT) then
 		})
 	end
 
-	-- TODO: при старте сервера может не работать...
---[[ 	function PLUGIN:PlayerBindPress(client, bind, pressed)
-		if (bind:find("use") and pressed) then
-			local entity = client:GetTraceEntity()
-			print(entity)
-
-			if (IsValid(entity) and entity:GetClass() == "gmodz_stash") then
-				OpenStash()
-			end
-		end
-	end ]]
-
 	net.Receive("ixStashSync", function()
 		local character = LocalPlayer():GetCharacter()
 
 		local panel = vgui.Create("ixStashView")
 		panel:SetLocalInventory(character:GetInventory(), character:GetMoney())
 		panel:SetStash(character:GetStash())
+
+		for _, v in ipairs(ents.FindInSphere(EyePos(), 256)) do
+			if (v and v:GetClass() == "gmodz_stash") then
+				v:EmitSound("items/ammocrate_open.wav")
+				break
+			end
+		end
 	end)
 end

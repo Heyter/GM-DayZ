@@ -7,15 +7,14 @@ function PANEL:Init()
 	self:SetTall(64)
 	self:Dock(BOTTOM)
 
-	self.moneyLabel = self:Add("DLabel")
+	self.moneyLabel = self:Add("ixDLabel")
 	self.moneyLabel:Dock(TOP)
+	self.moneyLabel:SetMaterial("icon16/money_dollar.png")
 	self.moneyLabel:SetFont("ixGenericFont")
 	self.moneyLabel:SetText("")
 	self.moneyLabel:SetTextInset(2, 0)
 	self.moneyLabel:SizeToContents()
-	self.moneyLabel.Paint = function(panel, width, height)
-		derma.SkinFunc("DrawImportantBackground", 0, 0, width, height, ix.config.Get("color"))
-	end
+	self.moneyLabel:SetPaintBackground(true)
 
 	self.amountEntry = self:Add("ixTextEntry")
 	self.amountEntry:Dock(FILL)
@@ -67,7 +66,7 @@ function PANEL:Init()
 	self.bNoBackgroundBlur = true
 end
 
-function PANEL:SetMoney(money)
+function PANEL:SetMoney(money, mat)
 	self.money = math.max(math.Round(tonumber(money) or 0), 0)
 	self.moneyLabel:SetText(ix.currency.Get(money))
 end

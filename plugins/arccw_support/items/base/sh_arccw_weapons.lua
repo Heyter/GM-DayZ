@@ -12,6 +12,8 @@ ITEM.useDurability = true
 ITEM.DegradeRate = 0.5 -- durability
 ITEM.JamChance = 0.04 -- jamming
 
+ITEM.ammo = nil -- type of the ammo
+
 function ITEM:GetJamChance()
 	return self.JamChance * 50
 end
@@ -28,6 +30,11 @@ function ITEM:CanSell()
 end
 
 if (CLIENT) then
+	function ITEM:CanStack(combineItem)
+		return combineItem:GetData("durability", combineItem.ammoAmount) == self:GetData("durability", self.ammoAmount)
+			and combineItem:GetData("ammo", 0) == self:GetData("ammo", 0)
+	end
+
 	function ITEM:PaintOver(itemObj, w, h)
 		local x, y = w - 14, h - 14
 
@@ -118,6 +125,26 @@ ITEM.functions.Detach = {
 		if (!ix.item.list[data[1]]) then return false end -- stop hacking you dumb fuck
 
 		ix.arccw_support.Detach(item, data[1])
+		return false
+	end
+}
+
+ITEM.functions.empty_clip = {
+	name = "Empty clip",
+	tip = "emptyClipTip",
+	icon = "icon16/bullet_yellow.png",
+
+	OnCanRun = function(itemSelf)
+		if (CLIENT) then
+			return !itemSelf.isGrenade and itemSelf.player:GetWeaponAmmo(itemSelf) >= 1
+		end
+
+		return !itemSelf.isGrenade
+	end,
+
+	OnRun = function(itemSelf)
+		ix.arccw_support.EmptyClip(itemSelf) -- :)
+
 		return false
 	end
 }

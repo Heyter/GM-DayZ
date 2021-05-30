@@ -89,4 +89,7 @@ LANGUAGE = {
 
 	deposit = "Deposit",
 	withdraw = "Withdraw",
+
+	// ArcCW
+	["Empty clip"] = "Empty clip",
 }

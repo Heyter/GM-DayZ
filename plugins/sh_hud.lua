@@ -65,6 +65,18 @@ else
 
 	hud.lang = {}
 
+	function hud.ResetLang()
+		hud.lang = {
+			radiation = L("Radiation"):utf8upper(),
+			well_fed = L("well_fed"):utf8upper(),
+			safezone = L("safezone_title"):utf8upper(),
+			hunger = L("needs_hunger"):utf8upper(),
+			thirst = L("needs_thirst"):utf8upper(),
+			stamina = L("Endurance"):utf8upper(),
+			l = ix.option.Get("language", "english")
+		}
+	end
+
 	function PLUGIN:LoadFonts()
 		surface.CreateFont("ixDHUDNum", {
 			font = "Jura",
@@ -108,14 +120,7 @@ else
 			weight = 400, 
 		})
 
-		hud.lang = {
-			radiation = L("Radiation"):utf8upper(),
-			well_fed = L("well_fed"):utf8upper(),
-			safezone = L("safezone_title"):utf8upper(),
-			hunger = L("needs_hunger"):utf8upper(),
-			thirst = L("needs_thirst"):utf8upper(),
-			stamina = L("Endurance"):utf8upper()
-		}
+		hud.ResetLang()
 	end
 
 	local percHistories = {}
@@ -420,6 +425,14 @@ else
 
 	local breathSound = Sound("gmodz/player/stamina.wav")
 	function PLUGIN:Think()
+		if (hud.lang.tick or 0) < CurTime() then
+			if (hud.lang.l != ix.option.Get("language", "english")) then
+				hud.ResetLang()
+			end
+
+			hud.lang.tick = CurTime() + 1
+		end
+
 		local client = LocalPlayer()
 		local playedHeartbeatSound = false
 
@@ -663,7 +676,7 @@ else
 		local rad = client:GetRadiationTotal()
 
 		if (rad > 0) then
-			perc.textColor = Color("yellow")
+			perc.textColor = rad >= 500 and Color("red") or Color("yellow")
 			perc.y = perc.y - perc.h - margin
 			hud:status(perc, hud.lang.radiation .. ": " .. math.Round(rad), "Z") -- СЫТ
 		end

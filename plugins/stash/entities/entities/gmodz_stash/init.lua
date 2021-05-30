@@ -8,6 +8,7 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_NONE)
 	self:SetSolid(6)
 	self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+	self:SetUseType(SIMPLE_USE)
 
 	-- Position correctly to wall
 	timer.Simple(1, function()

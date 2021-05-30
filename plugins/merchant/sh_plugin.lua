@@ -136,7 +136,7 @@ if (CLIENT) then
 		if (!IsValid(ix.gui.merchant)) then return end
 
 		if (!isSelling) then
-			local item = ix.gui.merchant.entityItems[id]
+			local item = PLUGIN.virtual_items[id]
 
 			if (item) then
 				ix.gui.merchant:TakeItem(id, item)

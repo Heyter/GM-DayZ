@@ -281,6 +281,15 @@ function PLUGIN:InitializedPlugins()
 					item.attachments = attachments
 					attachments = nil
 
+					if (v.Primary.Ammo and #v.Primary.Ammo > 0) then
+						for _, itemAmmo in pairs(ix.item.list) do
+							if ((itemAmmo.base == "base_ammo" or itemAmmo.base == "base_arccw_ammo") and itemAmmo.ammo == v.Primary.Ammo) then
+								item.ammo = itemAmmo.uniqueID
+								break
+							end
+						end
+					end
+
 					v.Primary.DefaultClip = 0
 					v.InitialDefaultClip = nil
 				end

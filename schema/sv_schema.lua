@@ -29,9 +29,9 @@ end
 local invalidBoundsMin = Vector(-8, -8, -8)
 local invalidBoundsMax = Vector(8, 8, 8)
 
-local ENT = scripted_ents.GetStored("ix_item").t
+local ixItemENT = scripted_ents.GetStored("ix_item").t
 
-function ENT:SetItem(itemID)
+function ixItemENT:SetItem(itemID)
 	local itemTable = ix.item.instances[itemID]
 
 	if (itemTable) then
@@ -69,6 +69,30 @@ function ENT:SetItem(itemID)
 		if (itemTable.OnEntityCreated) then
 			itemTable:OnEntityCreated(self)
 		end
+	end
+end
+
+function ixItemENT:Use(activator, caller)
+	local itemTable = self:GetItemTable()
+
+	if (IsValid(caller) and caller:IsPlayer() and caller:GetCharacter() and itemTable) then
+		itemTable.player = caller
+		itemTable.entity = self
+
+		if (itemTable.functions.take.OnCanRun(itemTable)) then
+			caller:PerformInteraction(ix.config.Get("itemPickupTime", 0.5), self, function(client)
+				if (!ix.item.PerformInventoryAction(client, "take", self)) then
+					return false -- do not mark dirty if interaction fails
+				else
+					client:ForceSequence("pickup", function()
+						client:EmitSound("items/itempickup.wav")
+					end, 1)
+				end
+			end)
+		end
+
+		itemTable.player = nil
+		itemTable.entity = nil
 	end
 end
 

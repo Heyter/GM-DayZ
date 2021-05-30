@@ -18,6 +18,23 @@ function playerMeta:GetTraceEntity(distance, mode)
 	return util.TraceLine(data).Entity
 end
 
+function playerMeta:GetWeaponAmmo(item)
+	local weapon = self.carryWeapons and self.carryWeapons[item.weaponCategory]
+	local ammo = 0
+
+	if (!IsValid(weapon)) then
+		weapon = self:GetWeapon(item.class)
+	end
+
+	if (IsValid(weapon) and weapon:Clip1() > 0) then
+		ammo = weapon:Clip1()
+	else
+		ammo = item:GetData("ammo", 0)
+	end
+
+	return ammo
+end
+
 do
 	--- Returns this player's current name.
 	-- @realm shared

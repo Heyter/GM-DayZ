@@ -95,7 +95,7 @@ end
 
 function SH_SZ:PlayerSpawn(ply)
 	-- If we spawn in a SZ it makes sense that we should receive protection immediately
-	timer.Simple(0, function()
+	timer.Simple(0.3, function()
 		if (!IsValid(ply)) then
 			return end
 

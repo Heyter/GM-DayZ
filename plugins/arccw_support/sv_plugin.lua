@@ -159,6 +159,78 @@ function ix.arccw_support.InitWeapon(client, weapon)
 	end
 end
 
+function ix.arccw_support.StackAmmo(itemSelf, combineItem)
+	local maxStacks = itemSelf.maxStacks
+	local rounds = itemSelf:GetData("rounds", itemSelf.ammoAmount)
+	local combineRounds = combineItem:GetData("rounds", combineItem.ammoAmount)
+
+	if (combineRounds >= maxStacks or rounds >= maxStacks) then return end
+
+	local totalRounds = combineRounds + rounds
+
+	if (totalRounds > maxStacks) then
+		itemSelf:SetData("rounds", maxStacks)
+		combineItem:SetData("rounds", totalRounds - maxStacks)
+	else
+		combineItem:Remove()
+		itemSelf:SetData("rounds", rounds + combineRounds)
+	end
+
+	rounds, combineRounds, totalRounds, maxStacks = nil, nil, nil, nil
+end
+
+function ix.arccw_support.EmptyClip(itemSelf)
+	local ammoID = itemSelf.ammo
+	if (!ammoID) then return end
+
+	local client = itemSelf.player
+	local weapon = client.carryWeapons and client.carryWeapons[itemSelf.weaponCategory]
+	local ammo = 0
+
+	if (!IsValid(weapon)) then
+		weapon = client:GetWeapon(itemSelf.class)
+	end
+
+	if (IsValid(weapon) and weapon:Clip1() > 0) then
+		ammo = weapon:Clip1()
+
+		if (ammo > 0) then
+			weapon:SetClip1(0)
+
+			itemSelf.data = itemSelf.data or {}
+			itemSelf.data.ammo = nil
+		end
+	else
+		ammo = itemSelf:GetData("ammo", 0)
+
+		if (ammo > 0) then
+			itemSelf:SetData("ammo", nil)
+		end
+	end
+
+	if (ammo > 0) then
+		local data = { rounds = ammo }
+
+		if (!client:GetCharacter():GetInventory():Add(ammoID, 1, data)) then
+			ix.item.Spawn(ammoID, client, nil, nil, data)
+		end
+
+		client:EmitSound("weapons/clipempty_rifle.wav")
+	end
+end
+
+concommand.Add('cl_weapons', function(client)
+	client = client or Entity(1)
+
+	local weapon = client:GetActiveWeapon()
+
+	if (IsValid(weapon)) then
+		print(weapon:GetPrimaryAmmoType(), weapon:GetSecondaryAmmoType())
+		print(game.GetAmmoName(weapon:GetPrimaryAmmoType()), game.GetAmmoName(weapon:GetSecondaryAmmoType()))
+		print(game.GetAmmoName(game.GetAmmoID(weapon.ClassName)))
+	end
+end)
+
 -- HOOKS --
 function PLUGIN:ArcCW_PlayerCanAttach(client, weapon, attID, slot, detach)
 	if (ix.arccw_support.free_atts[attID]) then

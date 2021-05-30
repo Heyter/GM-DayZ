@@ -81,12 +81,15 @@ LANGUAGE = {
 	stash_title = "Хранилище",
 	stash_title_count = "Хранилище %d/%d",
 	stash_desc = "Храните ваши вещи и деньги здесь",
-	stash_far = "Слишком далеко от хранилища.",
+	stash_far = "Вы слишком далеко от хранилища!",
 	stash_full = "В хранилище нет места для этого предмета!",
 	stash_enter_money = "Введите сумму",
 
 	derma_request_cancel = "Отмена",
 
-	deposit = "Положить",
-	withdraw = "Взять",
+	deposit = "Переместить",
+	withdraw = "Забрать",
+
+	// ArcCW
+	["Empty clip"] = "Разрядить обойму",
 }

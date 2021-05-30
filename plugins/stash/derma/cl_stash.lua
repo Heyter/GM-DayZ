@@ -69,21 +69,24 @@ function PANEL:Init()
 	self:SetSize(self.itemSize, self.itemSize * 1.4)
 
 	self.stack = 1
+	self.stack_keys = {}
 end
 
 function PANEL:IncStack(key)
 	self.stack = self.stack + 1
+	self.stack_keys[key] = true
 end
 
-function PANEL:DecStack()
+function PANEL:DecStack(key)
 	self.stack = math.max(0, self.stack - 1)
+	self.stack_keys[key] = nil
 
 	if (IsValid(ix.gui.stash)) then
 		if (self.stack <= 0) then
 			self:Remove()
 			return true
 		else
-			ix.gui.stash:GetStackKey(self.itemTable.uniqueID)
+			ix.gui.stash:GetStackKey(self.idxPanel, self.stack_keys)
 		end
 	end
 
@@ -151,7 +154,7 @@ function PANEL:SetItem(itemTable)
 		ix.gui.stash:TakeItem(self.key, self.itemTable)
 	end
 	self.icon.PaintOver = function(t, w, h)
-		if (self.stack > 1 and table.IsEmpty(itemTable.data)) then
+		if (self.stack > 1 and ix.gui.stash and ix.gui.stash:CanStackItem(self.itemTable)) then
 			draw.SimpleText("x" .. self.stack, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
@@ -312,29 +315,38 @@ function PANEL:SetLocalInventory(inventory, money)
 end
 
 function PANEL:TakeItem(key, item)
+	local idxPanel = self:CanStackItem(item, key)
+	local panel = self.items[idxPanel]
+
 	self.entityItems[key] = nil
 	PLUGIN.virtual_items[key] = nil
 
-	local text = key
-
-	if (table.IsEmpty(item.data)) then
-		text = item.uniqueID
-	end
-
-	if (IsValid(self.items[text]) and self.items[text]:DecStack()) then
-		self.items[text] = nil
+	if (IsValid(panel) and panel:DecStack(key)) then
+		self.items[idxPanel] = nil
+		panel = nil
 	end
 end
 
-function PANEL:GetStackKey(uniqueID)
-	if (uniqueID and IsValid(self.items[uniqueID])) then
-		for k, v in pairs(self.entityItems) do
-			if (v.uniqueID == uniqueID and table.IsEmpty(v.data)) then
-				self.items[uniqueID].key = k
-				break
-			end
+function PANEL:GetStackKey(idxPanel, stack_keys)
+	if (idxPanel and IsValid(self.items[idxPanel])) then
+		self.items[idxPanel].key = select(2, table.Random(stack_keys))
+	end
+end
+
+function PANEL:CanStackItem(item, default)
+	local index = default or item.id
+
+	for idx, panel in pairs(self.items) do
+		if (!IsValid(panel) or panel.itemTable.uniqueID != item.uniqueID) then continue end
+
+		if (item.CanStack and item:CanStack(panel.itemTable) and (item.price or 0) == (panel.itemTable.price or 0)
+			or table.IsEmpty(item.data) and table.IsEmpty(panel.itemTable.data)) then
+			index = idx
+			break
 		end
 	end
+
+	return index
 end
 
 function PANEL:AddItem(key, itemTable)
@@ -343,20 +355,17 @@ function PANEL:AddItem(key, itemTable)
 
 	self:AddCategory(item)
 
-	local text = key
+	local index = self:CanStackItem(item)
 
-	if (table.IsEmpty(item.data)) then
-		text = item.uniqueID
-	end
-
-	if (!IsValid(self.items[text])) then
+	if (!IsValid(self.items[index])) then
 		local itemSlot = self.categoryPanels[item.category][1]:Add("ixStashItem")
 		itemSlot:SetItem(item)
 		itemSlot.key = key
+		itemSlot.idxPanel = index
 
-		self.items[text] = itemSlot
+		self.items[index] = itemSlot
 	else
-		self.items[text]:IncStack()
+		self.items[index]:IncStack(key)
 	end
 end
 
@@ -433,6 +442,14 @@ function PANEL:Remove()
 	self:SetAlpha(255)
 	self:AlphaTo(0, self:GetFadeTime(), 0, function()
 		table.Empty(PLUGIN.virtual_items)
+
+		for _, v in ipairs(ents.FindInSphere(EyePos(), 256)) do
+			if (v and v:GetClass() == "gmodz_stash") then
+				v:EmitSound("items/ammocrate_close.wav")
+				break
+			end
+		end
+
 		BaseClass.Remove(self)
 	end)
 end

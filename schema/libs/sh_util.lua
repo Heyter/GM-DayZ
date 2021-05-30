@@ -33,7 +33,7 @@ if (CLIENT) then
 		local InnerPanel = vgui.Create( "DPanel", Window )
 		InnerPanel:SetPaintBackground( false )
 
-		local Text = vgui.Create( "DLabel", InnerPanel )
+		local Text = vgui.Create( "ixDLabel", InnerPanel )
 		Text:SetText( strText or "Message Text (Second Parameter)" )
 		Text:SizeToContents()
 		Text:SetContentAlignment( 5 )

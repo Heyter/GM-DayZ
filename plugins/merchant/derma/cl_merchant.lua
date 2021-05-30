@@ -9,21 +9,24 @@ function PANEL:Init()
 	self:SetSize(self.itemSize, self.itemSize * 1.4)
 
 	self.stack = 1
+	self.stack_keys = {}
 end
 
 function PANEL:IncStack(key)
 	self.stack = self.stack + 1
+	self.stack_keys[key] = true
 end
 
-function PANEL:DecStack()
+function PANEL:DecStack(key)
 	self.stack = math.max(0, self.stack - 1)
+	self.stack_keys[key] = nil
 
 	if (IsValid(ix.gui.merchant)) then
 		if (self.stack <= 0) then
 			self:Remove()
 			return true
 		else
-			ix.gui.merchant:GetStackKey(self.itemTable.uniqueID)
+			ix.gui.merchant:GetStackKey(self.idxPanel, self.stack_keys)
 		end
 	end
 
@@ -69,19 +72,17 @@ function PANEL:SetItem(itemTable)
 	self.icon:InvalidateLayout(true)
 	self.icon:SetModel(itemTable:GetModel(), itemTable:GetSkin())
 	self.icon:SetHelixTooltip(function(tooltip)
-		if (PLUGIN.virtual_items[self.key]) then
-			ix.hud.PopulateItemTooltip(tooltip, PLUGIN.virtual_items[self.key])
-		end
+		ix.hud.PopulateItemTooltip(tooltip, self.itemTable)
 	end)
 	self.icon.DoClick = function(this)
-		if (isnumber(self.calc_price) and !LocalPlayer():GetCharacter():HasMoney(self.calc_price)) then
-			return LocalPlayer():NotifyLocalized("canNotAfford")
-		end
-
 		if ((LocalPlayer().next_merchant_click or 0) < CurTime()) then
 			LocalPlayer().next_merchant_click = CurTime() + 0.5
 		else
 			return
+		end
+
+		if (isnumber(self.calc_price) and !LocalPlayer():GetCharacter():HasMoney(self.calc_price)) then
+			return LocalPlayer():NotifyLocalized("canNotAfford")
 		end
 
 		net.Start("ixMerchantTrade")
@@ -90,7 +91,7 @@ function PANEL:SetItem(itemTable)
 		net.SendToServer()
 	end
 	self.icon.PaintOver = function(t, w, h)
-		if (self.stack > 1 and table.IsEmpty(itemTable.data)) then
+		if (self.stack > 1 and ix.gui.merchant and ix.gui.merchant:CanStackItem(self.itemTable)) then
 			draw.SimpleText("x" .. self.stack, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
@@ -196,29 +197,38 @@ function PANEL:SetLocalInventory(inventory, money)
 end
 
 function PANEL:TakeItem(key, item)
+	local idxPanel = self:CanStackItem(item, key)
+	local panel = self.items[idxPanel]
+
 	self.entityItems[key] = nil
 	PLUGIN.virtual_items[key] = nil
 
-	local text = key
-
-	if (table.IsEmpty(item.data)) then
-		text = item.uniqueID
-	end
-
-	if (IsValid(self.items[text]) and self.items[text]:DecStack()) then
-		self.items[text] = nil
+	if (IsValid(panel) and panel:DecStack(key)) then
+		self.items[idxPanel] = nil
+		panel = nil
 	end
 end
 
-function PANEL:GetStackKey(uniqueID)
-	if (uniqueID and IsValid(self.items[uniqueID])) then
-		for k, v in pairs(self.entityItems) do
-			if (v.uniqueID == uniqueID and table.IsEmpty(v.data)) then
-				self.items[uniqueID].key = k
-				break
-			end
+function PANEL:GetStackKey(idxPanel, stack_keys)
+	if (idxPanel and IsValid(self.items[idxPanel])) then
+		self.items[idxPanel].key = select(2, table.Random(stack_keys))
+	end
+end
+
+function PANEL:CanStackItem(item, default)
+	local index = default or item.id
+
+	for idx, panel in pairs(self.items) do
+		if (!IsValid(panel) or panel.itemTable.uniqueID != item.uniqueID) then continue end
+
+		if (item.CanStack and item:CanStack(panel.itemTable) and (item.price or 0) == (panel.itemTable.price or 0)
+			or table.IsEmpty(item.data) and table.IsEmpty(panel.itemTable.data)) then
+			index = idx
+			break
 		end
 	end
+
+	return index
 end
 
 function PANEL:AddItem(key, itemTable)
@@ -228,20 +238,17 @@ function PANEL:AddItem(key, itemTable)
 
 	self:AddCategory(item)
 
-	local text = key
+	local index = self:CanStackItem(item)
 
-	if (table.IsEmpty(item.data)) then
-		text = item.uniqueID
-	end
-
-	if (!IsValid(self.items[text])) then
+	if (!IsValid(self.items[index])) then
 		local itemSlot = self.categoryPanels[item.category][1]:Add("ixMerchantItem")
 		itemSlot:SetItem(item)
 		itemSlot.key = key
+		itemSlot.idxPanel = index
 
-		self.items[text] = itemSlot
+		self.items[index] = itemSlot
 	else
-		self.items[text]:IncStack()
+		self.items[index]:IncStack(key)
 	end
 end
 
@@ -288,6 +295,10 @@ function PANEL:SetupMerchant(items, entity)
 			panels[2]:Clear()
 			panels[2]:InvalidateLayout(true)
 		end
+	end
+
+	for k in pairs(items) do
+		items[k].id = k
 	end
 
 	self.entityItems = items
