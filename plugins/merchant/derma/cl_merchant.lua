@@ -90,9 +90,10 @@ function PANEL:SetItem(itemTable)
 			net.WriteBool(false)
 		net.SendToServer()
 	end
+
 	self.icon.PaintOver = function(t, w, h)
 		if (self.stack > 1 and ix.gui.merchant and ix.gui.merchant:CanStackItem(self.itemTable)) then
-			draw.SimpleText("x" .. self.stack, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined("x" .. self.stack, "ixMerchant.NumLarge", w * 0.5, h * 0.5, Color("light_gray"), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
 		if (itemTable and itemTable.PaintOver) then
@@ -171,6 +172,22 @@ function PANEL:Init()
 	self.categories:Dock(FILL)
 	self.categories:DockMargin(0, 2, 4, 0)
 	self.categories:SetPaintBackground(true)
+	self.categories:Receiver("ixInventoryItem", function(this, panels, dropped)
+		if (dropped and panels[1]) then
+			local item = panels[1].itemTable
+
+			if (item) then
+				if (item.CanSell and item:CanSell() == false) then
+					return
+				end
+
+				net.Start("ixMerchantTrade")
+					net.WriteUInt(item:GetID(), 32)
+					net.WriteBool(true)
+				net.SendToServer()
+			end
+		end
+	end)
 
 	self.categoryPanels = {}
 	self.items = {}
@@ -256,7 +273,8 @@ function PANEL:AddCategory(item)
 	if (item and !self.categoryPanels[item.category]) then
 		local cat = vgui.Create('DCollapsibleCategory', self.categories)
 		cat.Paint = function() end
-		cat.Header:SetFont("ixToolTipText")
+		cat.Header:SetFont("ixSmallFont")
+		cat.Header:SetContentAlignment(5)
 		cat.Header.Paint = function(t, w, h)
 			surface.SetDrawColor(self.cCategoryRect)
 			surface.DrawRect(0, 0, w, h)

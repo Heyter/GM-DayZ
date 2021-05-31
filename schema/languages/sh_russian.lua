@@ -68,6 +68,7 @@ LANGUAGE = {
 	txtCond3 = "Изношенный",
 	txtCond4 = "Сломанный",
 	weaponJammed = "Ваше оружие заклинило! ПЕРЕЗАРЯДИТЕ оружие.",
+	raiseDurability = "Состояние",
 
 	// Grave
 	here_lies = "Здесь покоится",
@@ -92,4 +93,6 @@ LANGUAGE = {
 
 	// ArcCW
 	["Empty clip"] = "Разрядить обойму",
+
+	Consume = "Употребить",
 }

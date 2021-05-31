@@ -62,7 +62,7 @@ if (CLIENT) then
 		local health = math.max(0, math.floor((item:GetHealth() / ix.config.Get("gasmask_health", 100)) * 100))
 		local healthColor = Color(2.55 * (100 - health), 2.55 * health, 0, 255)
 
-		draw.SimpleText(health .. "%", "ixMerchant.Num", 1, h - 10, healthColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+		draw.SimpleTextOutlined(health .. "%", "ixMerchant.Num", 1, h - 10, healthColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 	end
 end
 

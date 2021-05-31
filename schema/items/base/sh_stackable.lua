@@ -2,36 +2,29 @@ ITEM.name = "Stackable Items Base"
 ITEM.description = "Stackable Item"
 ITEM.category = "Stackable"
 ITEM.model = Model('models/props_c17/TrapPropeller_Lever.mdl')
-ITEM.maxStacks = 16
+ITEM.maxQuantity = 16
 
 if (CLIENT) then
 	function ITEM:PaintOver(item, w, h)
-		draw.SimpleText(item:GetData("stacks", 1), "ixMerchant.Num", w - 5, h - 5, Color("light_green"), TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, color_black)
+		local quantity = item:GetData("quantity", 1)
+
+		if (quantity > 1) then
+			draw.SimpleTextOutlined("x" .. quantity, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
+		end
 	end
+
+	function ITEM:CanStack(combineItem)
+		return false--combineItem:GetData("quantity", 1) == self:GetData("quantity", 1)
+	end
+end
+
+function ITEM:CanSell()
+	return true
 end
 
 ITEM.functions.combine = {
 	OnRun = function(itemSelf, data)
-        local combineItem = ix.item.instances[data[1]]
-        if (itemSelf.uniqueID != combineItem.uniqueID) then return false end
-
-		local maxStacks = itemSelf.maxStacks
-		local stacks = itemSelf:GetData("stacks", 1)
-		local combineStacks = combineItem:GetData("stacks", 1)
-
-		if (combineStacks >= maxStacks or stacks >= maxStacks) then return end
-		local totalStacks = combineStacks + stacks
-
-		if (totalStacks > maxStacks) then
-			itemSelf:SetData("stacks", maxStacks)
-			combineItem:SetData("stacks", totalStacks - maxStacks)
-		else
-			combineItem:Remove()
-			itemSelf:SetData("stacks", stacks + combineStacks)
-		end
-
-		stacks, combineStacks, totalStacks, maxStacks = nil, nil, nil, nil
-
+		itemSelf:CombineStack(ix.item.instances[data[1]])
 		return false
 	end,
 	OnCanRun = function(itemSelf, data)
@@ -39,9 +32,9 @@ ITEM.functions.combine = {
 			if (istable(data) and data[1]) then
 				local combineItem = ix.item.instances[data[1]]
 
-				if (itemSelf.uniqueID != combineItem.uniqueID or 
-					combineItem:GetData("stacks", 1) >= itemSelf.maxStacks or
-					itemSelf:GetData("stacks", 1) >= itemSelf.maxStacks) then 
+				if (!combineItem or itemSelf.uniqueID != combineItem.uniqueID or 
+					combineItem:GetData("quantity", 1) >= itemSelf.maxQuantity or
+					itemSelf:GetData("quantity", 1) >= itemSelf.maxQuantity) then 
 					return false
 				else
 					return true

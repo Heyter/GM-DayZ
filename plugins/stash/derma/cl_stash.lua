@@ -155,7 +155,7 @@ function PANEL:SetItem(itemTable)
 	end
 	self.icon.PaintOver = function(t, w, h)
 		if (self.stack > 1 and ix.gui.stash and ix.gui.stash:CanStackItem(self.itemTable)) then
-			draw.SimpleText("x" .. self.stack, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined("x" .. self.stack, "ixMerchant.NumLarge", w * 0.5, h * 0.5, Color("light_gray"), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
 		if (itemTable and itemTable.PaintOver) then
@@ -258,7 +258,6 @@ function PANEL:Init()
 		self:Remove()
 	end
 
-	self.invStash.lblTitle:SetFont("MapFont")
 	self.invStash.lblTitle.UpdateColours = function(label)
 		return label:SetTextStyleColor(color_white)
 	end
@@ -285,7 +284,7 @@ function PANEL:Init()
 	self.categories:SetPaintBackground(true)
 
 	self.categories:Receiver("ixInventoryItem", function(this, panels, dropped)
-		if (dropped) then
+		if (dropped and panels[1]) then
 			PLUGIN:DepositItem(self.character, panels[1], panels[1].itemTable)
 		end
 	end)
@@ -373,7 +372,8 @@ function PANEL:AddCategory(item)
 	if (item and !self.categoryPanels[item.category]) then
 		local cat = vgui.Create('DCollapsibleCategory', self.categories)
 		cat.Paint = function() end
-		cat.Header:SetFont("ixToolTipText")
+		cat.Header:SetFont("ixSmallFont")
+		cat.Header:SetContentAlignment(5)
 		cat.Header.Paint = function(t, w, h)
 			surface.SetDrawColor(self.cCategoryRect)
 			surface.DrawRect(0, 0, w, h)

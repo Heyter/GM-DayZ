@@ -16,8 +16,8 @@ function ENT:Draw()
 		ang:RotateAroundAxis(ang:Forward(), 90)
 
 		cam.Start3D2D(self:GetPos() + ang:Up() * 4.8, ang, 0.2)
-			draw.SimpleTextOutlined(L"stash_title", "StashTextLarge", 0, -150 - 10, Color("sky_blue"), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
-			draw.SimpleTextOutlined(L"stash_desc", "StashTextSmall", 0, -150 + 65, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined(L"stash_title", "Stash3D2DTextLarge", 0, -150 - 10, Color("sky_blue"), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined(L"stash_desc", "Stash3D2DTextSmall", 0, -150 + 65, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
 		cam.End3D2D()
 
 	surface.SetAlphaMultiplier(1)

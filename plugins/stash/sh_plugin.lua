@@ -144,7 +144,7 @@ if (CLIENT) then
 	end
 
 	function PLUGIN:LoadFonts()
-		surface.CreateFont("StashTextSmall",
+		surface.CreateFont("Stash3D2DTextSmall",
 		{
 			font = "Jura",
 			size = 32,
@@ -152,7 +152,7 @@ if (CLIENT) then
 			extended = true,
 		})
 
-		surface.CreateFont("StashTextLarge",
+		surface.CreateFont("Stash3D2DTextLarge",
 		{
 			font = "Jura",
 			size = 72,

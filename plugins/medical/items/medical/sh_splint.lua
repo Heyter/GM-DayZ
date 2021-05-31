@@ -1,6 +1,6 @@
-ITEM.name = "Immobilizing splint"
-ITEM.model = Model("models/healthvial.mdl")
-ITEM.description = "Common splint for fixing the damaged bones in position as an emergency aid measure."
+ITEM.name = "Splint"
+ITEM.model = Model("models/props_c17/furnituredrawer001a_shard01.mdl")
+ITEM.description = "A splint is a rigid or flexible device that maintains in position a displaced or movable part, also used to keep in place and protect an injured part to support healing and to prevent further damage."
 
 ITEM.healthAmount = 5
 
@@ -10,7 +10,7 @@ if (SERVER) then
 	end
 else
 	function ITEM:ExtendDesc(text)
-		text[#text+1] = "Heals legs"
+		text[#text+1] = "Heals fracture"
 		return text
 	end
 end

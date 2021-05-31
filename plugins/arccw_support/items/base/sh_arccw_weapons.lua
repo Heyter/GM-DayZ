@@ -50,13 +50,13 @@ if (CLIENT) then
 			surface.DrawRect(x, y, 8, 8)
 		end
 
-		draw.SimpleText(itemObj:GetData("ammo", 0), "ixMerchant.Num", 1, 5, Color("orange"), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+		draw.SimpleTextOutlined(itemObj:GetData("ammo", 0), "ixMerchant.Num", 1, 5, Color("orange"), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 
 		local durability = math.max(0, itemObj:GetData("durability", 100))
 		-- 2.55 = (255 / 100)
 		local durabilityColor = Color(2.55 * (100 - durability), 2.55 * durability, 0, 255)
 
-		draw.SimpleText(math.Round(durability, 1) .. "%", "ixMerchant.Num", 1, h - 10, durabilityColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+		draw.SimpleTextOutlined(math.Round(durability, 1) .. "%", "ixMerchant.Num", 1, h - 10, durabilityColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 	end
 
 	function ITEM:PopulateTooltip(tooltip)
@@ -151,7 +151,7 @@ ITEM.functions.empty_clip = {
 
 ITEM.functions.combine = {
 	OnCanRun = function(item, data)
-		if (!data or !data[1]) then
+		if (!data or !data[1] or (item.player.nextUseItem or 0) > CurTime()) then
 			return false
 		end
 

@@ -1,6 +1,6 @@
 ITEM.name = "Bandage"
-ITEM.model = Model("models/props_wasteland/prison_toiletchunk01f.mdl")
-ITEM.description = "The most common gauze bandage, autoclaved and aseptic."
+ITEM.model = Model("models/props_wasteland/prison_toiletchunk01l.mdl")
+ITEM.description = "Small roll of gauze cloth."
 
 ITEM.healthAmount = 5
 

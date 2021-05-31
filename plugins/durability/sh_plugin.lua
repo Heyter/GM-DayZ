@@ -84,7 +84,7 @@ function PLUGIN:InitializedPlugins()
 				end,
 
 				OnCanRun = function(item)
-					if (item:GetData("durability", 100) >= 100) then
+					if ((item.player.nextUseItem or 0) > CurTime() or item:GetData("durability", 100) >= 100) then
 						return false
 					end
 

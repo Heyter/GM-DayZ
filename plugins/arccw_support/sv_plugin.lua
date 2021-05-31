@@ -159,32 +159,13 @@ function ix.arccw_support.InitWeapon(client, weapon)
 	end
 end
 
-function ix.arccw_support.StackAmmoQuantity(itemSelf, combineItem)
-	local maxQuantity = itemSelf.maxQuantity
-	local quantity = itemSelf:GetData("quantity", 1)
-	local combineQuantity = combineItem:GetData("quantity", 1)
-
-	if (combineQuantity >= maxQuantity or quantity >= maxQuantity) then return end
-	local totalQuantity = combineQuantity + quantity
-
-	if (totalQuantity > maxQuantity) then
-		itemSelf:SetData("quantity", maxQuantity)
-		combineItem:SetData("quantity", totalQuantity - maxQuantity)
-	else
-		combineItem:Remove()
-		itemSelf:SetData("quantity", quantity + combineQuantity)
-	end
-
-	maxQuantity, quantity, combineQuantity, totalQuantity = nil, nil, nil, nil
-end
-
 function ix.arccw_support.StackAmmo(itemSelf, combineItem)
 	local maxRounds = itemSelf.maxRounds
 	local rounds = itemSelf:GetData("rounds", itemSelf.ammoAmount)
 	local combineRounds = combineItem:GetData("rounds", combineItem.ammoAmount)
 
-	if (combineRounds == rounds and rounds == maxRounds) then
-		ix.arccw_support.StackAmmoQuantity(itemSelf, combineItem)
+	if (combineRounds == rounds and rounds >= maxRounds) then
+		itemSelf:CombineStack(combineItem)
 		return
 	end
 

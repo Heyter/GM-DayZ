@@ -68,6 +68,7 @@ LANGUAGE = {
 	txtCond3 = "Barely Functional",
 	txtCond4 = "Broken",
 	weaponJammed = "Your weapon has jammed! Press the RELOAD key.",
+	raiseDurability = "Durability",
 
 	// Grave
 	here_lies = "Here lies",
@@ -92,4 +93,6 @@ LANGUAGE = {
 
 	// ArcCW
 	["Empty clip"] = "Empty clip",
+
+	Consume = "Употребить",
 }

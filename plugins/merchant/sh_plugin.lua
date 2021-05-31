@@ -60,14 +60,16 @@ if (CLIENT) then
 	function PLUGIN:LoadFonts(font, genericFont)
 		surface.CreateFont("ixMerchant.Num", {
 			font = font,
-			size = ScreenScale(8),
-			weight = 150
+			size = math.max(ScreenScale(8), 20),
+			weight = 500,
+			extended = true
 		})
 
-		surface.CreateFont("ixMerchant.Num1", {
+		surface.CreateFont("ixMerchant.NumLarge", {
 			font = font,
-			size = 13,
-			weight = 800
+			size = math.max(ScreenScale(12), 46),
+			weight = 500,
+			extended = true
 		})
 	end
 
@@ -80,29 +82,25 @@ if (CLIENT) then
 	end
 
 	function PLUGIN:CreateItemInteractionMenu(itemPanel, menu, item)
-		if (IsValid(ix.gui.merchant)) then
-			local inventory = LocalPlayer():GetCharacter():GetInventory()
-
-			if (inventory and inventory.slots) then
-				if (item.CanSell and item:CanSell() == false) then
-					return
-				end
-
-				local price = PLUGIN:CalculatePrice(item, true, LocalPlayer())
-
-				if (!price or price < 1) then
-					price = ""
-				else
-					price = ix.currency.Get(price)
-				end
-
-				menu:AddOption(Format("%s %s", L"sell", price), function()
-					net.Start("ixMerchantTrade")
-						net.WriteUInt(item:GetID(), 32)
-						net.WriteBool(true)
-					net.SendToServer()
-				end):SetImage("icon16/basket_put.png")
+		if (IsValid(ix.gui.merchant) and item) then
+			if (item.CanSell and item:CanSell() == false) then
+				return
 			end
+
+			local price = PLUGIN:CalculatePrice(item, true, LocalPlayer())
+
+			if (!price or price < 1) then
+				price = ""
+			else
+				price = ix.currency.Get(price)
+			end
+
+			menu:AddOption(Format("%s %s", L"sell", price), function()
+				net.Start("ixMerchantTrade")
+					net.WriteUInt(item:GetID(), 32)
+					net.WriteBool(true)
+				net.SendToServer()
+			end):SetImage("icon16/basket_put.png")
 		end
 	end
 
