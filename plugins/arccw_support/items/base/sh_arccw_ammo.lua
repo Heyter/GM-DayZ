@@ -15,10 +15,10 @@ if (CLIENT) then
 			draw.SimpleTextOutlined("x" .. quantity, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 	end
+end
 
-	function ITEM:CanStack(combineItem)
-		return combineItem:GetData("rounds", combineItem.ammoAmount) == self:GetData("rounds", self.ammoAmount)
-	end
+function ITEM:CanStack(combineItem)
+	return combineItem:GetData("rounds", combineItem.ammoAmount) == self:GetData("rounds", self.ammoAmount)
 end
 
 ITEM.functions.use = {

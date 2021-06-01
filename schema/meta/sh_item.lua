@@ -40,9 +40,17 @@ function ITEM:SetData(key, value, receivers, noSave, noCheckEntity)
 	end
 end
 
-function ITEM:UseStackItem(bMaxQuantity)
+function ITEM:UseStackItem(bMaxQuantity, callback)
 	local quantity = self:GetData("quantity", 1)
 	local newQuantity = quantity - (bMaxQuantity and quantity or 1)
+
+	if (bMaxQuantity) then
+		if (callback) then
+			newQuantity, quantity = callback(newQuantity, quantity)
+		end
+	else
+		quantity = 1
+	end
 
 	if (newQuantity < 1) then
 		return true, quantity

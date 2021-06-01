@@ -18,3 +18,25 @@ function INVENTORY:GetItemCount(uniqueID, onlyMain)
 
 	return i
 end
+
+function INVENTORY:CanItemFitStack(item, onlyMain)
+	local result
+
+	if (item and item.isStackable) then
+		local items = self:GetItemsByUniqueID(item.uniqueID, onlyMain)
+
+		if (items) then
+			local maxQuantity = item.maxQuantity
+
+			for _, targetItem in pairs(items) do
+				if (targetItem:GetData("quantity", 1) >= maxQuantity) then continue end
+				if (item.CanStack and item:CanStack(targetItem) == false) then continue end
+
+				result = true
+				break
+			end
+		end
+	end
+
+	return result
+end

@@ -120,7 +120,8 @@ net.Receive("ixStashDepositItem", function(len, client)
 	local character = client:GetCharacter()
 	if (!character) then return end
 
-	if (character:GetStashCount() >= character:GetStashMax()) then
+	local totalStash, maxStash = character:GetStashCount(), character:GetStashMax()
+	if (totalStash >= maxStash) then
 		client:NotifyLocalized("stash_full")
 		return
 	end
@@ -135,8 +136,18 @@ net.Receive("ixStashDepositItem", function(len, client)
 	end
 
 	local bAllItems = net.ReadBool()
+	local result, quantity = item:UseStackItem(isbool(bAllItems) and bAllItems or nil, function(new, old)
+		local diff = totalStash + (old - new)
+		local remainder = new - (maxStash - diff)
 
-	if (item:UseStackItem(isbool(bAllItems) and bAllItems or nil) and !item:Remove()) then
+		if (diff > maxStash) then
+			return remainder, (old - new) - remainder
+		end
+
+		return new, old
+	end)
+
+	if (result and !item:Remove()) then
 		return client:NotifyLocalized("tellAdmin", "0A00!")
 	end
 
@@ -150,15 +161,9 @@ net.Receive("ixStashDepositItem", function(len, client)
 
 	local stash = character:GetStash()
 	local copyData = table.Copy(item.data or {})
-	local num = 1
-
-	if (bAllItems) then
-		num = copyData.quantity or 1
-	end
-
 	copyData.quantity = 1
 
-	for i = 1, num do
+	for i = 1, quantity do
 		stash[#stash + 1] = {
 			uniqueID = item.uniqueID,
 			data = copyData
@@ -174,7 +179,7 @@ net.Receive("ixStashDepositItem", function(len, client)
 	stash[0].max = i
 
 	character:SetStash(stash)
-	stash, copyData, num = nil, nil, nil
+	stash, copyData, quantity = nil, nil, nil
 end)
 
 function PLUGIN:LoadData()

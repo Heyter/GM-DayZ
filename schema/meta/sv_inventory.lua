@@ -29,6 +29,10 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication)
 	end
 
 	if ((item.invID or 0) == 0 and item.isStackable) then
+		if (!isnumber(uniqueID)) then
+			item.data = (data or {})
+		end
+
 		local items = targetInv:GetItemsByUniqueID(item.uniqueID, true)
 
 		if (items) then
@@ -38,6 +42,7 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication)
 			for _, targetItem in pairs(items) do
 				local targetQuantity = ((targetItem.data or {}).quantity or 1)
 				if (targetQuantity >= maxQuantity) then continue end
+				if (item.CanStack and item:CanStack(targetItem) == false) then continue end
 
 				local totalQuantity = targetQuantity + remainingQuantity
 				if (totalQuantity > maxQuantity) then

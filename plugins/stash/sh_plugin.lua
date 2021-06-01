@@ -81,14 +81,16 @@ if (CLIENT) then
 	end
 
 	function PLUGIN:DepositItem(character, icon, item)
-		if (character:GetStashCount() >= character:GetStashMax()) then
-			LocalPlayer():NotifyLocalized("stash_full")
-			return
-		end
-
 		if ((LocalPlayer().next_stash_click or 0) < CurTime()) then
 			LocalPlayer().next_stash_click = CurTime() + 0.5
 		else
+			return
+		end
+
+		local maxStash = character:GetStashMax()
+
+		if (character:GetStashCount() >= maxStash) then
+			LocalPlayer():NotifyLocalized("stash_full")
 			return
 		end
 
@@ -98,7 +100,16 @@ if (CLIENT) then
 
 		if (item) then
 			local bAllItems = input.IsShiftDown()
-			local bResult = item:UseStackItem(bAllItems)
+			local result, quantity = item:UseStackItem(bAllItems, function(new, old)
+				local diff = character:GetStashCount() + (old - new)
+				local remainder = new - (maxStash - diff)
+
+				if (diff > maxStash) then
+					return remainder, (old - new) - remainder
+				end
+
+				return new, old
+			end)
 
 			if (item.data) then
 				item.data.equip = nil
@@ -110,15 +121,9 @@ if (CLIENT) then
 
 			local stash = character:GetStash()
 			local copyData = table.Copy(item.data or {})
-			local num, quantity = 1, copyData.quantity or 1
-
-			if (bAllItems) then
-				num = copyData.quantity or 1
-			end
-
 			copyData.quantity = 1
 
-			for i = 1, num do
+			for i = 1, quantity do
 				local index = #stash + 1
 				stash[index] = {
 					uniqueID = item.uniqueID,
@@ -136,18 +141,16 @@ if (CLIENT) then
 				net.WriteBool(bAllItems)
 			net.SendToServer()
 
-			if (ix.item.inventories[icon.inventoryID]) then
-				if (bResult) then
-					ix.item.inventories[icon.inventoryID]:Remove(id)
+			if (result and ix.item.inventories[icon.inventoryID]) then
+				ix.item.inventories[icon.inventoryID]:Remove(id)
 
-					for _, v in ipairs(icon.slots or {}) do
-						if (v.item == icon) then
-							v.item = nil
-						end
+				for _, v in ipairs(icon.slots or {}) do
+					if (v.item == icon) then
+						v.item = nil
 					end
-
-					icon:Remove()
 				end
+
+				icon:Remove()
 			end
 		end
 	end
@@ -155,7 +158,7 @@ if (CLIENT) then
 	function PLUGIN:CreateItemInteractionMenu(icon, menu, item)
 		local character = LocalPlayer():GetCharacter()
 
-		if (IsValid(ix.gui.stash) and character:GetStashCount() < character:GetStashMax()) then
+		if (IsValid(ix.gui.stash)) then
 			local inventory = character:GetInventory()
 
 			if (inventory and inventory.slots) then

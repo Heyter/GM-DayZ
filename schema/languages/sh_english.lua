@@ -94,5 +94,6 @@ LANGUAGE = {
 	// ArcCW
 	["Empty clip"] = "Empty clip",
 
-	Consume = "Употребить",
+	Consume = "Consume",
+	Attach = "Attach",
 }

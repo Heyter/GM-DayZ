@@ -8,6 +8,12 @@ ITEM.height = 1
 ITEM.isAttachment = true
 ITEM.isArcCW = true
 
+if (CLIENT) then
+	function ITEM:CanStack()
+		return true
+	end
+end
+
 ITEM.functions.Attach = {
 	name = "Attach",
 	icon = "icon16/wrench.png",

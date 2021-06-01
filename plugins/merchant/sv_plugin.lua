@@ -100,7 +100,6 @@ net.Receive("ixMerchantTrade", function(len, client)
 		end
 
 		if (!character:GetInventory():Add(itemData.uniqueID, 1, itemData.data)) then
-			--ix.item.Spawn(itemData.uniqueID, client, nil, nil, itemData.data)
 			client:NotifyLocalized("noFit")
 			return
 		end

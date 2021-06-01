@@ -129,24 +129,26 @@ function PANEL:SetItem(itemTable)
 
 		if (!IsValid(ix.gui.inv1)) then return end
 
-		-- TODO: CanItemFitStack
+		local inventory = LocalPlayer():GetCharacter():GetInventory()
 
-		local w, h = self.itemTable.width, self.itemTable.height
-		local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
-		local x2, y2
+		if (!inventory:CanItemFitStack(self.itemTable, true)) then
+			local w, h = self.itemTable.width, self.itemTable.height
+			local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
+			local x2, y2
 
-		for x = 1, invW do
-			for y = 1, invH do
-				if (ix.gui.inv1:IsAllEmpty(x, y, w, h)) then
-					x2 = x
-					y2 = y
+			for x = 1, invW do
+				for y = 1, invH do
+					if (ix.gui.inv1:IsAllEmpty(x, y, w, h)) then
+						x2 = x
+						y2 = y
+					end
 				end
 			end
-		end
 
-		if !(x2 and y2) then
-			LocalPlayer():NotifyLocalized("noFit")
-			return
+			if !(x2 and y2) then
+				LocalPlayer():NotifyLocalized("noFit")
+				return
+			end
 		end
 
 		net.Start("ixStashWithdrawItem")
