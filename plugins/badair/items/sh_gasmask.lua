@@ -64,6 +64,10 @@ if (CLIENT) then
 
 		draw.SimpleTextOutlined(health .. "%", "ixMerchant.Num", 1, h - 10, healthColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 	end
+
+	function ITEM:CanStack(combineItem)
+		return combineItem:GetHealth() == self:GetHealth() and combineItem:GetFilter() and self:GetFilter()
+	end
 end
 
 function ITEM:GetHealth()

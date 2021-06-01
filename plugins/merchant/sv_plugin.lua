@@ -43,59 +43,46 @@ net.Receive("ixMerchantTrade", function(len, client)
 	if (!character) then return end
 
 	if (isSellingToVendor) then -- продать торговцу шмот
-		local itemData = ix.item.instances[id]
-		if (!itemData) then
+		local item = character:GetInventory():GetItems(true)[id]
+
+		if (!item or item.CanSell and item:CanSell() == false) then
 			return
 		end
 
-		if (itemData.CanSell and itemData:CanSell() == false) then
-			return
+		if (item:GetData("equip")) then
+			client:RemoveEquippableItem(item)
 		end
 
-		local found, invOkay = false, true
-		local name
-
-		for _, v in pairs(character:GetInventory():GetItems(true)) do
-			if (v.id == id) then
-				if (v:GetData("equip")) then
-					client:RemoveEquippableItem(v)
-				end
-
-				invOkay = v:Remove()
-				found = true
-				name = L(v.name, client)
-
-				break
-			end
-		end
-
-		if (!found) then return end
-		if (!invOkay) then
-			client:GetCharacter():GetInventory():Sync(client, true)
+		if (item:UseStackItem() and !item:Remove()) then
+			character:GetInventory():HalfSync(client)
 			return client:NotifyLocalized("tellAdmin", "trd!iid")
 		end
 
-		local price = PLUGIN:CalculatePrice(itemData, isSellingToVendor, client)
+		local price = PLUGIN:CalculatePrice(item, isSellingToVendor, client)
 
 		character:GiveMoney(price)
-		client:NotifyLocalized("businessSell", name, ix.currency.Get(price))
+		client:NotifyLocalized("businessSell", L(item.name, client), ix.currency.Get(price))
 
-		if (itemData.data) then
-			itemData.data.equip = nil
+		if (item.data) then
+			item.data.equip = nil
 
-			if (itemData.data.ammo and itemData.data.ammo < 1) then
-				itemData.data.ammo = nil
+			if (item.data.ammo and item.data.ammo < 1) then
+				item.data.ammo = nil
 			end
 		end
 
+		local copyData = table.Copy(item.data or {})
+		copyData.quantity = 1
+
 		local item_id = #entity.items + 1
 		entity.items[item_id] = {
-			uniqueID = itemData.uniqueID,
+			uniqueID = item.uniqueID,
 			price = price <= 0 and nil or price,
-			data = itemData.data or {}
+			data = copyData
 		}
 
 		entity:SyncItems(item_id, entity.items[item_id], true)
+		copyData = nil
 
 		save_count = save_count + 1
 		if (save_count >= 15) then

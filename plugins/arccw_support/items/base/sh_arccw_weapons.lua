@@ -151,7 +151,7 @@ ITEM.functions.empty_clip = {
 
 ITEM.functions.combine = {
 	OnCanRun = function(item, data)
-		if (!data or !data[1] or (item.player.nextUseItem or 0) > CurTime()) then
+		if (!data or !data[1] or item.player and (item.player.nextUseItem or 0) > CurTime()) then
 			return false
 		end
 

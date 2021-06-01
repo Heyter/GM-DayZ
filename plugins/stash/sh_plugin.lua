@@ -86,11 +86,20 @@ if (CLIENT) then
 			return
 		end
 
+		if ((LocalPlayer().next_stash_click or 0) < CurTime()) then
+			LocalPlayer().next_stash_click = CurTime() + 0.5
+		else
+			return
+		end
+
 		local items = character:GetInventory():GetItems(true)
 		local id = item:GetID()
 		local item = items and items[id]
 
 		if (item) then
+			local bAllItems = input.IsShiftDown()
+			local bResult = item:UseStackItem(bAllItems)
+
 			if (item.data) then
 				item.data.equip = nil
 
@@ -100,29 +109,45 @@ if (CLIENT) then
 			end
 
 			local stash = character:GetStash()
-			local index = #stash + 1
-			stash[index] = {
-				uniqueID = item.uniqueID,
-				data = item.data or {}
-			}
+			local copyData = table.Copy(item.data or {})
+			local num, quantity = 1, copyData.quantity or 1
 
-			ix.gui.stash:AddItem(index, stash[index])
-			ix.gui.stash.entityItems[index] = stash[index]
+			if (bAllItems) then
+				num = copyData.quantity or 1
+			end
+
+			copyData.quantity = 1
+
+			for i = 1, num do
+				local index = #stash + 1
+				stash[index] = {
+					uniqueID = item.uniqueID,
+					data = copyData
+				}
+
+				ix.gui.stash:AddItem(index, stash[index])
+				ix.gui.stash.entityItems[index] = stash[index]
+			end
+
+			copyData = nil
 
 			net.Start("ixStashDepositItem")
 				net.WriteUInt(id, 32)
+				net.WriteBool(bAllItems)
 			net.SendToServer()
 
 			if (ix.item.inventories[icon.inventoryID]) then
-				ix.item.inventories[icon.inventoryID]:Remove(id)
+				if (bResult) then
+					ix.item.inventories[icon.inventoryID]:Remove(id)
 
-				for _, v in ipairs(icon.slots or {}) do
-					if (v.item == icon) then
-						v.item = nil
+					for _, v in ipairs(icon.slots or {}) do
+						if (v.item == icon) then
+							v.item = nil
+						end
 					end
-				end
 
-				icon:Remove()
+					icon:Remove()
+				end
 			end
 		end
 	end
@@ -134,11 +159,16 @@ if (CLIENT) then
 			local inventory = character:GetInventory()
 
 			if (inventory and inventory.slots) then
-				menu:AddOption(L"deposit", function()
+				if (input.IsShiftDown()) then
 					PLUGIN:DepositItem(character, icon, item)
-				end):SetImage("icon16/package_add.png")
+					return true
+				else
+					menu:AddOption(L"deposit", function()
+						PLUGIN:DepositItem(character, icon, item)
+					end):SetImage("icon16/package_add.png")
 
-				menu:AddSpacer()
+					menu:AddSpacer()
+				end
 			end
 		end
 	end
@@ -164,9 +194,12 @@ if (CLIENT) then
 	net.Receive("ixStashSync", function()
 		local character = LocalPlayer():GetCharacter()
 
+		local stash = character:GetStash()
+		stash = net.ReadTable()
+
 		local panel = vgui.Create("ixStashView")
 		panel:SetLocalInventory(character:GetInventory(), character:GetMoney())
-		panel:SetStash(character:GetStash())
+		panel:SetStash(stash)
 
 		for _, v in ipairs(ents.FindInSphere(EyePos(), 256)) do
 			if (v and v:GetClass() == "gmodz_stash") then

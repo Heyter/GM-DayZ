@@ -3,6 +3,7 @@ ITEM.description = "Stackable Item"
 ITEM.category = "Stackable"
 ITEM.model = Model('models/props_c17/TrapPropeller_Lever.mdl')
 ITEM.maxQuantity = 16
+ITEM.isStackable = true
 
 if (CLIENT) then
 	function ITEM:PaintOver(item, w, h)
@@ -14,7 +15,7 @@ if (CLIENT) then
 	end
 
 	function ITEM:CanStack(combineItem)
-		return false--combineItem:GetData("quantity", 1) == self:GetData("quantity", 1)
+		return true--combineItem:GetData("quantity", 1) == self:GetData("quantity", 1)
 	end
 end
 

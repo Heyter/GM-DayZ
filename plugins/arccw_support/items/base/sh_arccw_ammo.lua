@@ -1,6 +1,7 @@
 ITEM.base = "base_ammo"
 ITEM.maxRounds = 30 -- макс. патронов помещаемых в одну коробку (авто.)
 ITEM.maxQuantity = 16 -- макс. кол-во стакнутых коробок
+ITEM.isStackable = true
 
 if (CLIENT) then
 	function ITEM:PaintOver(item, w, h)
@@ -16,8 +17,7 @@ if (CLIENT) then
 	end
 
 	function ITEM:CanStack(combineItem)
-		return combineItem:GetData("rounds", combineItem.ammoAmount) == self:GetData("rounds", self.ammoAmount) and
-			combineItem:GetData("quantity", 1) == self:GetData("quantity", 1)
+		return combineItem:GetData("rounds", combineItem.ammoAmount) == self:GetData("rounds", self.ammoAmount)
 	end
 end
 

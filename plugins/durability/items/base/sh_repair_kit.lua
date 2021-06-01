@@ -2,7 +2,7 @@ ITEM.base = "base_stackable"
 
 ITEM.name = "Repair Kit Base"
 ITEM.category = "RepairKit"
-ITEM.description = "repairkit"
+ITEM.description = "Repair Kit Base description"
 ITEM.model = "models/props_lab/box01a.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -36,6 +36,10 @@ if (SERVER) then
 		if (self:UseStackItem()) then
 			self:Remove()
 		end
+	end
+
+	function ITEM:GetDescription()
+		return Format(self.description, self.raiseDurability)
 	end
 end
 

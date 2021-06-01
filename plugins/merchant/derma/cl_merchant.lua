@@ -85,6 +85,28 @@ function PANEL:SetItem(itemTable)
 			return LocalPlayer():NotifyLocalized("canNotAfford")
 		end
 
+		if (!IsValid(ix.gui.inv1)) then return end
+
+		-- TODO: CanItemFitStack
+
+		local w, h = self.itemTable.width, self.itemTable.height
+		local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
+		local x2, y2
+
+		for x = 1, invW do
+			for y = 1, invH do
+				if (ix.gui.inv1:IsAllEmpty(x, y, w, h)) then
+					x2 = x
+					y2 = y
+				end
+			end
+		end
+
+		if !(x2 and y2) then
+			LocalPlayer():NotifyLocalized("noFit")
+			return
+		end
+
 		net.Start("ixMerchantTrade")
 			net.WriteUInt(self.key, 32)
 			net.WriteBool(false)
@@ -93,7 +115,7 @@ function PANEL:SetItem(itemTable)
 
 	self.icon.PaintOver = function(t, w, h)
 		if (self.stack > 1 and ix.gui.merchant and ix.gui.merchant:CanStackItem(self.itemTable)) then
-			draw.SimpleTextOutlined("x" .. self.stack, "ixMerchant.NumLarge", w * 0.5, h * 0.5, Color("light_gray"), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined("x" .. self.stack, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
 		if (itemTable and itemTable.PaintOver) then

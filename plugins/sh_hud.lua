@@ -412,9 +412,16 @@ else
 					if (IsValid(ix.gui.entityInfo) and ix.gui.entityInfo.entity == ent) then continue end
 
 					local item = ent:GetItemTable()
+					local quantity = ent:GetData("quantity", 1)
+					local text = item:GetName()
+
+					if (quantity >= 2) then
+						text = Format("%s (x%d)", text, quantity)
+					end
+
 					cam.Start2D()
 						local centerScreen = ent:GetPos():ToScreen()
-						draw.SimpleTextOutlined(item:GetName(), "ixNoticeFont",
+						draw.SimpleTextOutlined(text, "ixNoticeFont",
 							centerScreen.x, centerScreen.y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, shadowColor
 						)
 					cam.End2D()

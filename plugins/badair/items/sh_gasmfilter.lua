@@ -9,6 +9,13 @@ ITEM.iconCam = {
 	ang = Angle(25, 220, 0),
 	fov = 6.508287169279,
 }
+
+if (CLIENT) then
+	function ITEM:CanStack(combineItem)
+		return combineItem:GetFilterHealth() == self:GetFilterHealth()
+	end
+end
+
 function ITEM:OnGetDropModel(entity)
 	return "models/props_lab/box01a.mdl"
 end
@@ -41,12 +48,8 @@ ITEM.functions.combine = {
         if (IsValid(client)) then
             local combineItem = ix.item.instances[data[1]]
 
-            if (combineItem) then
-                if (combineItem.isGasMask) then
-                    return combineItem:ChangeFilter(client, combineItem, item)
-                else
-                    client:NotifyLocalized("notGasMask")
-                end
+            if (combineItem and combineItem.isGasMask) then
+				return combineItem:ChangeFilter(client, combineItem, item)
             end
         end
 

@@ -129,6 +129,8 @@ function PANEL:SetItem(itemTable)
 
 		if (!IsValid(ix.gui.inv1)) then return end
 
+		-- TODO: CanItemFitStack
+
 		local w, h = self.itemTable.width, self.itemTable.height
 		local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
 		local x2, y2
@@ -151,11 +153,13 @@ function PANEL:SetItem(itemTable)
 			net.WriteUInt(self.key, 32)
 		net.SendToServer()
 
-		ix.gui.stash:TakeItem(self.key, self.itemTable)
+		if (IsValid(ix.gui.stash)) then
+			ix.gui.stash:TakeItem(self.key, self.itemTable)
+		end
 	end
 	self.icon.PaintOver = function(t, w, h)
 		if (self.stack > 1 and ix.gui.stash and ix.gui.stash:CanStackItem(self.itemTable)) then
-			draw.SimpleTextOutlined("x" .. self.stack, "ixMerchant.NumLarge", w * 0.5, h * 0.5, Color("light_gray"), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined("x" .. self.stack, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
 		if (itemTable and itemTable.PaintOver) then

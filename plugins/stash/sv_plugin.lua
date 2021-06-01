@@ -92,7 +92,7 @@ net.Receive("ixStashWithdrawItem", function(len, client)
 
 	local i = 0
 	for k, v in pairs(stash) do
-		if k == 0 then continue end
+		if (k == 0 or v.data.noWeight) then continue end
 		i = i + 1
 	end
 	stash[0] = stash[0] or {}
@@ -134,8 +134,10 @@ net.Receive("ixStashDepositItem", function(len, client)
 		client:RemoveEquippableItem(item)
 	end
 
-	if (!item:Remove()) then
-		return client:NotifyLocalized("tellAdmin", "trd!iid")
+	local bAllItems = net.ReadBool()
+
+	if (item:UseStackItem(isbool(bAllItems) and bAllItems or nil) and !item:Remove()) then
+		return client:NotifyLocalized("tellAdmin", "0A00!")
 	end
 
 	if (item.data) then
@@ -147,22 +149,32 @@ net.Receive("ixStashDepositItem", function(len, client)
 	end
 
 	local stash = character:GetStash()
+	local copyData = table.Copy(item.data or {})
+	local num = 1
 
-	stash[#stash + 1] = {
-		uniqueID = item.uniqueID,
-		data = item.data or {}
-	}
+	if (bAllItems) then
+		num = copyData.quantity or 1
+	end
+
+	copyData.quantity = 1
+
+	for i = 1, num do
+		stash[#stash + 1] = {
+			uniqueID = item.uniqueID,
+			data = copyData
+		}
+	end
 
 	local i = 0
 	for k, v in pairs(stash) do
-		if k == 0 then continue end
+		if (k == 0 or v.data.noWeight) then continue end
 		i = i + 1
 	end
 	stash[0] = stash[0] or {}
 	stash[0].max = i
 
 	character:SetStash(stash)
-	stash = nil
+	stash, copyData, num = nil, nil, nil
 end)
 
 function PLUGIN:LoadData()
@@ -179,7 +191,9 @@ function PLUGIN:SaveData()
 	local data = {}
 
 	for _, v in ipairs(ents.FindByClass("gmodz_stash")) do
-		data[#data + 1] =  {v:GetPos(), v:GetAngles()}
+		if (!v:GetNetVar("Persistent", false)) then
+			data[#data + 1] =  {v:GetPos(), v:GetAngles()}
+		end
 	end
 
 	self:SetData(data)

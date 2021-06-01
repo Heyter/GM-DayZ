@@ -91,10 +91,21 @@ function Schema:PopulateImportantCharacterInfo(client, character, container)
 end
 
 function ix.hud.PopulateItemTooltip(tooltip, item)
+	local text = item.GetName and item:GetName() or L(item.name)
+
+	if (IsValid(item.entity)) then
+		local quantity = item:GetData("quantity", 1)
+
+		if (quantity >= 2) then
+			text = Format("%s (x%d)", text, quantity)
+		end
+	end
+
 	local panel = tooltip:AddRow("name")
 	panel:SetImportant()
-	panel:SetText(item.GetName and item:GetName() or L(item.name))
+	panel:SetText(text)
 	panel:SetMaxWidth(math.max(panel:GetMaxWidth(), ScrW() * 0.5))
+	panel:SetTextColor(color_white)
 	panel:SizeToContents()
 
 	if (!IsValid(item.entity)) then

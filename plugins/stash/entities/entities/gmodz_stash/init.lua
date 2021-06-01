@@ -45,6 +45,7 @@ function ENT:Use(activator)
 	character:GetInventory():HalfSync(activator)
 
 	net.Start("ixStashSync")
+		net.WriteTable(character:GetStash())
 	net.Send(activator)
 end
 
