@@ -41,6 +41,13 @@ if (CLIENT) then
 		self.DeathNotify = panel
 	end
 
+	function PLUGIN:ScreenResolutionChanged()
+		if (IsValid(self.DeathNotify)) then
+			self.DeathNotify:Remove()
+			self:InitPostEntity()
+		end
+	end
+
 	local function KilledByWeapon(death_msg, ent_class, attacker, victim, color1, color2, pnl)
 		local text = "killed"
 

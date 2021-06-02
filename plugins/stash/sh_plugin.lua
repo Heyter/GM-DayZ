@@ -196,13 +196,12 @@ if (CLIENT) then
 
 	net.Receive("ixStashSync", function()
 		local character = LocalPlayer():GetCharacter()
-
-		local stash = character:GetStash()
-		stash = net.ReadTable()
+		local data = net.ReadTable()
+		character.vars["stash"] = data
 
 		local panel = vgui.Create("ixStashView")
 		panel:SetLocalInventory(character:GetInventory(), character:GetMoney())
-		panel:SetStash(stash)
+		panel:SetStash(data)
 
 		for _, v in ipairs(ents.FindInSphere(EyePos(), 256)) do
 			if (v and v:GetClass() == "gmodz_stash") then

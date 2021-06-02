@@ -72,6 +72,22 @@ function ixItemENT:SetItem(itemID)
 	end
 end
 
+function ixItemENT:Initialize()
+	self:SetModel("models/props_junk/watermelon01.mdl")
+	self:SetSolid(SOLID_VPHYSICS)
+	self:PhysicsInit(SOLID_VPHYSICS)
+	self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+	self:SetUseType(SIMPLE_USE)
+	self.health = 50
+
+	local physObj = self:GetPhysicsObject()
+
+	if (IsValid(physObj)) then
+		physObj:EnableMotion(true)
+		physObj:Wake()
+	end
+end
+
 function ixItemENT:Use(activator, caller)
 	local itemTable = self:GetItemTable()
 

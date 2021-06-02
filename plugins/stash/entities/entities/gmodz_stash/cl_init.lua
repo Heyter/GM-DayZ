@@ -3,7 +3,7 @@
 ENT.MaxRenderDistance = 500000
 ENT.MaxAlphaDistance = 100000
 
-function ENT:Draw()
+function ENT:DrawTranslucent()
 	--self:DrawModel()
 
 	local dist = EyePos():DistToSqr(self:GetPos())

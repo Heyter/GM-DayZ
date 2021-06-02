@@ -18,7 +18,9 @@ if (CLIENT) then
 end
 
 function ITEM:CanStack(combineItem)
-	return combineItem:GetData("rounds", combineItem.ammoAmount) == self:GetData("rounds", self.ammoAmount)
+	local rounds = self:GetData("rounds", self.ammoAmount)
+
+	return combineItem:GetData("rounds", combineItem.ammoAmount) == rounds and rounds >= self.maxRounds
 end
 
 ITEM.functions.use = {
@@ -48,16 +50,13 @@ ITEM.functions.combine = {
 		if (CLIENT) then
 			if (istable(data) and data[1]) then
 				local combineItem = ix.item.instances[data[1]]
-				local rounds = itemSelf:GetData("rounds", itemSelf.ammoAmount)
 
 				if (itemSelf.uniqueID != combineItem.uniqueID or 
 					combineItem:GetData("quantity", 1) >= itemSelf.maxQuantity or
 					itemSelf:GetData("quantity", 1) >= itemSelf.maxQuantity) then
 					return false
 				else
-					return (
-						combineItem:GetData("rounds", combineItem.ammoAmount) == rounds and rounds >= itemSelf.maxRounds
-					)
+					return itemSelf:CanStack(combineItem)
 				end
 			else
 				return false

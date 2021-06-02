@@ -379,7 +379,7 @@ function SWEP:PrimaryAttack()
 		return
 	end
 
-	if (ix.plugin.Get("stamina")) then
+	if (ix.plugin.Get("gmodz_stamina")) then
 		local staminaUse = ix.config.Get("punchStamina")
 
 		if (staminaUse > 0) then

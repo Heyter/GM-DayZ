@@ -108,3 +108,49 @@ function Schema:InitPostEntity()
     game.ConsoleCommand("sv_airaccelerate 1000\n")
     game.ConsoleCommand("sv_alltalk 0\n")
 end
+
+-- Stack hooks
+
+-- function Schema.UpdateStackItem(character, item)
+	-- local result
+
+	-- if (character) then
+		-- local items = character:GetInventory():GetItems(true)
+
+		-- for _, v in pairs(items) do
+			-- if (v.id != item.id and v.uniqueID == item.uniqueID and v:GetData("quantity", 1) < item.maxQuantity) then
+				-- v:CombineStack(item)
+				-- result = true
+				-- break
+			-- end
+		-- end
+	-- end
+
+	-- return result
+-- end
+
+--function Schema:OnItemTransferred(item, oldInv, newInv)
+--[[ 	if (item.maxQuantity) then
+		--if (oldInv.owner and !newInv.owner) then -- Removing item from inventory.
+		--elseif (!oldInv.owner and newInv.owner) then -- Adding item to inventory.
+		if (!oldInv.owner and newInv.owner) then -- Adding item to inventory.
+			Schema.UpdateStackItem(ix.char.loaded[newInv.owner], item)
+		end
+	end ]]
+--end
+
+--function Schema:InventoryItemAdded(oldInv, newInv, item)
+--[[ 	if (item.maxQuantity) then
+		if (!oldInv and newInv.owner) then -- When an item is directly created in their inventory.
+			Schema.UpdateStackItem(ix.char.loaded[newInv.owner], item)
+		end
+	end ]]
+--end
+
+--function Schema:CanTransferItem(item, oldInv, newInv) -- When a player attempts to take an item out of a container.
+	-- if (newInv.owner and item.maxQuantity and (oldInv and oldInv.owner != newInv.owner)) then
+		-- if (Schema.UpdateStackItem(ix.char.loaded[newInv.owner], item)) then
+			-- return false
+		-- end
+	-- end
+--end
