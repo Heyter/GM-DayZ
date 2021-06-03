@@ -1,6 +1,6 @@
 local INVENTORY = ix.meta.inventory
 
-function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication)
+function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 	quantity = quantity or 1
 
 	if (quantity < 1) then
@@ -28,7 +28,7 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication)
 		return false, "invalidItem"
 	end
 
-	if ((item.invID or 0) == 0 and item.isStackable) then
+	if (!split and (item.invID or 0) == 0 and item.isStackable) then
 		if (!isnumber(uniqueID)) then
 			item.data = (data or {})
 		end

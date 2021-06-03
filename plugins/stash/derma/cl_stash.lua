@@ -344,7 +344,7 @@ function PANEL:CanStackItem(item, default)
 	for idx, panel in pairs(self.items) do
 		if (!IsValid(panel) or panel.itemTable.uniqueID != item.uniqueID) then continue end
 
-		if (item.CanStack and item:CanStack(panel.itemTable) and (item.price or 0) == (panel.itemTable.price or 0)
+		if (item.CanStack and item:CanStack(panel.itemTable, true) and (item.price or 0) == (panel.itemTable.price or 0)
 			or table.IsEmpty(item.data) and table.IsEmpty(panel.itemTable.data)) then
 			index = idx
 			break

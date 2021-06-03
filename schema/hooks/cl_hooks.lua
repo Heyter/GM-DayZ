@@ -45,15 +45,14 @@ end
 --end
 
 function Schema:PopulateImportantCharacterInfo(client, character, container)
-	local health_color = ix.util.GetInjuredColor(client)
-
+	container.health = client:Health()
 	container:SetArrowColor(ix.config.Get("color"))
 
 	-- name
 	local name = container:AddRow("name")
 	name:SetImportant()
 	name:SetText(client:GetName())
-	name:SetBackgroundColor(health_color)
+	name:SetBackgroundColor(ix.util.GetInjuredColor(client))
 	name:SizeToContents()
 
 	local countryIcon = ix.geoip:GetMaterial(client)
@@ -95,6 +94,8 @@ function ix.hud.PopulateItemTooltip(tooltip, item)
 
 	if (IsValid(item.entity)) then
 		local quantity = item:GetData("quantity", 1)
+		tooltip.quantity = quantity
+		tooltip.item_name = text
 
 		if (quantity >= 2) then
 			text = Format("%s (x%d)", text, quantity)
@@ -111,7 +112,7 @@ function ix.hud.PopulateItemTooltip(tooltip, item)
 	if (!IsValid(item.entity)) then
 		panel = tooltip:AddRow("description")
 		panel:SetBackgroundColor(color_black)
-		panel:SetText(item and item:GetDescription() or "")
+		panel:SetText(item:GetDescription() or "")
 		panel:SizeToContents()
 	end
 
@@ -120,4 +121,147 @@ function ix.hud.PopulateItemTooltip(tooltip, item)
 	end
 
 	hook.Run("PopulateItemTooltip", tooltip, item)
+end
+
+do
+	local aimLength = 0.15
+	local aimTime = 0
+	local aimEntity
+	local lastEntity
+	local lastTrace = {}
+
+	timer.Create("ixCheckTargetEntity", 0.1, 0, function()
+		local client = LocalPlayer()
+		local time = SysTime()
+
+		if (!IsValid(client)) then
+			return
+		end
+
+		local character = client:GetCharacter()
+
+		if (!character) then
+			return
+		end
+
+		lastTrace.start = client:GetShootPos()
+		lastTrace.endpos = lastTrace.start + client:GetAimVector(client) * 160
+		lastTrace.filter = client
+		lastTrace.mask = MASK_SHOT_HULL
+
+		lastEntity = util.TraceHull(lastTrace).Entity
+
+		if (lastEntity != aimEntity) then
+			aimTime = time + aimLength
+			aimEntity = lastEntity
+		end
+
+		local panel = ix.gui.entityInfo
+		local bShouldShow = time >= aimTime and (!IsValid(ix.gui.menu) or ix.gui.menu.bClosing) and
+			(!IsValid(ix.gui.characterMenu) or ix.gui.characterMenu.bClosing)
+		local bShouldPopulate = lastEntity.OnShouldPopulateEntityInfo and lastEntity:OnShouldPopulateEntityInfo() or true
+
+		if (bShouldShow and IsValid(lastEntity) and hook.Run("ShouldPopulateEntityInfo", lastEntity) != false and
+			(lastEntity.PopulateEntityInfo or bShouldPopulate)) then
+
+			if (!IsValid(panel) or (IsValid(panel) and panel:GetEntity() != lastEntity)) then
+				if (IsValid(ix.gui.entityInfo)) then
+					ix.gui.entityInfo:Remove()
+				end
+
+				local infoPanel = vgui.Create(ix.option.Get("minimalTooltips", false) and "ixTooltipMinimal" or "ixTooltip")
+				local entityPlayer = lastEntity:GetNetVar("player")
+
+				if (entityPlayer) then
+					infoPanel:SetEntity(entityPlayer)
+					infoPanel.entity = lastEntity
+				else
+					infoPanel:SetEntity(lastEntity)
+				end
+
+				infoPanel:SetDrawArrow(true)
+				ix.gui.entityInfo = infoPanel
+			end
+		elseif (IsValid(panel)) then
+			panel:Remove()
+		end
+	end)
+end
+
+local panel
+function Schema:ShouldPopulateEntityInfo(lastEntity)
+	panel = ix.gui.entityInfo
+
+	if (IsValid(panel) and panel:GetEntity() == lastEntity) then
+		local name = panel:GetRow("name")
+
+		if (IsValid(name)) then
+			if (panel.health and panel.health != lastEntity:Health()) then
+				panel.health = lastEntity:Health()
+				name:SetBackgroundColor(ix.util.GetInjuredColor(lastEntity))
+			--elseif (panel.quantity and lastEntity.GetItemTable) then
+--[[ 				local data = lastEntity:GetNetVar("data", {})
+
+				if (panel.quantity != (data.quantity or 1)) then
+					panel.quantity = (data.quantity or 1)
+
+					if (panel.quantity >= 2) then
+						name:SetText(Format("%s (x%d)", panel.item_name, panel.quantity))
+					else
+						name:SetText(panel.item_name)
+					end
+				end ]]
+			end
+		end
+	end
+end
+
+-- Stack hooks
+function Schema:CreateItemInteractionMenu(iconPanel, _, item)
+	if (input.IsControlDown() and item.isStackable) then
+		local quantity = item:GetData("quantity", 1)
+		local inventory = ix.inventory.Get(item.invID)
+
+		if (item.ammoAmount and quantity <= 1) then
+			quantity = item:GetData("rounds", item.ammoAmount)
+		end
+
+		iconPanel.entry = vgui.Create("ixSettingsRowNumberEntry")
+		iconPanel.entry:Attach(iconPanel)
+		iconPanel.entry:SetValue(math.ceil(quantity / 2), true)
+		iconPanel.entry.OnValueChanged = function(t)
+			local value = math.Round(t:GetValue(), 0)
+
+			if (value == 0 or quantity <= 1 or value == quantity) then return end
+			if (!inventory or !item) then return end
+
+			if (!inventory:CanItemFitStack(item, true)) then
+				local panel = ix.gui["inv" .. inventory:GetID()]
+				local invW, invH = inventory:GetSize()
+				local x2, y2
+
+				for x = 1, invW do
+					for y = 1, invH do
+						if (!IsValid(panel)) then break end
+						if (panel:IsAllEmpty(x, y, item.width, item.height)) then
+							x2 = x
+							y2 = y
+						end
+					end
+				end
+
+				if !(x2 and y2) then
+					LocalPlayer():NotifyLocalized("noFit")
+					return
+				end
+			end
+
+			net.Start(item.ammoAmount and "ixArcCWAmmoSplit" or "ixItemSplit")
+				net.WriteUInt(item.id, 32)
+				net.WriteUInt(value, 32)
+			net.SendToServer()
+		end
+
+		return true
+	end
 end

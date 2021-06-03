@@ -110,6 +110,40 @@ function Schema:InitPostEntity()
 end
 
 -- Stack hooks
+util.AddNetworkString("ixItemSplit")
+
+net.Receive("ixItemSplit", function(_, client)
+	if ((client.ixItemSplitTry or 0) < CurTime()) then
+		client.ixItemSplitTry = CurTime() + 0.33
+	else
+		return
+	end
+
+	local character = client:GetCharacter()
+	if (!character) then return end
+
+	local item = ix.item.instances[net.ReadUInt(32)]
+	if (!item or !item.isStackable or IsValid(item.entity)) then return end
+
+	local quantity = item:GetData("quantity", 1)
+	if (quantity <= 1) then return end
+
+	local amount = net.ReadUInt(32)
+	amount = math.Clamp(math.Round(tonumber(amount) or 0), 0, quantity)
+	if (amount == 0 or amount == quantity) then return end
+
+	if (character:GetInventory():Add(item.uniqueID, 1, {quantity = amount}, nil, nil, nil, true)) then
+		amount = quantity - amount
+
+		if (amount < 1) then
+			item:Remove()
+		else
+			item:SetData("quantity", amount)
+		end
+	else
+		client:NotifyLocalized("noFit")
+	end
+end)
 
 -- function Schema.UpdateStackItem(character, item)
 	-- local result

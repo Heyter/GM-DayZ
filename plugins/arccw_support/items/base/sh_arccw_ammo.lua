@@ -17,10 +17,23 @@ if (CLIENT) then
 	end
 end
 
-function ITEM:CanStack(combineItem)
-	local rounds = self:GetData("rounds", self.ammoAmount)
+if (SERVER) then
+	function ITEM:CanStack(combineItem)
+		local rounds = self:GetData("rounds", self.ammoAmount)
 
-	return combineItem:GetData("rounds", combineItem.ammoAmount) == rounds and rounds >= self.maxRounds
+		return combineItem:GetData("rounds", combineItem.ammoAmount) == rounds and rounds >= self.maxRounds
+	end
+else
+	function ITEM:CanStack(combineItem, isVendor)
+		local rounds = self:GetData("rounds", self.ammoAmount)
+		local isEqual = combineItem:GetData("rounds", combineItem.ammoAmount) == rounds
+
+		if (isVendor) then
+			return isEqual
+		end
+
+		return isEqual and rounds >= self.maxRounds
+	end
 end
 
 ITEM.functions.use = {
@@ -36,6 +49,65 @@ ITEM.functions.use = {
 		return item:UseStackItem()
 	end,
 }
+
+--[[ ITEM.functions.Split = {
+	name = "Split",
+	icon = "icon16/arrow_divide.png",
+	OnClick = function(itemSelf)
+		local inventory = ix.inventory.Get(itemSelf.invID)
+		if (!inventory) then return false end
+
+		if (!inventory:CanItemFitStack(itemSelf, true)) then
+			local panel = ix.gui["inv" .. inventory:GetID()]
+			local invW, invH = inventory:GetSize()
+			local x2, y2
+
+			for x = 1, invW do
+				for y = 1, invH do
+					if (!IsValid(panel)) then break end
+					if (panel:IsAllEmpty(x, y, itemSelf.width, itemSelf.height)) then
+						x2 = x
+						y2 = y
+					end
+				end
+			end
+
+			if !(x2 and y2) then
+				LocalPlayer():NotifyLocalized("noFit")
+				return false
+			end
+		end
+
+		local rounds = itemSelf:GetData("rounds", itemSelf.ammoAmount)
+		local quantity = itemSelf:GetData("quantity", 1)
+
+		if (quantity >= 2) then
+			rounds = quantity
+		end
+
+		Derma_NumericRequest(L"Split", L"split_enter_quantity", math.ceil(rounds / 2), function(text)
+			local amount = math.max(0, math.Round(tonumber(text) or 0))
+
+			if (amount != 0) then
+				if (quantity >= 2) then
+					if (amount == quantity) then return end
+				else
+					if (amount == rounds) then return end
+				end
+
+				net.Start("ixArcCWAmmoSplit")
+					net.WriteUInt(itemSelf.id, 32)
+					net.WriteUInt(amount, 32)
+				net.SendToServer()
+			end
+		end)
+
+		return false
+	end,
+	OnCanRun = function(itemSelf)
+		return !IsValid(itemSelf.entity) and itemSelf:GetData("rounds", itemSelf.ammoAmount) > 1
+	end
+} ]]
 
 ITEM.functions.combine = {
 	OnRun = function(itemSelf, data)

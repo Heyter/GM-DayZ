@@ -32,7 +32,7 @@ function INVENTORY:CanItemFitStack(item, onlyMain)
 				if (targetItem:GetData("quantity", 1) >= maxQuantity) then continue end
 				if (item.CanStack and item:CanStack(targetItem) == false) then continue end
 
-				result = true
+				result = targetItem
 				break
 			end
 		end

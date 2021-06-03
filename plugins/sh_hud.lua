@@ -44,7 +44,7 @@ else
 		})
 
 		function PLUGIN:PreDrawOutlines()
-			local entity = LocalPlayer():GetTraceEntity()
+			local entity = LocalPlayer():GetTraceEntity(120)
 
 			if (IsValid(entity) and Schema.outlineItems[entity:GetClass()]) then
 				color = ix.option.Get("colorOutlineItems", color_white)
@@ -395,40 +395,40 @@ else
 		end
 	end
 
-	do
+	--do
 		-- ix_item toScreen
-		local rangeSize, angleCos = 80, math.cos(math.rad(45))
-		local shadowColor = Color(66, 66, 66)
-		hook.Add("PostDrawTranslucentRenderables", "PostDrawTranslucentRenderables.ix_item", function(bDepth, bSkybox)
-			if (bDepth or bSkybox or !LocalPlayer():GetCharacter()) then return end
+		--local rangeSize, angleCos = 80, math.cos(math.rad(45))
+		--local shadowColor = Color(66, 66, 66)
+		--hook.Add("PostDrawTranslucentRenderables", "PostDrawTranslucentRenderables.ix_item", function(bDepth, bSkybox)
+			-- if (bDepth or bSkybox or !LocalPlayer():GetCharacter()) then return end
 
-			local startPos = LocalPlayer():EyePos()
-			local dir = LocalPlayer():GetAimVector()
+			-- local startPos = LocalPlayer():EyePos()
+			-- local dir = LocalPlayer():GetAimVector()
 
-			local entities = ents.FindInCone(startPos, dir, rangeSize, angleCos)
+			-- local entities = ents.FindInCone(startPos, dir, rangeSize, angleCos)
 
-			for _, ent in ipairs(entities) do
-				if (IsValid(ent) and ent:GetClass() == "ix_item") then
-					if (IsValid(ix.gui.entityInfo) and ix.gui.entityInfo.entity == ent) then continue end
+			-- for _, ent in ipairs(entities) do
+				-- if (IsValid(ent) and ent:GetClass() == "ix_item") then
+					-- if (IsValid(ix.gui.entityInfo) and ix.gui.entityInfo.entity == ent) then continue end
 
-					local item = ent:GetItemTable()
-					local quantity = ent:GetData("quantity", 1)
-					local text = item:GetName()
+					-- local item = ent:GetItemTable()
+					-- local quantity = ent:GetData("quantity", 1)
+					-- local text = item:GetName()
 
-					if (quantity >= 2) then
-						text = Format("%s (x%d)", text, quantity)
-					end
+					-- if (quantity >= 2) then
+						-- text = Format("%s (x%d)", text, quantity)
+					-- end
 
-					cam.Start2D()
-						local centerScreen = ent:GetPos():ToScreen()
-						draw.SimpleTextOutlined(text, "ixNoticeFont",
-							centerScreen.x, centerScreen.y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, shadowColor
-						)
-					cam.End2D()
-				end
-			end
-		end)
-	end
+					-- cam.Start2D()
+						-- local centerScreen = ent:GetPos():ToScreen()
+						-- draw.SimpleTextOutlined(text, "ixNoticeFont",
+							-- centerScreen.x, centerScreen.y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, shadowColor
+						-- )
+					-- cam.End2D()
+				-- end
+			-- end
+		--end)
+	--end
 
 	local breathSound = Sound("gmodz/player/stamina.wav")
 	function PLUGIN:Think()

@@ -16,7 +16,7 @@ function ITEM:CombineStack(combineItem)
 		combineItem:SetData("quantity", totalQuantity - maxQuantity)
 	else
 		combineItem:Remove()
-		self:SetData("quantity", quantity + combineQuantity)
+		self:SetData("quantity", totalQuantity)
 	end
 
 	maxQuantity, quantity, combineQuantity, totalQuantity = nil, nil, nil, nil

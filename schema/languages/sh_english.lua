@@ -96,4 +96,7 @@ LANGUAGE = {
 
 	Consume = "Consume",
 	Attach = "Attach",
+	Split = "Split",
+
+	split_enter_quantity = "Enter the quantity",
 }

@@ -96,4 +96,7 @@ LANGUAGE = {
 
 	Consume = "Употребить",
 	Attach = "Прикрепить",
+	Split = "Разделить",
+
+	split_enter_quantity = "Enter the quantity",
 }

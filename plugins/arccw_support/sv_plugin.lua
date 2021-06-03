@@ -1,5 +1,7 @@
 local timer, IsValid = timer, IsValid
 
+util.AddNetworkString("ixArcCWAmmoSplit")
+
 function ix.arccw_support.Attach(itemWeapon, attID)
 	if (!itemWeapon or !attID or !itemWeapon.isWeapon or !itemWeapon.attachments) then
 		return false
@@ -222,6 +224,59 @@ function ix.arccw_support.EmptyClip(itemSelf)
 		client:EmitSound("weapons/clipempty_rifle.wav")
 	end
 end
+
+net.Receive("ixArcCWAmmoSplit", function(_, client)
+	if ((client.ixAmmoSplitTry or 0) < CurTime()) then
+		client.ixAmmoSplitTry = CurTime() + 0.33
+	else
+		return
+	end
+
+	local character = client:GetCharacter()
+	if (!character) then return end
+
+	local item = ix.item.instances[net.ReadUInt(32)]
+	if (!item or !item.isStackable) then return end
+
+	local rounds = item:GetData("rounds", item.ammoAmount)
+	if (rounds <= 1) then return end
+
+	local quantity = item:GetData("quantity", 1)
+	local amount = net.ReadUInt(32)
+
+	amount = math.Clamp(math.Round(tonumber(amount) or 0), 0, quantity >= 2 and quantity or rounds)
+	if (amount == 0) then return end
+
+	if (quantity >= 2) then
+		if (amount == quantity) then return end
+
+		if (character:GetInventory():Add(item.uniqueID, 1, {quantity = amount}, nil, nil, nil, true)) then
+			amount = quantity - amount
+
+			if (amount < 1) then
+				item:Remove()
+			else
+				item:SetData("quantity", amount)
+			end
+		else
+			client:NotifyLocalized("noFit")
+		end
+	else
+		if (amount == rounds) then return end
+
+		if (character:GetInventory():Add(item.uniqueID, 1, {rounds = amount}, nil, nil, nil, true)) then
+			amount = rounds - amount
+
+			if (amount < 1) then
+				item:Remove()
+			else
+				item:SetData("rounds", amount)
+			end
+		else
+			client:NotifyLocalized("noFit")
+		end
+	end
+end)
 
 -- HOOKS --
 function PLUGIN:ArcCW_PlayerCanAttach(client, weapon, attID, slot, detach)
