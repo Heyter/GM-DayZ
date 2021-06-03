@@ -17,6 +17,10 @@ do
 			self.a
 		)
 	end
+
+	function colorMeta:Alpha(amt)
+		return ColorAlpha(self, amt or 255)
+	end
 end
 
 function Color(r, g, b, a)

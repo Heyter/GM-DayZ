@@ -98,5 +98,5 @@ LANGUAGE = {
 	Attach = "Прикрепить",
 	Split = "Разделить",
 
-	split_enter_quantity = "Enter the quantity",
+	split_enter_quantity = "Введите количество",
 }

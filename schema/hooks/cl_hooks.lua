@@ -199,18 +199,6 @@ function Schema:ShouldPopulateEntityInfo(lastEntity)
 			if (panel.health and panel.health != lastEntity:Health()) then
 				panel.health = lastEntity:Health()
 				name:SetBackgroundColor(ix.util.GetInjuredColor(lastEntity))
-			--elseif (panel.quantity and lastEntity.GetItemTable) then
---[[ 				local data = lastEntity:GetNetVar("data", {})
-
-				if (panel.quantity != (data.quantity or 1)) then
-					panel.quantity = (data.quantity or 1)
-
-					if (panel.quantity >= 2) then
-						name:SetText(Format("%s (x%d)", panel.item_name, panel.quantity))
-					else
-						name:SetText(panel.item_name)
-					end
-				end ]]
 			end
 		end
 	end
@@ -226,7 +214,7 @@ function Schema:CreateItemInteractionMenu(iconPanel, _, item)
 			quantity = item:GetData("rounds", item.ammoAmount)
 		end
 
-		iconPanel.entry = vgui.Create("ixSettingsRowNumberEntry")
+		iconPanel.entry = vgui.Create("ixRowNumberEntry")
 		iconPanel.entry:Attach(iconPanel)
 		iconPanel.entry:SetValue(math.ceil(quantity / 2), true)
 		iconPanel.entry.OnValueChanged = function(t)

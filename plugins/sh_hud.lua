@@ -517,22 +517,9 @@ else
 		end
 	end
 
-	local lastEntity
 	function PLUGIN:HUDPaint()
 		local client = LocalPlayer()
 		if (!client:GetCharacter() or !client:Alive()) then return end
-
-		-- Draw Entity Info --
---[[ 		lastEntity = client:GetTraceEntity(170, 2) -- TraceHull
-
-		if (IsValid(lastEntity)) then
-			if (lastEntity.DrawEntityInfo) then
-				lastEntity:DrawEntityInfo()
-			else
-				hook.Run("DrawEntityInfo", lastEntity)
-			end
-		end ]]
-		-- Draw Entity Info End --
 
 		hud:drawNotifications()
 
