@@ -331,6 +331,19 @@ function PLUGIN:InitPostEntity()
 	end
 end
 
+function PLUGIN:InitializedPlugins()
+	game.AddAmmoType({
+		name = "762x39mm",
+		dmgtype = DMG_BULLET,
+		tracer = TRACER_LINE,
+		plydmg = 0,
+		npcdmg = 0,
+		force = 2000,
+		minsplash = 5,
+		maxsplash = 10
+	})
+end
+
 ix.util.Include("sv_plugin.lua")
 
 if (CLIENT) then

@@ -46,4 +46,16 @@ do
 
 	playerMeta.Nick = playerMeta.GetName
 	playerMeta.Name = playerMeta.GetName
+
+	function playerMeta:GetItems(onlyMain)
+		local char = self:GetCharacter()
+
+		if (char) then
+			local inv = char:GetInventory()
+
+			if (inv) then
+				return inv:GetItems(onlyMain)
+			end
+		end
+	end
 end

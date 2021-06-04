@@ -118,6 +118,7 @@ function ITEM:Transfer(invID, x, y, client, noReplication, isLogical)
 					end
 
 					hook.Run("OnItemTransferred", self, curInv, inventory)
+
 					return true
 				end
 			else

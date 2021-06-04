@@ -57,6 +57,19 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 			end
 
 			if (remainingQuantity == 0) then
+				if (isnumber(uniqueID)) then
+					if (item.OnRemoved) then
+						item:OnRemoved()
+					end
+
+					local query = mysql:Delete("ix_items")
+						query:Where("item_id", item.id)
+					query:Execute()
+
+					ix.item.instances[item.id] = nil
+					item = nil
+				end
+
 				return true
 			end
 		end
