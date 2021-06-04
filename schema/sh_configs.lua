@@ -29,7 +29,8 @@ local noLoad = {
 	wepselect = true,
 	stamina = true,
 	doors = true,
-	spawnsaver = true
+	spawnsaver = true,
+	thirdperson = true
 }
 
 function Schema:InitializedPlugins()

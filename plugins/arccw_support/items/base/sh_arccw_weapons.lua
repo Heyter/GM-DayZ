@@ -185,3 +185,26 @@ ITEM.functions.combine = {
 		return false
 	end,
 }
+
+hook.Add("PlayerDeath", "ixStripClip", function(client)
+	client.carryWeapons = {}
+	local weapon
+
+	for _, v in pairs(client:GetCharacter():GetInventory():GetItems()) do
+		if (v.isWeapon and v:GetData("equip")) then
+			weapon = client:GetWeapon(v.class)
+
+			if (IsValid(weapon) and weapon:Clip1() > 0) then
+				v:SetData("ammo", weapon:Clip1())
+			else
+				v:SetData("ammo", nil)
+			end
+
+			v:SetData("equip", nil)
+
+			if (v.pacData) then
+				v:RemovePAC(client)
+			end
+		end
+	end
+end)
