@@ -1,6 +1,7 @@
 local timer, IsValid = timer, IsValid
 
 util.AddNetworkString("ixArcCWAmmoSplit")
+util.AddNetworkString("ixRequestDropAmmo")
 
 function ix.arccw_support.Attach(itemWeapon, attID)
 	if (!itemWeapon or !attID or !itemWeapon.isWeapon or !itemWeapon.attachments) then
@@ -166,7 +167,7 @@ function ix.arccw_support.StackAmmo(itemSelf, combineItem)
 	local rounds = itemSelf:GetData("rounds", itemSelf.ammoAmount)
 	local combineRounds = combineItem:GetData("rounds", combineItem.ammoAmount)
 
-	if (combineRounds == rounds and rounds >= maxRounds) then
+	if (itemSelf.isStackable and combineRounds == rounds and rounds >= maxRounds) then
 		itemSelf:CombineStack(combineItem)
 		return
 	end
@@ -202,9 +203,12 @@ function ix.arccw_support.EmptyClip(itemSelf)
 
 		if (ammo > 0) then
 			weapon:SetClip1(0)
+			client:SetAmmo(weapon:Ammo1() + ammo, weapon.Primary.Ammo)
 
-			itemSelf.data = itemSelf.data or {}
-			itemSelf.data.ammo = nil
+			-- itemSelf.data = itemSelf.data or {}
+			-- itemSelf.data.ammo = nil
+
+			return
 		end
 	else
 		ammo = itemSelf:GetData("ammo", 0)
@@ -217,13 +221,44 @@ function ix.arccw_support.EmptyClip(itemSelf)
 	if (ammo > 0) then
 		local data = { rounds = ammo }
 
-		if (!client:GetCharacter():GetInventory():Add(ammoID, 1, data)) then
+		if (!client:GetCharacter():GetInventory():Add(ammoID, 1, data, nil, nil, nil, nil, true)) then
 			ix.item.Spawn(ammoID, client, nil, nil, data)
 		end
 
 		client:EmitSound("weapons/clipempty_rifle.wav")
 	end
 end
+
+net.Receive("ixRequestDropAmmo", function(_, client)
+	if ((client.ixAmmoSplitTry or 0) < CurTime()) then
+		client.ixAmmoSplitTry = CurTime() + 0.33
+	else
+		return
+	end
+
+	if (!client:GetCharacter() or !client:Alive()) then return end
+
+	local ammoName = net.ReadString()
+	if (!isstring(ammoName)) then return end
+
+	local item = ix.item.list[ammoName]
+	if (!item or (item.base or "") != "base_arccw_ammo") then return end
+
+	local ammo = client:GetAmmoCount(ammoName)
+	if (!ammo or ammo <= 0) then return end
+
+	local maxRounds = item.maxRounds
+	local totalAmmo = ammo > maxRounds and maxRounds - ammo or ammo
+
+	if (totalAmmo < 1) then
+		totalAmmo = maxRounds
+	end
+
+	if (client:GetCharacter():GetInventory():Add(ammoName, 1, { rounds = totalAmmo })) then
+		ammo = ammo - maxRounds
+		client:SetAmmo(math.max(ammo, 0), ammoName)
+	end
+end)
 
 net.Receive("ixArcCWAmmoSplit", function(_, client)
 	if ((client.ixAmmoSplitTry or 0) < CurTime()) then
@@ -233,10 +268,10 @@ net.Receive("ixArcCWAmmoSplit", function(_, client)
 	end
 
 	local character = client:GetCharacter()
-	if (!character) then return end
+	if (!character or !client:Alive()) then return end
 
 	local item = ix.item.instances[net.ReadUInt(32)]
-	if (!item or !item.isStackable) then return end
+	if (!item or (item.base or "") != "base_arccw_ammo") then return end
 
 	local rounds = item:GetData("rounds", item.ammoAmount)
 	if (rounds <= 1) then return end
@@ -247,7 +282,7 @@ net.Receive("ixArcCWAmmoSplit", function(_, client)
 	amount = math.Clamp(math.Round(tonumber(amount) or 0), 0, quantity >= 2 and quantity or rounds)
 	if (amount == 0) then return end
 
-	if (quantity >= 2) then
+	if (item.isStackable and quantity >= 2) then
 		if (amount == quantity) then return end
 
 		if (character:GetInventory():Add(item.uniqueID, 1, {quantity = amount}, nil, nil, nil, true)) then

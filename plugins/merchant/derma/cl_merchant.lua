@@ -274,6 +274,8 @@ end
 
 function PANEL:AddItem(key, itemTable)
 	local item = PLUGIN:MakeVirtualItem(itemTable.uniqueID, key)
+	if (!item) then return end
+
 	item.data = itemTable.data or {}
 	item.price = itemTable.price or nil
 

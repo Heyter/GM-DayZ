@@ -52,8 +52,6 @@ if (CLIENT) then
 			self.virtual_items[id] = item
 
 			return item
-		else
-			ErrorNoHalt("[Helix] Attempt to index unknown item '"..uniqueID.."'\n")
 		end
 	end
 

@@ -47,7 +47,7 @@ ITEM.functions.use = {
 		item.player:EmitSound(item.useSound, 110)
 
 		return item:UseStackItem()
-	end,
+	end
 }
 
 ITEM.functions.combine = {

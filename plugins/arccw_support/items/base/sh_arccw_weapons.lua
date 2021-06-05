@@ -139,7 +139,7 @@ ITEM.functions.empty_clip = {
 			return !itemSelf.isGrenade and itemSelf.player:GetWeaponAmmo(itemSelf) >= 1
 		end
 
-		return !itemSelf.isGrenade
+		return !itemSelf.isGrenade and itemSelf.isWeapon
 	end,
 
 	OnRun = function(itemSelf)

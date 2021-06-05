@@ -1,7 +1,7 @@
 local ITEM = ix.meta.item
 
 function ITEM:CombineStack(combineItem)
-	if (!combineItem) then return end
+	if (!self.isStackable or !combineItem) then return end
 	if (self.uniqueID != combineItem.uniqueID) then return end
 
 	local maxQuantity = self.maxQuantity

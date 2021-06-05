@@ -8,6 +8,7 @@ if (CLIENT) then
 		["ix_item"] = true,
 	}
 
+	local lastEntity
 	function PLUGIN:ShouldPopulateEntityInfo(entity)
 		if (notShouldEnts[entity:GetClass()]) then
 			return false
@@ -34,8 +35,17 @@ if (CLIENT) then
 					end
 				end
 
-				local position = entity:LocalToWorld(entity:OBBCenter())
-				local x, y = position:ToScreen().x, position:ToScreen().y
+				local x, y
+				local lastEntity = LocalPlayer():GetTraceEntity(160, 2)
+
+				if (lastEntity and lastEntity == entity) then
+					x, y = ScrW() / 2, ScrH() / 2
+				else
+					local position = entity:LocalToWorld(entity:OBBCenter())
+					x, y = position:ToScreen().x, position:ToScreen().y
+				end
+
+				if !(x and y) then continue end
 
 				draw.SimpleTextOutlined(itemName, "ixNoticeFont",
 					x, y-(noticeHeight/2), color_white, 1, 1, 1, shadowColor

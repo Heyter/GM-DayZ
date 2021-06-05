@@ -205,8 +205,9 @@ function Schema:ShouldPopulateEntityInfo(lastEntity)
 end
 
 -- Stack hooks
+local strAllowedNumericCharacters = "1234567890"
 function Schema:CreateItemInteractionMenu(iconPanel, _, item)
-	if (input.IsControlDown() and item.isStackable) then
+	if (input.IsControlDown() and (item.isStackable or item.base == "base_arccw_ammo")) then
 		local quantity = item:GetData("quantity", 1)
 		local inventory = ix.inventory.Get(item.invID)
 
@@ -216,6 +217,7 @@ function Schema:CreateItemInteractionMenu(iconPanel, _, item)
 
 		iconPanel.entry = vgui.Create("ixRowNumberEntry")
 		iconPanel.entry:Attach(iconPanel)
+		iconPanel.entry:SetCharacters(strAllowedNumericCharacters)
 		iconPanel.entry:SetValue(math.ceil(quantity / 2), true)
 		iconPanel.entry.OnValueChanged = function(t)
 			local value = math.Round(t:GetValue(), 0)
@@ -253,3 +255,165 @@ function Schema:CreateItemInteractionMenu(iconPanel, _, item)
 		return true
 	end
 end
+
+hook.Add("CreateMenuButtons", "ixInventory", function(tabs)
+	if (hook.Run("CanPlayerViewInventory") == false) then
+		return
+	end
+
+	tabs["inv"] = {
+		bDefault = true,
+		Create = function(info, container)
+			local canvas = container:Add("DTileLayout")
+			local canvasLayout = canvas.PerformLayout
+			canvas.PerformLayout = nil -- we'll layout after we add the panels instead of each time one is added
+			canvas:SetBorder(0)
+			canvas:SetSpaceX(2)
+			canvas:SetSpaceY(2)
+			canvas:Dock(FILL)
+
+			ix.gui.menuInventoryContainer = canvas
+
+			local panel = canvas:Add("ixInventory")
+			panel:SetPos(0, 0)
+			panel:SetDraggable(false)
+			panel:SetSizable(false)
+			panel:SetTitle(nil)
+			panel.bNoBackgroundBlur = true
+			panel.childPanels = {}
+
+			local inventory = LocalPlayer():GetCharacter():GetInventory()
+
+			if (inventory) then
+				panel:SetInventory(inventory)
+			end
+
+			ix.gui.inv1 = panel
+
+			local panel2 = panel:Add("EditablePanel")
+			panel2:Dock(BOTTOM)
+			panel2:DockPadding(1, 1, 1, 1)
+			panel:SetTall(panel:GetTall() + panel2:GetTall() + 4)
+
+			local money = panel2:Add("ixStashMoney")
+			money:Dock(FILL)
+			money:DockMargin(0, 0, 5, 0)
+			money:SetMoney(LocalPlayer():GetCharacter():GetMoney())
+			money.Think = function(t)
+				if (t.money != LocalPlayer():GetCharacter():GetMoney()) then
+					t:SetMoney(LocalPlayer():GetCharacter():GetMoney())
+				end
+			end
+			money.OnTransfer = function(_, amount, keyCode)
+				if (LocalPlayer():GetCharacter():GetMoney() <= 0) then
+					return
+				end
+
+				if (keyCode == MOUSE_RIGHT) then
+					amount = LocalPlayer():GetCharacter():GetMoney()
+				end
+
+				LocalPlayer():ConCommand("say /DropMoney " .. amount)
+			end
+
+			local textButton = panel2:Add("DButton")
+			textButton:Dock(RIGHT)
+			textButton:SetFont("ixGenericFont")
+			textButton:SetText(L"Ammunition")
+			textButton:SizeToContents()
+			textButton.Paint = function(t, w, h)
+				t.set_color = ix.config.Get("color")
+
+				if (t:IsHovered()) then
+					t.set_color = t.set_color:Darken(25)
+				end
+
+				surface.SetDrawColor(t.set_color)
+				surface.DrawRect(0, 0, w, h)
+
+				surface.SetDrawColor(color_black)
+				surface.DrawOutlinedRect(0, 0, w, h)
+			end
+			textButton.DoClick = function(t)
+				if (table.IsEmpty(LocalPlayer():GetAmmo())) then return end
+
+				local function NetInventory(ammoName)
+					if ((LocalPlayer().next_stash_click or 0) < CurTime()) then
+						LocalPlayer().next_stash_click = CurTime() + 0.5
+					else
+						return
+					end
+
+					local itemData = ix.item.list[ammoName]
+					if (!itemData) then return false end
+
+					local inventory = LocalPlayer():GetCharacter():GetInventory()
+
+					if (!inventory:CanItemFitStack(itemData, true)) then
+						local w, h = itemData.width, itemData.height
+						local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
+						local x2, y2
+
+						for x = 1, invW do
+							for y = 1, invH do
+								if (!IsValid(ix.gui.inv1)) then
+									x2, y2 = nil, nil
+									break
+								end
+								if (ix.gui.inv1:IsAllEmpty(x, y, w, h)) then
+									x2 = x
+									y2 = y
+								end
+							end
+						end
+
+						if (IsValid(ix.gui.inv1)) then
+							if !(x2 and y2) then
+								LocalPlayer():NotifyLocalized("noFit")
+								return false
+							end
+						else
+							return false
+						end
+					end
+
+					return true
+				end
+
+				local ammoName
+				local x, y = t:LocalToScreen(0, t:GetTall())
+				local menu = DermaMenu(false, t)
+
+				for ammoID, count in pairs(LocalPlayer():GetAmmo()) do
+					ammoName = game.GetAmmoName(ammoID)
+					menu:AddOption(Format("%s (x%d)", ammoName, count), function()
+						local bool = input.IsShiftDown() or input.IsControlDown()
+
+						if (NetInventory(ammoName)) then
+							net.Start("ixRequestDropAmmo")
+								net.WriteString(ammoName)
+								net.WriteBool(bool)
+							net.SendToServer()
+						end
+					end):SetFont("ixToolTipText")
+				end
+
+				menu:SetMinimumWidth(t:GetWide())
+				menu:Open(x, y, false, t)
+			end
+
+			if (ix.option.Get("openBags", true)) then
+				for _, v in pairs(inventory:GetItems()) do
+					if (!v.isBag) then
+						continue
+					end
+
+					v.functions.View.OnClick(v)
+				end
+			end
+
+			canvas.PerformLayout = canvasLayout
+			canvas:Layout()
+		end
+	}
+end)

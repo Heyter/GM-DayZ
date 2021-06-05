@@ -1,8 +1,11 @@
+local strAllowedNumericCharacters = "1234567890.-"
+
 DEFINE_BASECLASS("Panel")
 --local baseEntry = baseclass.Get( "DTextEntry" )
 local PANEL = {}
 
 AccessorFunc(PANEL, "bDeleteSelf", "DeleteSelf", FORCE_BOOL)
+AccessorFunc(PANEL, "m_characters", "Characters", FORCE_STRING)
 
 PANEL.outlineRect = Color(204, 204, 204, 100)
 
@@ -18,8 +21,11 @@ function PANEL:Init()
 	self:SetSize(width + 50, height)
 	self:DockPadding(4, 4, 4, 4)
 
+	self:SetCharacters(strAllowedNumericCharacters)
+
 	self.textEntry = self:Add("ixTextEntry")
 	self.textEntry:SetNumeric(true)
+	self.textEntry:SetAllowNonAsciiCharacters(false)
 	self.textEntry:SetFont("ixMenuButtonFont")
 	self.textEntry:SetCursorColor(color_white)
 	self.textEntry:Dock(FILL)
@@ -31,7 +37,15 @@ function PANEL:Init()
 		surface.SetDrawColor(90, 90, 90, 255)
 		surface.DrawRect(0, 0, w, h)
 
-		derma.SkinHook( "Paint", "TextEntry", t, w, h )
+		t:DrawTextEntryText(color_white, ix.config.Get("color"), color_white)
+	end
+	self.textEntry.CheckNumeric = function(t, strValue)
+		if ( !t:GetNumeric() ) then return false end
+		if ( !string.find( self.m_characters, strValue, 1, true ) ) then
+			return true
+		end
+
+		return false
 	end
 
 	self.textButton = self:Add("DButton")
@@ -40,7 +54,7 @@ function PANEL:Init()
 	self.textButton:Dock(RIGHT)
 	self.textButton:SizeToContents()
 	self.textButton.Paint = function(t, w, h)
-		surface.SetDrawColor(derma.GetColor("DarkerBackground", t))
+		surface.SetDrawColor(color_black)
 		surface.DrawRect(0, 0, w, h)
 
 		surface.SetDrawColor(self.outlineRect)
