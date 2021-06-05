@@ -29,7 +29,10 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split, noD
 	end
 
 	if (!split and (item.invID or 0) == 0 and item.isStackable) then
-		if (!noData and !isnumber(uniqueID)) then
+		local resetData
+
+		if (!isnumber(uniqueID)) then
+			resetData = true
 			item.data = (data or {})
 		end
 
@@ -70,8 +73,16 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split, noD
 					item = nil
 				end
 
+				if (resetData) then
+					item.data = {}
+				end
+
 				return true
 			end
+		end
+
+		if (resetData) then
+			item.data = {}
 		end
 	end
 

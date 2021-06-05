@@ -9,6 +9,15 @@ do
 		return (math.cos(CurTime() * c) + 1) / 2
 	end
 
+	function colorMeta:Lighten(amt)
+	  return Color(
+		math.Clamp(self.r + amt, 0, 255),
+		math.Clamp(self.g + amt, 0, 255),
+		math.Clamp(self.b + amt, 0, 255),
+		self.a
+	  )
+	end
+
 	function colorMeta:Darken(amt)
 		return Color(
 			math.Clamp(self.r - amt, 0, 255),

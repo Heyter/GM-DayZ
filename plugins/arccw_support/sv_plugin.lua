@@ -221,7 +221,7 @@ function ix.arccw_support.EmptyClip(itemSelf)
 	if (ammo > 0) then
 		local data = { rounds = ammo }
 
-		if (!client:GetCharacter():GetInventory():Add(ammoID, 1, data, nil, nil, nil, nil, true)) then
+		if (!client:GetCharacter():GetInventory():Add(ammoID, 1, data)) then
 			ix.item.Spawn(ammoID, client, nil, nil, data)
 		end
 
@@ -248,16 +248,42 @@ net.Receive("ixRequestDropAmmo", function(_, client)
 	if (!ammo or ammo <= 0) then return end
 
 	local maxRounds = item.maxRounds
-	local totalAmmo = ammo > maxRounds and maxRounds - ammo or ammo
 
-	if (totalAmmo < 1) then
-		totalAmmo = maxRounds
+	if (!net.ReadBool()) then
+		local totalAmmo = ammo > maxRounds and maxRounds - ammo or ammo
+
+		if (totalAmmo < 1) then
+			totalAmmo = maxRounds
+		end
+
+		if (client:GetCharacter():GetInventory():Add(ammoName, 1, { rounds = totalAmmo })) then
+			ammo = ammo - maxRounds
+			client:SetAmmo(math.max(ammo, 0), ammoName)
+		end
+
+		totalAmmo = nil
+	else
+		local totalAmmo = math.floor(ammo / maxRounds) -- число полных обойм
+		local result = totalAmmo * maxRounds -- сколько поместилось
+		local data = {}
+
+		if (result < 1) then
+			result = ammo - result -- остаток
+			data["rounds"] = result
+		elseif (result > 0 and totalAmmo >= 2) then
+			data["quantity"] = totalAmmo
+			data["rounds"] = maxRounds
+		end
+
+		if (client:GetCharacter():GetInventory():Add(ammoName, 1, data)) then
+			ammo = ammo - result
+			client:SetAmmo(math.max(ammo, 0), ammoName)
+		end
+
+		totalAmmo, result, data = nil, nil, nil
 	end
 
-	if (client:GetCharacter():GetInventory():Add(ammoName, 1, { rounds = totalAmmo })) then
-		ammo = ammo - maxRounds
-		client:SetAmmo(math.max(ammo, 0), ammoName)
-	end
+	ammo = nil
 end)
 
 net.Receive("ixArcCWAmmoSplit", function(_, client)
