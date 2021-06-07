@@ -84,6 +84,16 @@ if (CLIENT) then
 		client.buffs = client.buffs or {}
 		client.buffs[uniqueID] = value
 
+		local buff = ix.buff.list[uniqueID]
+
+		if (buff) then
+			if (buff.OnRunOnce) then
+				buff:OnRunOnce(self)
+			end
+
+			if (buff.permanently) then return end
+		end
+
 		timer.Create("ixBuff", 1, 0, function()
 			if (!IsValid(client)) then
 				timer.Remove("ixBuff")
@@ -101,7 +111,7 @@ if (CLIENT) then
 				end
 			end
 
-			if (table.IsEmpty(client.buffs) or !client:Alive() or client:Health() <= 0) then
+			if (table.IsEmpty(client.buffs) or !client:Alive() or client:GetHealth() <= 0) then
 				timer.Remove("ixBuff")
 				client.buffs = {}
 			end

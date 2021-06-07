@@ -1,4 +1,6 @@
 function BUFF:OnRunOnce(client)
+	client:SetExtraHealth(CurTime() + math.min(200, client:ExtraHealth() + 25))
+
 	local maxHP = client:GetMaxHealth()
 	if (client:Health() >= maxHP) then return end
 

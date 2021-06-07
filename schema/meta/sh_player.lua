@@ -59,3 +59,27 @@ do
 		end
 	end
 end
+
+function playerMeta:ExtraHealth()
+	return math.max(0, self:GetLocalVar("extra_health", 0) - CurTime())
+end
+
+if (SERVER) then
+	function playerMeta:SetExtraHealth(amount)
+		self:SetLocalVar("extra_health", amount)
+	end
+
+	function playerMeta:AddExtraHealth(amount)
+		amount = self:ExtraHealth() + amount
+
+		if (amount > 0) then
+			self:SetLocalVar("extra_health", CurTime() + amount)
+		else
+			self:SetLocalVar("extra_health", nil)
+		end
+	end
+end
+
+function playerMeta:GetHealth()
+	return self:Health() + self:ExtraHealth()
+end

@@ -1,6 +1,6 @@
 local INVENTORY = ix.meta.inventory
 
-function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split, noData)
+function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 	quantity = quantity or 1
 
 	if (quantity < 1) then

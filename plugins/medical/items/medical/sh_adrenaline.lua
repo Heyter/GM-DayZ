@@ -1,4 +1,4 @@
-ITEM.name = "Adrenaline injector"
+ITEM.name = "Adrenaline shot"
 ITEM.model = Model("models/healthvial.mdl")
 ITEM.description = "Sterile disposable syringe with a dose of adrenaline - the main hormone of the adrenal medulla. It is used to enhance the physiological response associated with the preparation of all muscles to increase activity temporarily boosts strength endurance. Relieves the sensation of pain."
 

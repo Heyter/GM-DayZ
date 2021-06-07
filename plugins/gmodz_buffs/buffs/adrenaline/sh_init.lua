@@ -21,8 +21,18 @@ if (CLIENT) then
 			local value = math.max(0, (LocalPlayer():HasBuff(self.uniqueID) - CurTime()) / (ix.buff.list[self.uniqueID].time / 2))
 
 			if (value > 0) then
-				DrawSharpen(math.min(2, value * 3), 1.2)
+				DrawSharpen(math.min(1.5, value * 3), 1.1)
 			end
+		end
+	end
+
+	function BUFF:HUDExtraPaint(client, perc, hud, margin)
+		if (LocalPlayer():HasBuff(self.uniqueID)) then
+			local time = math.max(0, LocalPlayer():HasBuff(self.uniqueID) - CurTime())
+
+			perc.textColor = color_white
+			perc.y = perc.y - perc.h - margin
+			hud:drawText(perc, "ADRENALINE: " .. string.ToMinutesSeconds(time))
 		end
 	end
 end

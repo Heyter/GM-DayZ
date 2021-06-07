@@ -6,7 +6,7 @@ util.AddNetworkString("ixHitmarker")
 function PLUGIN:GetFallDamage(client, speed)
 	local damage = speed / 10
 
-	if (damage > client:Health() / 2 and damage < client:Health()) then
+	if (damage > client:GetHealth() / 2 and damage < client:GetHealth()) then
 		client:BreakLeg()
 		client:EmitSound("Flesh.Break")
 
@@ -38,7 +38,7 @@ function PLUGIN:PlayerSpawn(client)
 	end
 end
 
--- Возможно стоит перекинуть на EntityTakeDamage т.к урон от взрыва не определяется (он по хитгруппе 0)
+-- TODO: Возможно стоит перекинуть на EntityTakeDamage т.к урон от взрыва не определяется (он по хитгруппе 0)
 function PLUGIN:PlayerHurt(client, attacker, health, damage)
 	if (damage > 0 and health > 0 and (attacker:IsPlayer() or attacker:IsNPC())) then
 		if (attacker:IsPlayer() and hook.Run("PlayerShouldTakeDamage", client, attacker) == false) then return end
@@ -56,7 +56,7 @@ function PLUGIN:PlayerHurt(client, attacker, health, damage)
 
 		client:SetBleeding(damage, nil, attacker)
 
-		if ((hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) and damage > client:Health() / 2 and damage < client:Health()) then
+		if ((hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) and damage > client:GetHealth() / 2 and damage < client:GetHealth()) then
 			client:BreakLeg()
 		end
 	end
@@ -100,67 +100,71 @@ function playerMeta:HealLeg()
 	self:SetLocalVar("legBroken", nil)
 end
 
+function ix.bleeding.Timer(client, level, isRise)
+	level = math.min(ix.bleeding.max_level, level)
+
+	local timerID = "ixBleeding" .. client:EntIndex()
+	local reps = level == 1 and math.random(5, 20) or 0
+	local delay = math.Remap( level, ix.bleeding.max_level, 1, 0.5, 3.5 )
+
+	client.bleeding = {
+		loss = math.floor(math.Remap( level, 1, ix.bleeding.max_level, 1, 8 )), // сколько хп отнимаем каждый круг
+		riseTime = level != 1 and CurTime() + 20 or nil // повышаем уровень кровотечения
+	}
+
+	client:SetNetVar("bleeding", level)
+
+	if (isRise) then
+		timer.Adjust(timerID, delay, reps)
+		return
+	else
+		client:ScreenFade(SCREENFADE.IN, Color("red", 128), 0.3, 0)
+	end
+
+	timer.Create(timerID, delay, reps, function()
+		if (IsValid(client)) then
+			if (!client:Alive()) then
+				timer.Remove(timerID)
+				return
+			elseif (timer.RepsLeft(timerID) == 0) then
+				client:HealBleeding()
+				return
+			end
+
+			local amt = client:GetHealth() - client.bleeding.loss
+			if (amt <= 0) then
+				timer.Remove(timerID)
+				client:KillFeed("bledout")
+				return
+			end
+
+			client:SetHealth(amt)
+			if (self:GetLocalVar("extra_health")) then client:AddExtraHealth(-client.bleeding.loss) end
+
+			if (client.bleeding.riseTime and client.bleeding.riseTime < CurTime()) then
+				ix.bleeding.Timer(client, client:GetNetVar("bleeding", 1) + 1, true)
+			end
+		else
+			timer.Remove(timerID)
+		end
+	end)
+end
+
 function playerMeta:SetBleeding(damage, bForce, inflictor)
 	if (!damage) then return end
 	if (!bForce and hook.Run("PlayerShouldTakeDamage", self, self) == false) then return end
+	if (damage >= self:GetMaxHealth() or self:GetHealth() - damage <= 0) then return end
 
-	local max_health = self:GetMaxHealth()
-	if (damage >= max_health or self:Health() - damage <= 0) then return end -- считай парень и так труп
+	local bleeding = self:GetNetVar("bleeding")
+	local level = math.floor(damage / ix.bleeding.min_damage)
 
-	local amt_bleeding = self:GetNetVar("bleeding")
-	if (amt_bleeding and amt_bleeding > damage) then return end -- не перезаписываем более лучшее кровотечение
-
-	if (damage >= 15) then
-		self:SetNetVar("bleeding", damage)
-
+	if (bleeding and bleeding > level) then return end -- не перезаписываем более лучшее кровотечение
+	if (level >= 1) then
 		if (inflictor and inflictor != self) then
 			self.bleeding_att = inflictor
 		end
 
-		local delay, repetitions, loss = 10, 0, 4
-		local dmgPerc = math.max(0, (max_health - damage) / max_health)
-
-		if (damage == 15 and math.random(1, 3) == 1) then -- легкий тип кровотечения (иллюзия нелинейности)
-			repetitions = math.random(1, 7) -- т.к это легкий, то позволим ему самому вылечиться
-		elseif (damage >= 50) then
-			dmgPerc = dmgPerc * 0.8
-			loss = loss + 1
-
-			if (damage >= 65) then
-				delay = delay - 1.5
-			else
-				delay = delay - 1
-			end
-		end
-
-		delay = math.max(0.5, math.floor(delay * dmgPerc))
-		loss = math.min(32, math.floor(loss / dmgPerc)) -- сколько хп отнимаем каждый круг
-
-		self:ScreenFade(SCREENFADE.IN, Color("red", 128), 0.3, 0)
-
-		local uniqueID = "ixBleeding" .. self:EntIndex()
-
-		timer.Create(uniqueID, delay, repetitions, function()
-			if (IsValid(self)) then
-				if (!self:Alive()) then
-					timer.Remove(uniqueID)
-					return
-				elseif (timer.RepsLeft(uniqueID) == 0) then
-					self:HealBleeding()
-					return
-				end
-
-				local amt = math.max(0, self:Health() - loss)
-
-				if (amt <= 0) then
-					timer.Remove(uniqueID)
-					self:KillFeed("bledout")
-					return
-				end
-
-				self:SetHealth(amt)
-			end
-		end)
+		ix.bleeding.Timer(self, level)
 	end
 end
 
@@ -168,6 +172,7 @@ function playerMeta:HealBleeding(amount)
 	timer.Remove("ixBleeding" .. self:EntIndex())
 	self:SetNetVar("bleeding", nil)
 
+	self.bleeding = nil
 	self.bleeding_att = nil
 
 	if (amount) then

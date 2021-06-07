@@ -37,4 +37,7 @@ function BUFF:TimerExists(client)
 	return timer.Exists("ixBuffTimer_" .. tostring(self) .. client:EntIndex())
 end
 
+-- @realm shared
+-- BUFF:OnRunOnce(client) // Вызывается 1 раз
+
 ix.buff.meta = BUFF

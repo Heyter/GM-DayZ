@@ -2,6 +2,29 @@ PLUGIN.name = "Enchanced Damage"
 PLUGIN.author = "STEAM_0:1:29606990"
 PLUGIN.description = "Break legs, bleeding, etc..."
 
+ix.bleeding = ix.bleeding or { max_level = 4, min_damage = 15 }
+
+if (CLIENT) then
+	function ix.bleeding:Format()
+		local level = LocalPlayer():GetNetVar("bleeding")
+		if (!level) then return end
+
+		local prefix = L"bleeding_type_mild" -- ЛЕГКОЕ
+
+		if (level == 2) then
+			prefix = L"bleeding_type_average" -- СРЕДНЕЕ
+		elseif (level == 3) then
+			prefix = L"bleeding_type_serious" -- СЕРЬЁЗНОЕ
+		elseif (level >= 4) then
+			prefix = L"bleeding_type_heavy" -- ТЯЖЕЛОЕ
+		end
+
+		prefix = Format("%s %s", prefix, L"bleeding_blood_loss") -- КРОВОТЕЧЕНИЕ
+
+		return prefix, ix.util.LerpColorHSV(nil, nil, ix.bleeding.max_level, ix.bleeding.max_level - level, 0)
+	end
+end
+
 ix.util.Include("sv_plugin.lua")
 
 function PLUGIN:ScalePlayerDamage(client, hit_group, dmg_info)

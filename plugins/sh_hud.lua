@@ -186,7 +186,13 @@ else
 
 		surface.SetDrawColor(192, 57, 43)
 		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen * math.min(maxHP, self.awto) / maxHP, h - sscale(6))
-		ix.util.DrawText(math.Clamp(math.Round(self.awto), 0, maxHP) .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
+
+		HP = math.Clamp(math.Round(self.awto), 0, maxHP)
+		local xHP = ix.util.DrawText(HP .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
+
+		if (LocalPlayer():ExtraHealth() > 0) then
+			ix.util.DrawText(Format("(+%d)", LocalPlayer():ExtraHealth()), x + sscale(8) + tx + (xHP + sscale(4)), y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
+		end
 	end
 
 	function hud:drawText(wok, title, font)
@@ -444,7 +450,7 @@ else
 		local playedHeartbeatSound = false
 
 		if (client:Alive()) then
-			local health = client:Health()
+			local health = client:GetHealth()
 			local maxHealth = client:GetMaxHealth()
 
 			if (health < maxHealth) then
@@ -505,7 +511,7 @@ else
 		local color = 0
 		function PLUGIN:RenderScreenspaceEffects()
 			if (LocalPlayer():Alive()) then
-				color = 1 - (LocalPlayer():Health() / LocalPlayer():GetMaxHealth())
+				color = 1 - (LocalPlayer():GetHealth() / LocalPlayer():GetMaxHealth())
 				-- color = math.Approach(color, math.Clamp(1 - math.Clamp(LocalPlayer():Health() / LocalPlayer():GetMaxHealth(), 0, 1), 0, 1), FrameTime() * 3)
 
 				if (color > 0) then
@@ -572,58 +578,37 @@ else
 		perc.x = sscale(5)
 
 		if (client:GetNetVar("bleeding")) then
-			local damage = client:GetNetVar("bleeding")
-			local prefix = L"bleeding_type_mild" -- ЛЕГКОЕ
+			local prefix, color = ix.bleeding:Format()
 
-			if (damage >= 50) then
-				prefix = L"bleeding_type_serious" -- СЕРЬЁЗНОЕ
-
-				if (damage >= 65) then
-					prefix = L"bleeding_type_heavy" -- ТЯЖЕЛОЕ
-
-					damage = damage * 2
-				end
-			elseif (damage >= 30) then
-				prefix = L"bleeding_type_average" -- СРЕДНЕЕ
-			end
-
-			perc.textColor = ix.util.LerpColorHSV(nil, nil, client:GetMaxHealth(), client:GetMaxHealth() - damage, 0) -- цвет серьёзности кровотечения
+			perc.textColor = color
 			perc.y = perc.y - perc.h - margin
-			hud:status(perc, prefix .. " " .. L"bleeding_blood_loss", "5") -- КРОВОТЕЧЕНИЕ
+			hud:status(perc, prefix, "5")
 		end
 
 		-- blood loss effect
+		local bleeding_level
 		for _, v in ipairs(player.GetAll()) do
 			if (IsValid(v) and v:Health() > 0) then
-				local damage = v:GetNetVar("bleeding")
+				bleeding_level = v:GetNetVar("bleeding")
 
-				if (damage and (!v.timeBlood or v.timeBlood < CurTime())) then
+				if (bleeding_level and (v.nextBloodDrop or 0) < CurTime()) then
 					local bone_pos = v:GetBonePosition(v:LookupBone("ValveBiped.Bip01_Spine"))
+					if (!bone_pos) then continue end
+
 					local effect = EffectData()
 						effect:SetOrigin(bone_pos)
 						effect:SetMagnitude(1)
-						--effect:SetNormal((v:GetPos() - bone_pos):GetNormalized())
-						--effect:SetScale(200)
 					util.Effect("blooddrop", effect, nil)
 
-					local delay = 5
-
-					if (damage >= 50) then
-						delay = (damage >= 65 and 0.25 or 0.5)
-					else
-						local dmgPerc = math.max(0, (v:GetMaxHealth() - damage) / v:GetMaxHealth())
-						delay = math.max(0.25, 2 * dmgPerc)
-					end
-
-					v.timeBlood = CurTime() + delay
+					v.nextBloodDrop = CurTime() + math.max(0.25, 0.5 + ix.bleeding.max_level - bleeding_level)
 				end
 			end
 		end
 
-		if (client:IsBrokenLeg()) then
+		if (client:IsBrokenLeg()) then -- НОГА ПОВРЕЖДЕНА
 			perc.textColor = Color("red")
 			perc.y = perc.y - perc.h - margin
-			hud:status(perc, L("broken_leg")) -- НОГА ПОВРЕЖДЕНА
+			hud:status(perc, L("broken_leg"))
 		end
 
 		-- Safezone
@@ -674,5 +659,7 @@ else
 			perc.y = perc.y - perc.h - margin
 			hud:status(perc, hud.lang.radiation .. ": " .. math.Round(rad), "Z") -- СЫТ
 		end
+
+		hook.Run("HUDExtraPaint", client, perc, hud, margin)
 	end
 end

@@ -109,6 +109,21 @@ function Schema:InitPostEntity()
     game.ConsoleCommand("sv_alltalk 0\n")
 end
 
+function Schema:EntityTakeDamage(target, dmgInfo)
+	if (!IsValid(target) or dmgInfo:GetDamage() == 0) then return end
+
+	if (target:IsPlayer()) then
+		local extra_health = target:ExtraHealth()
+
+		if (extra_health > 0) then
+			dmgInfo:SubtractDamage(extra_health)
+			target:AddExtraHealth(-extra_health)
+		end
+
+		if (dmgInfo:GetDamage() <= 0.5) then return true end
+	end
+end
+
 -- Stack hooks
 util.AddNetworkString("ixItemSplit")
 
