@@ -45,7 +45,14 @@ function Schema:InitializedPlugins()
 	end
 
 	if (SERVER and bRestart) then
-		RunConsoleCommand("changelevel", game.GetMap())
+		MsgC(Color(87, 180, 242), "[GMODZ]: ", Color(255, 172, 0), "Plugins unloaded. Restarting server in 5 seconds!", "\n")
+		RunConsoleCommand("sv_hibernate_think", "1")
+
+		timer.Simple(5, function()
+			RunConsoleCommand("_restart")
+		end)
+
+		return
 	end
 
 	do

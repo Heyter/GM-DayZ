@@ -2,6 +2,8 @@ Schema.name = "GmodZ"
 Schema.author = "Hikka"
 Schema.description = ""
 
+-- ix.util.Include("libs/thirdparty/circles.lua", "client")
+
 math.randomseed(os.time())
 
 function Schema:GetGameDescription()

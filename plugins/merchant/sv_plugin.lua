@@ -26,7 +26,7 @@ net.Receive("ixMerchantTrade", function(len, client)
 
 	local entity = client.ixMerchant
 
-	if (!IsValid(entity)) then
+	if (!IsValid(entity) or !client:Alive()) then
 		return
 	else
 		if (client:GetPos():DistToSqr(entity:GetPos()) > 36864) then

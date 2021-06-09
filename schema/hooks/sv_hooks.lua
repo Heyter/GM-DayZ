@@ -135,7 +135,7 @@ net.Receive("ixItemSplit", function(_, client)
 	end
 
 	local character = client:GetCharacter()
-	if (!character) then return end
+	if (!character or !client:Alive()) then return end
 
 	local item = ix.item.instances[net.ReadUInt(32)]
 	if (!item or !item.isStackable or IsValid(item.entity)) then return end

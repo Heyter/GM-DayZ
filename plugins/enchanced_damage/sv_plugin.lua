@@ -4,14 +4,18 @@
 util.AddNetworkString("ixHitmarker")
 
 function PLUGIN:GetFallDamage(client, speed)
-	local damage = speed / 10
+	--local damage = speed / 10
+	if (speed < 660) then
+		speed = speed - 250
+	end
+
+	local damage = 100 * ((speed) / 850) * 0.75
 
 	if (damage > client:GetHealth() / 2 and damage < client:GetHealth()) then
 		client:BreakLeg()
 		client:EmitSound("Flesh.Break")
 
 		if (math.random() >= 0.8) then
-			--damage = damage / 0.8
 			client:SetBleeding(damage)
 		end
 	end
@@ -101,14 +105,20 @@ function playerMeta:HealLeg()
 end
 
 function ix.bleeding.Timer(client, level, isRise)
-	level = math.min(ix.bleeding.max_level, level)
+	local maxLevel = ix.bleeding.max_level
+	level = math.min(maxLevel, level)
+
+	if (isRise and level == maxLevel) then
+		client.bleeding.riseTime = nil
+		return
+	end
 
 	local timerID = "ixBleeding" .. client:EntIndex()
 	local reps = level == 1 and math.random(5, 20) or 0
-	local delay = math.Remap( level, ix.bleeding.max_level, 1, 0.5, 3.5 )
+	local delay = math.Remap( level, maxLevel, 1, 0.5, 3.5 )
 
 	client.bleeding = {
-		loss = math.floor(math.Remap( level, 1, ix.bleeding.max_level, 1, 8 )), // сколько хп отнимаем каждый круг
+		loss = math.floor(math.Remap( level, 1, maxLevel, 1, 8 )), // сколько хп отнимаем каждый круг
 		riseTime = level != 1 and CurTime() + 20 or nil // повышаем уровень кровотечения
 	}
 

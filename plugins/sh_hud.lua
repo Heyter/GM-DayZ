@@ -36,6 +36,8 @@ else
 	function PLUGIN:ShouldHideBars() return true end
 	function PLUGIN:ShouldBarDraw() return false end
 
+	local faded_black = ColorAlpha(color_black, 200)
+
 	-- OUTLINE ITEMS --
 	do
 		local color
@@ -64,7 +66,6 @@ else
 	local dbox = draw.RoundedBox
 
 	hud.lang = {}
-
 	function hud.ResetLang()
 		hud.lang = {
 			radiation = L("Radiation"):utf8upper(),
@@ -88,7 +89,7 @@ else
 		surface.CreateFont("nutDHUDIcon", {
 			font = "fontello",
 			extended = true, 
-			size = sscale(12),
+			size = ix.util.ScreenScaleH(14),
 			weight = 1500, 
 		})
 
@@ -136,7 +137,7 @@ else
 		local tx = surface.GetTextSize(title)
 		w = w / 4 + tx + sscale(2)
 
-		dbox(wok.rnd or 8, x, y, w, h, ColorAlpha(color_black, 200))
+		dbox(wok.rnd or 8, x, y, w, h, faded_black)
 		y = y - sscale(2)
 		ix.util.DrawText(title, x + w/2, y + h/2, wok.textColor or color_white, TEXT_ALIGN_CENTER, 4, "ixNoticeFont")
 
@@ -170,22 +171,20 @@ else
 
 	function hud:edgyBar(wok, color)
 		local x, y, w, h = wok.x, wok.y, wok.w, wok.h
+		dbox(wok.rnd or 8, x, y, w, h, faded_black)
 
-		dbox(wok.rnd or 8, x, y, w, h, ColorAlpha(color_black, 200))
-		local tx, ty = ix.util.DrawText("A", x + sscale(4), y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "nutDHUDIcon")
-
+		local tx, ty = ix.util.DrawText("A", x + sscale(4), y + h/2 - sscale(1), color_white, 3, 1, "nutDHUDIcon")
 		local totallen = w - tx - sscale(12)
-
 		local maxHP = LocalPlayer():GetMaxHealth()
 		local HP = LocalPlayer():Health()
 
 		self.awto = Lerp(FrameTime() * 5, self.awto or HP, HP)
 
 		surface.SetDrawColor(192, 57, 43, 75)
-		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen, h - sscale(6))
+		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen, h - sscale(5))
 
 		surface.SetDrawColor(192, 57, 43)
-		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen * math.min(maxHP, self.awto) / maxHP, h - sscale(6))
+		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen * math.min(maxHP, self.awto) / maxHP, h - sscale(5))
 
 		HP = math.Clamp(math.Round(self.awto), 0, maxHP)
 		local xHP = ix.util.DrawText(HP .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
@@ -204,7 +203,7 @@ else
 		local tx = surface.GetTextSize(title)
 		w = w / 4 + tx + sscale(2)
 
-		dbox(wok.rnd or 8, x, y, w, h, ColorAlpha(color_black, 200))
+		dbox(wok.rnd or 8, x, y, w, h, faded_black)
 		ix.util.DrawText(title, x + w/2, y + h/2 - sscale(1), wok.textColor or color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, font)
 	end
 
@@ -217,7 +216,7 @@ else
 			w = w / 2 + tx + sscale(2)
 		end
 
-		dbox(wok.rnd or 8, x, y, w, h, ColorAlpha(color_black, 200))
+		dbox(wok.rnd or 8, x, y, w, h, faded_black)
 		local tx, ty = ix.util.DrawText(icon or "Z", x + sscale(4), y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "nutDHUDIcon2")
 		local next = w/2 + tx + sscale(2)
 		ix.util.DrawText(text, next, y + h/2 - sscale(1), wok.textColor or color_white, 1, TEXT_ALIGN_CENTER, "nutDHUDFont")
@@ -234,7 +233,7 @@ else
 	function hud:compass(wok)
 		local x, y, w, h = wok.x, wok.y, wok.w, wok.h
 
-		dbox(wok.rnd or 8, x, y, w, h, ColorAlpha(color_black, 200))
+		dbox(wok.rnd or 8, x, y, w, h, faded_black)
 
 		surface.SetDrawColor(color_white)
 		local startX, endX = x + sscale(5), x + w - sscale(5)
