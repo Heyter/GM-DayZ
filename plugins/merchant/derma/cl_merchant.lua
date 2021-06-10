@@ -115,6 +115,10 @@ function PANEL:SetItem(itemTable)
 		net.SendToServer()
 	end
 
+	self.icon.Paint = function(t, w, h)
+
+	end
+
 	self.icon.PaintOver = function(t, w, h)
 		if (self.stack > 1 and ix.gui.merchant and ix.gui.merchant:CanStackItem(self.itemTable)) then
 			draw.SimpleTextOutlined("x" .. self.stack, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
@@ -139,6 +143,17 @@ function PANEL:SetItem(itemTable)
 		self.icon:RebuildSpawnIconEx(
 			iconCam
 		)
+	end
+end
+
+function PANEL:Paint(w, h)
+	if (GLOBAL_TOOLTIP and IsValid(GLOBAL_TOOLTIP[1]) 
+		and self.itemTable and GLOBAL_TOOLTIP[2].uniqueID != self.itemTable.uniqueID 
+		and GLOBAL_TOOLTIP[2].CanTooltip 
+		and GLOBAL_TOOLTIP[2]:CanTooltip(self.itemTable)) then
+
+		surface.SetDrawColor(Color(125, 125, 125, 30))
+		surface.DrawRect(2, 2, w - 4, h - 4)
 	end
 end
 

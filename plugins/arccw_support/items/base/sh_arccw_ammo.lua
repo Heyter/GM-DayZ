@@ -15,6 +15,10 @@ if (CLIENT) then
 			draw.SimpleTextOutlined("x" .. quantity, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 	end
+
+	function ITEM:CanTooltip(targetItem)
+		return targetItem.isWeapon and targetItem.ammo == self.ammo
+	end
 end
 
 if (SERVER) then

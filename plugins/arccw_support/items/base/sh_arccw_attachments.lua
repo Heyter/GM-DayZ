@@ -12,6 +12,10 @@ if (CLIENT) then
 	function ITEM:CanStack()
 		return true
 	end
+
+	function ITEM:CanTooltip(targetItem)
+		return targetItem.isWeapon and targetItem.attachments[self.uniqueID]
+	end
 end
 
 ITEM.functions.Attach = {

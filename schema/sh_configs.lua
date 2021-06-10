@@ -54,18 +54,6 @@ function Schema:InitializedPlugins()
 
 		return
 	end
-
-	do
-		if (CLIENT) then
-			for _, ITEM in pairs(ix.item.list) do
-				if (ITEM.base == "base_ammo") then
-					function ITEM:PaintOver(item, w, h)
-						draw.SimpleTextOutlined(item.ammoAmount, "ixMerchant.Num", 1, 5, Color("light_green"), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
-					end
-				end
-			end
-		end
-	end
 end
 
 Schema.countryIcon = {

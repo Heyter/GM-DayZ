@@ -1,5 +1,5 @@
 local matTile = ix.util.GetMaterial('gmodz/gui/concrete/tile.png')
-local matSelected = ix.util.GetMaterial('gmodz/gui/concrete/borderselected.png')
+--local matSelected = ix.util.GetMaterial('gmodz/gui/concrete/borderselected.png')
 
 local function draw_tile(w, h)
 	surface.SetDrawColor(200, 200, 200, 255)
@@ -15,7 +15,118 @@ local function draw_selected(w, h, color)
 	surface.DrawRect(2, 2, w - 4, h - 4)
 end
 
+-- The queue for the rendered icons.
+ICON_RENDER_QUEUE = ICON_RENDER_QUEUE or {}
+
+-- To make making inventory variant, This must be followed up.
+local function RenderNewIcon(panel, itemTable)
+	local model = itemTable:GetModel()
+
+	-- re-render icons
+	if ((itemTable.iconCam and !ICON_RENDER_QUEUE[string.lower(model)]) or itemTable.forceRender) then
+		local iconCam = itemTable.iconCam
+		iconCam = {
+			cam_pos = iconCam.pos,
+			cam_ang = iconCam.ang,
+			cam_fov = iconCam.fov,
+		}
+		ICON_RENDER_QUEUE[string.lower(model)] = true
+
+		panel.Icon:RebuildSpawnIconEx(
+			iconCam
+		)
+	end
+end
+
 local PANEL = vgui.GetControlTable("ixInventory")
+
+function PANEL:AddIcon(model, x, y, w, h, skin)
+	local iconSize = self.iconSize
+
+	w = w or 1
+	h = h or 1
+
+	if (self.slots[x] and self.slots[x][y]) then
+		local panel = self:Add("ixItemIcon")
+		panel:SetSize(w * iconSize, h * iconSize)
+		panel:SetZPos(999)
+		panel:InvalidateLayout(true)
+		panel:SetModel(model, skin)
+		panel:SetPos(self.slots[x][y]:GetPos())
+		panel.gridX = x
+		panel.gridY = y
+		panel.gridW = w
+		panel.gridH = h
+
+		local inventory = ix.item.inventories[self.invID]
+
+		if (!inventory) then
+			return
+		end
+
+		local itemTable = inventory:GetItemAt(panel.gridX, panel.gridY)
+
+		panel:SetInventoryID(inventory:GetID())
+		panel:SetItemTable(itemTable)
+
+		if (self.panels[itemTable:GetID()]) then
+			self.panels[itemTable:GetID()]:Remove()
+		end
+
+		if (itemTable.exRender) then
+			panel.Icon:SetVisible(false)
+			panel.ExtraPaint = function(this, panelX, panelY)
+				local exIcon = ikon:GetIcon(itemTable.uniqueID)
+				if (exIcon) then
+					surface.SetMaterial(exIcon)
+					surface.SetDrawColor(color_white)
+					surface.DrawTexturedRect(0, 0, panelX, panelY)
+				else
+					ikon:renderIcon(
+						itemTable.uniqueID,
+						itemTable.width,
+						itemTable.height,
+						itemTable:GetModel(),
+						itemTable.iconCam
+					)
+				end
+			end
+		elseif (itemTable.icon) then
+			self.Icon:SetVisible(false)
+			self.ExtraPaint = function(self, x, y)
+				surface.SetDrawColor(color_white)
+				surface.SetMaterial(itemTable.icon)
+				surface.DrawTexturedRect(0, 0, x, y)
+			end
+		else
+			-- yeah..
+			RenderNewIcon(panel, itemTable)
+		end
+
+		panel.slots = {}
+
+		for i = 0, w - 1 do
+			for i2 = 0, h - 1 do
+				local slot = self.slots[x + i] and self.slots[x + i][y + i2]
+
+				if (IsValid(slot)) then
+					slot.item = panel
+					panel.slots[#panel.slots + 1] = slot
+				else
+					for _, v in ipairs(panel.slots) do
+						v.item = nil
+					end
+
+					panel:Remove()
+
+					return
+				end
+			end
+		end
+
+		return panel
+	end
+end
 
 function PANEL:PaintDragPreview(width, height, mouseX, mouseY, itemPanel)
 	local iconSize = self.iconSize
@@ -131,15 +242,27 @@ derma.DefineControl("ixInventory", "", PANEL, "DFrame")
 -- IX_ITEM_ICON
 PANEL = vgui.GetControlTable("ixItemIcon")
 
+PANEL.colors = {
+	tile = Color(0, 0, 0, 85),
+	tooltip = Color(125, 125, 125, 30)
+}
+
 function PANEL:Paint(width, height)
 	draw_tile(width, height)
 
-	if (self:IsHovered()) then
+	self.hovered_color = self.colors.tile
+
+	if (GLOBAL_TOOLTIP and IsValid(GLOBAL_TOOLTIP[1]) 
+		and self.itemTable and GLOBAL_TOOLTIP[2].uniqueID != self.itemTable.uniqueID 
+		and GLOBAL_TOOLTIP[2].CanTooltip 
+		and GLOBAL_TOOLTIP[2]:CanTooltip(self.itemTable)) then
+
+		self.hovered_color = self.colors.tooltip
+	elseif (self:IsHovered()) then
 		draw_selected(width, height, ColorAlpha(derma.GetColor("Success", self, Color(200, 0, 0)), 35))
 	end
 
-	surface.SetDrawColor(0, 0, 0, 85)
-	surface.DrawRect(2, 2, width - 4, height - 4)
+	draw_selected(width, height, self.hovered_color)
 
 	self:ExtraPaint(width, height)
 end

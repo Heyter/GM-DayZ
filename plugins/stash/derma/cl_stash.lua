@@ -186,6 +186,17 @@ function PANEL:SetItem(itemTable)
 	end
 end
 
+function PANEL:Paint(w, h)
+	if (GLOBAL_TOOLTIP and IsValid(GLOBAL_TOOLTIP[1]) 
+		and self.itemTable and GLOBAL_TOOLTIP[2].uniqueID != self.itemTable.uniqueID 
+		and GLOBAL_TOOLTIP[2].CanTooltip 
+		and GLOBAL_TOOLTIP[2]:CanTooltip(self.itemTable)) then
+
+		surface.SetDrawColor(Color(125, 125, 125, 30))
+		surface.DrawRect(2, 2, w - 4, h - 4)
+	end
+end
+
 vgui.Register("ixStashItem", PANEL, "DPanel")
 
 DEFINE_BASECLASS("Panel")

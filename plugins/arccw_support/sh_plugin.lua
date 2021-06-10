@@ -249,7 +249,7 @@ function PLUGIN:InitPostEntity()
 
 					ix.arccw_support.atts_slots[item.uniqueID] = ix.arccw_support.atts_slots[item.uniqueID] or {}
 
-					attachments = {}
+					item.attachments = {}
 
 					-- pretty heavy.
 					if (v.Attachments) then
@@ -263,8 +263,8 @@ function PLUGIN:InitPostEntity()
 
 							for _, slot in ipairs(slots) do
 								for _, attID in ipairs(ArcCW:GetAttsForSlot((v.Attachments[slot] or {}).Slot, v)) do
-									if (!attachments[attID]) then
-										attachments[attID] = slot
+									if (!item.attachments[attID]) then
+										item.attachments[attID] = slot
 									else
 										-- bruh
 										ix.arccw_support.atts_slots[item.uniqueID][attID] = ix.arccw_support.atts_slots[item.uniqueID][attID] or {}
@@ -277,9 +277,6 @@ function PLUGIN:InitPostEntity()
 							::SKIP::
 						end
 					end
-
-					item.attachments = attachments
-					attachments = nil
 
 					if (v.Primary.Ammo and #v.Primary.Ammo > 0) then
 						for _, itemAmmo in pairs(ix.item.list) do

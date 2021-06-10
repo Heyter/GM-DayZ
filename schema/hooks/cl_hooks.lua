@@ -90,6 +90,8 @@ function Schema:PopulateImportantCharacterInfo(client, character, container)
 end
 
 function ix.hud.PopulateItemTooltip(tooltip, item)
+	GLOBAL_TOOLTIP = {tooltip, item}
+
 	local text = item.GetName and item:GetName() or L(item.name)
 
 	if (IsValid(item.entity)) then

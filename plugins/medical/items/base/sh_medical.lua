@@ -63,7 +63,7 @@ ITEM.functions.use = {
 			end
 
 			if (health > 0) then
-				client:SetHealth(math.Clamp(health, 0, client:GetMaxHealth()))
+				client:SetHealth(math.min(client:GetMaxHealth(), health))
 			end
 		end
 
@@ -81,7 +81,7 @@ ITEM.functions.use = {
 			if (isstring(item.useSound)) then
 				client:EmitSound(item.useSound, 60)
 			elseif (istable(item.useSound)) then
-				client:EmitSound(item.useSound[1], item.useSound[2], item.useSound[3])
+				client:EmitSound(unpack(item.useSound))
 			end
 		end
 

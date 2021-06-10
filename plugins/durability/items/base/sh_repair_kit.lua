@@ -29,7 +29,7 @@ if (SERVER) then
 			if (isstring(useSound)) then
 				client:EmitSound(useSound, 60)
 			elseif (istable(useSound)) then
-				client:EmitSound(useSound[1], useSound[2], useSound[3])
+				client:EmitSound(unpack(useSound))
 			end
 		end
 
