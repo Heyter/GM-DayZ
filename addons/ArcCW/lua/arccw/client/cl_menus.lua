@@ -10,7 +10,7 @@
     b - checkbox                      text var
     i - integer slider                text var min max
     f - float slider (2 nums after .) text var min max
-    m - color mixer                   text r g b a 
+    m - color mixer                   text r g b a
     p - press or button               text func
     t - textbox                       text string
     o - combo box                     text var choices (key - cvar, value - text)
@@ -28,6 +28,7 @@
 
 local BulletPanel = {
     { type = "h", text = "#arccw.adminonly" },
+    { type = "c", text = "#arccw.bullet_help" },
     { type = "b", text = "#arccw.cvar.bullet_enable", var = "arccw_bullet_enable", sv = true },
     { type = "b", text = "#arccw.cvar.enable_penetration", var = "arccw_enable_penetration", sv = true },
     { type = "b", text = "#arccw.cvar.enable_ricochet", var = "arccw_enable_ricochet", sv = true },
@@ -56,6 +57,8 @@ local ClientPanel = {
     { type = "c", text = "#arccw.cvar.2d3d_info" },
     { type = "t", text = "#arccw.cvar.language", var = "arccw_language"  },
     { type = "c", text = "#arccw.cvar.language_info" },
+    { type = "b", text = "#arccw.cvar.ammonames", var = "arccw_ammonames" },
+    { type = "c", text = "#arccw.cvar.ammonames.desc" },
 }
 
 local PerformancePanel = {
@@ -67,8 +70,10 @@ local PerformancePanel = {
     -- { type = "c", text = "#arccw.cvar.flatscopes.desc" },
     { type = "b", text = "#arccw.cvar.muzzleeffects", var = "arccw_muzzleeffects" },
     { type = "b", text = "#arccw.cvar.fastmuzzles", var = "arccw_fastmuzzles" },
+    { type = "b", text = "#arccw.cvar.fasttracers", var = "arccw_fasttracers" },
     { type = "b", text = "#arccw.cvar.shelleffects", var = "arccw_shelleffects" },
     { type = "b", text = "#arccw.cvar.att_showothers", var = "arccw_att_showothers" },
+    { type = "b", text = "#arccw.cvar.att_showground", var = "arccw_att_showground" },
     { type = "i", text = "#arccw.cvar.visibility", var = "arccw_visibility", min = -1, max = 32000},
     { type = "c", text = "#arccw.cvar.visibility.desc" },
     { type = "b", text = "#arccw.cvar.blur", var = "arccw_blur" },
@@ -97,7 +102,6 @@ local ViewmodelPanel = {
     { type = "f", text = "#arccw.cvar.vm_sway_ymult", var = "arccw_vm_sway_ymult", min = -5, max = 5 },
     { type = "f", text = "#arccw.cvar.vm_sway_zmult", var = "arccw_vm_sway_zmult", min = -5, max = 5 },
     { type = "f", text = "#arccw.cvar.vm_sway_speedmult", var = "arccw_vm_sway_speedmult", min = 0, max = 2 },
-    { type = "f", text = "#arccw.cvar.vm_sway_rotatemult", var = "arccw_vm_sway_rotatemult", min = -3, max = 3 },
     { type = "h", text = "" },
     { type = "c", text = "#arccw.cvar.vm_viewwarn" },
     { type = "f", text = "#arccw.cvar.vm_coolviewmult", var = "arccw_vm_coolview_mult", min = -5, max = 5 },
@@ -130,13 +134,15 @@ local HudPanel = {
     { type = "b", text = "#arccw.cvar.attinv_darkunowned", var = "arccw_attinv_darkunowned" },
     { type = "b", text = "#arccw.cvar.attinv_onlyinspect", var = "arccw_attinv_onlyinspect" },
     { type = "b", text = "#arccw.cvar.attinv_simpleproscons", var = "arccw_attinv_simpleproscons" },
-    
-    { type = "h", text = "#arccw.3d2d" },
+    --{ type = "b", text = "#arccw.cvar.attinv_gamemodebuttons", var = "arccw_attinv_gamemodebuttons" },
+    --{ type = "c", text = "#arccw.cvar.attinv_gamemodebuttons.desc" },
+
+    { type = "h", text = "#arccw.ammohud" },
     { type = "b", text = "#arccw.cvar.hud_3dfun", var = "arccw_hud_3dfun" },
     { type = "c", text = "#arccw.cvar.hud_3dfun.desc" },
     { type = "b", text = "#arccw.cvar.hud_3dfun_lite", var = "arccw_hud_3dfun_lite" },
     { type = "c", text = "#arccw.cvar.hud_3dfun_lite.desc" },
-	{ type = "b", text = "#arccw.cvar.hud_fcgbars", var = "arccw_hud_fcgbars" },
+    { type = "b", text = "#arccw.cvar.hud_fcgbars", var = "arccw_hud_fcgbars" },
     { type = "b", text = "#arccw.cvar.hud_3dfun_ammotype", var = "arccw_hud_3dfun_ammotype" },
     { type = "c", text = "#arccw.cvar.hud_3dfun_ammotype.desc" },
 
@@ -155,6 +161,7 @@ local CrosshairPanel = {
     { type = "b", text = "#arccw.cvar.crosshair_shotgun", var = "arccw_crosshair_shotgun" },
     { type = "b", text = "#arccw.cvar.crosshair_equip", var = "arccw_crosshair_equip" },
     { type = "b", text = "#arccw.cvar.crosshair_static", var = "arccw_crosshair_static" },
+    { type = "b", text = "#arccw.cvar.crosshair_trueaim", var = "arccw_crosshair_trueaim" },
     { type = "b", text = "#arccw.cvar.crosshair_clump", var = "arccw_crosshair_clump" },
     { type = "b", text = "#arccw.cvar.crosshair_clump_outline", var = "arccw_crosshair_clump_outline" },
     { type = "b", text = "#arccw.cvar.crosshair_clump_always", var = "arccw_crosshair_clump_always" },
@@ -179,8 +186,8 @@ local BindsPanel = {
     { type = "d", text = "#arccw.bind.switch_scope", var = "arccw_switch_scope" },
     { type = "d", text = "#arccw.bind.toggle_ubgl", var = "arccw_toggle_ubgl" },
     { type = "d", text = "#arccw.bind.melee", var = "arccw_melee" },
+    { type = "d", text = "#arccw.bind.toggle_att", var = "arccw_toggle_att" },
 }
-
 
 local ServerPanel = {
     { type = "h", text = "#arccw.adminonly" },
@@ -188,6 +195,8 @@ local ServerPanel = {
             choices = {[-1] = "#arccw.cvar.enable_customization.-1", [0] = "#arccw.cvar.enable_customization.0", [1] = "#arccw.cvar.enable_customization.1"}},
     { type = "c", text = "#arccw.cvar.enable_customization.desc" },
     { type = "b", text = "#arccw.cvar.truenames", var = "arccw_truenames", sv = true },
+    { type = "b", text = "#arccw.cvar.equipmentammo", var = "arccw_equipmentammo", sv = true },
+    { type = "c", text = "#arccw.cvar.equipmentammo.desc" },
     { type = "b", text = "#arccw.cvar.equipmentsingleton", var = "arccw_equipmentsingleton", sv = true },
     { type = "c", text = "#arccw.cvar.equipmentsingleton.desc" },
     { type = "i", text = "#arccw.cvar.equipmenttime", var = "arccw_equipmenttime", min = 15, max = 3600, sv = true },
@@ -195,13 +204,15 @@ local ServerPanel = {
     { type = "b", text = "#arccw.cvar.limityear_enable", var = "arccw_limityear_enable", sv = true },
     { type = "i", text = "#arccw.cvar.limityear", var = "arccw_limityear", min = 1800, max = 2100, sv = true },
     { type = "c", text = "#arccw.cvar.limityear.desc"},
+    { type = "b", text = "#arccw.cvar.bodydamagecancel", var = "arccw_bodydamagemult_cancel", sv = true},
+    { type = "c", text = "#arccw.cvar.bodydamagecancel.desc"},
     { type = "b", text = "#arccw.cvar.desync", var = "arccw_desync", sv = true },
     { type = "c", text = "#arccw.cvar.desync.desc" },
     { type = "b", text = "#arccw.cvar.override_crosshair_off", var = "arccw_override_crosshair_off", sv = true },
     { type = "b", text = "#arccw.cvar.override_barrellength", var = "arccw_override_nearwall", sv = true },
     { type = "b", text = "#arccw.cvar.doorbust", var = "arccw_doorbust", sv = true },
     { type = "f", text = "#arccw.cvar.weakensounds", var = "arccw_weakensounds", min = -20, max = 30, sv = true},
-    { type = "c", text = "#arccw.cvar.weakensounds.desc" },
+    { type = "c", text = "#arccw.cvar.weakensounds.desc" }
 }
 
 local AmmoPanel = {
@@ -245,6 +256,11 @@ local DevPanel = {
     { type = "c", text = "#arccw.cvar.dev_showignored.desc" },
     { type = "b", text = "#arccw.cvar.dev_debug", var = "arccw_dev_debug", sv = true },
     { type = "c", text = "#arccw.cvar.dev_debug.desc" },
+    { type = "b", text = "Customization Menu Overhaul beta", var = "arccw_dev_cust2beta", sv = true },
+    { type = "c", text = "Enable the customization menu overhaul. Remove this convar when we done doe" },
+    { type = "o", text = "Firing Info", var = "arccw_dev_shootinfo", sv = true,
+            choices = {[0] = "#arccw.combobox.disabled", [1] = "1 - Damage", [2] = "2 - Penetration", [3] = "3 - Dispersion"}},
+    { type = "c", text = "Show information when shooting the weapon. Requires 'developer' ConVar to be enabled." },
     { type = "p", text = "#arccw.cvar.dev_reloadatts", func = function() RunConsoleCommand("arccw_reloadatts") end },
     { type = "h", text = "#arccw.cvar.dev_reloadatts.desc" },
     { type = "p", text = "#arccw.cvar.dev_reloadlangs", func = function() RunConsoleCommand("arccw_reloadlangs") end },
@@ -270,12 +286,23 @@ local MultsPanel = {
     { type = "f", text = "#arccw.cvar.mult_heat",            var = "arccw_mult_heat", min = 0, max = 3, sv = true },
     { type = "f", text = "#arccw.cvar.mult_crouchdisp",      var = "arccw_mult_crouchdisp", min = 0, max = 1, sv = true },
     { type = "f", text = "#arccw.cvar.mult_crouchrecoil",    var = "arccw_mult_crouchrecoil", min = 0, max = 1, sv = true },
+    { type = "f", text = "#arccw.cvar.mult_sway",            var = "arccw_mult_sway", min = 0, max = 10, sv = true },
+    { type = "f", text = "#arccw.cvar.mult_meleedamage",     var = "arccw_mult_meleedamage", min = 0, max = 4, sv = true },
+    { type = "f", text = "#arccw.cvar.mult_meleetime",     var = "arccw_mult_meleetime", min = 0, max = 3, sv = true },
+    { type = "f", text = "#arccw.cvar.mult_malfunction",     var = "arccw_mult_malfunction", min = 0, max = 10, sv = true },
+
     { type = "b", text = "#arccw.cvar.mult_startunloaded",   var = "arccw_mult_startunloaded", sv = true },
     { type = "b", text = "#arccw.cvar.mult_shootwhilesprinting",   var = "arccw_mult_shootwhilesprinting", sv = true },
+    { type = "o", text = "#arccw.cvar.malfunction", var = "arccw_malfunction", sv = true,
+            choices = {[0] = "#arccw.cvar.malfunction.0", [1] = "#arccw.cvar.malfunction.1", [2] = "#arccw.cvar.malfunction.2"}},
+
+    { type = "b", text = "#arccw.cvar.mult_bottomlessclip",   var = "arccw_mult_bottomlessclip", sv = true },
+    { type = "c", text = "Bottomless Clip is currently unfinished and will just give you a bunch of ammo if you change attachments with it on." },
+    { type = "b", text = "#arccw.cvar.mult_infiniteammo",   var = "arccw_mult_infiniteammo", sv = true },
 }
 
 local MultPresets = {
-    ["#preset.default"] = {
+    ["#preset.default"] = { -- this needs fills
         arccw_mult_damage                   = "1",
         arccw_mult_npcdamage                = "1",
         arccw_mult_range                    = "1",
@@ -287,7 +314,16 @@ local MultPresets = {
         arccw_mult_sighttime                = "1",
         arccw_mult_defaultclip              = "1",
         arccw_mult_attchance                = "1",
+        arccw_mult_crouchdisp               = "1",
+        arccw_mult_crouchrecoil             = "1",
         arccw_mult_heat                     = "1",
+        arccw_mult_meleetime                = "1",
+        arccw_mult_meleedamage              = "1",
+        arccw_mult_malfunction              = "1",
+        arccw_mult_startunloaded            = "0",
+        arccw_mult_shootwhilesprinting      = "0",
+        arccw_mult_bottomlessclip           = "0",
+        arccw_mult_infiniteammo             = "0",
     }
 }
 
@@ -521,7 +557,6 @@ local ViewmodelPresets = {
         arccw_vm_sway_ymult            = "1",
         arccw_vm_sway_zmult            = "1",
         arccw_vm_sway_speedmult        = "1",
-        arccw_vm_sway_rotatemult       = "1",
         arccw_vm_coolview_mult        = "1",
     }
 }

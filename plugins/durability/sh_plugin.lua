@@ -53,7 +53,8 @@ function PLUGIN:InitializedPlugins()
 
 					function WEAPON:Hook_PostFireBullets()
 						if (self:GetOwner():GetLocalVar("WeaponDurability", 100) <= 0) then
-							self:SetJammed(true)
+							--self:SetJammed(true)
+							self.NextMalfunction = 999999
 						end
 					end
 				end

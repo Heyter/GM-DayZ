@@ -155,3 +155,14 @@ function ITEM:Transfer(invID, x, y, client, noReplication, isLogical)
 		return false, "invalidInventory"
 	end
 end
+
+function ITEM:PlayerDropItem(client)
+	client = client or self.player
+	if (!IsValid(client)) then return end
+
+	local trace = client:GetEyeTraceNoCursor()
+	local model = self:GetModel() or "models/props_junk/watermelon01.mdl"
+
+	ix.util.SpawnProp(model, client:EyePos() + client:GetForward() * 3, trace.Normal * 200, 60)
+	trace, model = nil, nil
+end

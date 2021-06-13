@@ -52,16 +52,18 @@ function SWEP:ChangeFiremode(pred)
         end
     end)
 
-    if SERVER then
-        if pred then
-            SuppressHostEvents(self:GetOwner())
+    if lastfmi != fmi then
+        if SERVER then
+            if pred then
+                SuppressHostEvents(self:GetOwner())
+            end
+            self:MyEmitSound(self.FiremodeSound, 75, 100, 1, CHAN_ITEM + 2)
+            if pred then
+                SuppressHostEvents(NULL)
+            end
+        else
+           self:MyEmitSound(self.FiremodeSound, 75, 100, 1, CHAN_ITEM + 2)
         end
-        self:MyEmitSound(self.FiremodeSound, 75, 100, 1, CHAN_ITEM + 2)
-        if pred then
-            SuppressHostEvents(NULL)
-        end
-    else
-       self:MyEmitSound(self.FiremodeSound, 75, 100, 1, CHAN_ITEM + 2)
     end
 
     local a = tostring(lastfmi) .. "_to_" .. tostring(fmi)
@@ -103,7 +105,7 @@ function SWEP:GetFiremodeName()
 
     local fm = self:GetCurrentFiremode()
 
-    if fm.PrintName then return fm.PrintName end
+    if fm.PrintName then return ArcCW.GetTranslation("fcg." .. string.lower(fm.PrintName)) or ArcCW.TryTranslation(fm.PrintName) end
 
     local mode = fm.Mode
 

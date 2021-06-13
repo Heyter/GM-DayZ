@@ -5,6 +5,7 @@ ArcCW.NoDraw = true
 
 ArcCW.HUToM    = 0.0254 -- 1 / 12 * 0.3048
 ArcCW.MOAToAcc = 0.00092592592 -- 10 / 180 / 60
+ArcCW.RecoilUnit = 41.4 -- lbfps
 
 ArcCW.STATE_IDLE      = 0
 ArcCW.STATE_SIGHTS    = 1
@@ -29,9 +30,28 @@ COND_WEAPON_HAS_LOS = 41
 COND_WEAPON_SIGHT_OCCLUDED = 45
 
 ArcCW.ShellSoundsTable = {
-    "player/pl_shell1.wav",
-    "player/pl_shell2.wav",
-    "player/pl_shell3.wav"
+    "weapons/arccw/casings/casing_556_1.wav",
+    "weapons/arccw/casings/casing_556_2.wav",
+    "weapons/arccw/casings/casing_556_3.wav",
+    "weapons/arccw/casings/casing_556_4.wav",
+    "weapons/arccw/casings/casing_308_1.wav",
+    "weapons/arccw/casings/casing_308_2.wav",
+    "weapons/arccw/casings/casing_308_3.wav",
+    "weapons/arccw/casings/casing_308_4.wav"
+}
+
+ArcCW.PistolShellSoundsTable = {
+    "weapons/arccw/casings/casing_9mm_1.wav",
+    "weapons/arccw/casings/casing_9mm_2.wav",
+    "weapons/arccw/casings/casing_9mm_3.wav",
+    "weapons/arccw/casings/casing_9mm_4.wav"
+}
+
+ArcCW.TinyShellSoundsTable = {
+    "weapons/arccw/casings/casing_22_1.wav",
+    "weapons/arccw/casings/casing_22_2.wav",
+    "weapons/arccw/casings/casing_22_3.wav",
+    "weapons/arccw/casings/casing_22_4.wav"
 }
 
 ArcCW.ShotgunShellSoundsTable = {
@@ -57,6 +77,25 @@ ArcCW.ReloadTimeTable = {
     [ACT_HL2MP_GESTURE_RELOAD_DUEL]     = 3.25,
 }
 
+ArcCW.LimbCompensation = {
+    [1] = {
+        [HITGROUP_HEAD]     = 1 / 2,
+        [HITGROUP_LEFTARM]  = 1 / 0.25,
+        [HITGROUP_RIGHTARM] = 1 / 0.25,
+        [HITGROUP_LEFTLEG]  = 1 / 0.25,
+        [HITGROUP_RIGHTLEG] = 1 / 0.25,
+        [HITGROUP_GEAR]     = 1 / 0.25,
+    },
+    ["terrortown"] = {
+        [HITGROUP_HEAD]     = 1 / 2.5, -- ArcCW's sh_ttt.lua line 5!!!
+        [HITGROUP_LEFTARM]  = 1 / 0.55,
+        [HITGROUP_RIGHTARM] = 1 / 0.55,
+        [HITGROUP_LEFTLEG]  = 1 / 0.55,
+        [HITGROUP_RIGHTLEG] = 1 / 0.55,
+        [HITGROUP_GEAR]     = 1 / 0.55,
+    },
+}
+
 ArcCW.ReplaceWeapons = {
     ["weapon_pistol"]    = true,
     ["weapon_smg1"]      = true,
@@ -69,13 +108,21 @@ ArcCW.ReplaceWeapons = {
     ["weapon_annabelle"] = true,
 }
 
+ArcCW.MeleeDamageTypes = {
+    [DMG_GENERIC] = "dmg.generic",
+    [DMG_BULLET] = "dmg.bullet",
+    [DMG_SLASH] = "dmg.slash",
+    [DMG_CLUB] = "dmg.club",
+    [DMG_SHOCK] = "dmg.shock",
+}
+
 ArcCW.PenTable = {
    [MAT_ANTLION]     = 1,
    [MAT_BLOODYFLESH] = 1,
    [MAT_CONCRETE]    = 0.75,
    [MAT_DIRT]        = 0.5,
    [MAT_EGGSHELL]    = 1,
-   [MAT_FLESH]       = 0.25,
+   [MAT_FLESH]       = 0.1,
    [MAT_GRATE]       = 1,
    [MAT_ALIENFLESH]  = 0.25,
    [MAT_CLIP]        = 1000,

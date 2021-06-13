@@ -329,6 +329,10 @@ function Schema.AddInventoryAmmoButton(panel)
 
 		for ammoID, count in pairs(LocalPlayer():GetAmmo()) do
 			ammoName = game.GetAmmoName(ammoID)
+
+			local item = ix.item.list[ammoName]
+			if (!item or (item.base or "") != "base_arccw_ammo") then continue end
+
 			menu:AddOption(Format("%s (x%d)", ammoName, count), function()
 				local bool = input.IsShiftDown() or input.IsControlDown()
 

@@ -5,14 +5,13 @@ function SWEP:InBipod()
     --     self:ExitBipod()
     -- end
 
-    if self.BipodPos != self:GetOwner():EyePos() then
+    if IsValid(self:GetOwner()) and self:GetBipodPos() != self:GetOwner():EyePos() then
         self:ExitBipod()
     end
 
     return bip
 end
 
-SWEP.BipodAngle = nil
 SWEP.CachedCanBipod = true
 SWEP.CachedCanBipodTime = 0
 
@@ -88,8 +87,8 @@ function SWEP:EnterBipod()
         self:DoLHIKAnimation("enter", 0.5)
     end
 
-    self.BipodPos = self:GetOwner():EyePos()
-    self.BipodAngle = self:GetOwner():EyeAngles()
+    self:SetBipodPos(self:GetOwner():EyePos())
+    self:SetBipodAngle(self:GetOwner():EyeAngles())
 
     self:SetNextSecondaryFire(CurTime() + 0.075)
 
@@ -111,10 +110,10 @@ function SWEP:ExitBipod()
         self:DoLHIKAnimation("exit", 0.5)
     end
 
-    self.BipodPos = nil
-    self.BipodAngle = nil
-
     self:SetNextSecondaryFire(CurTime() + 0.075)
+
+    self:SetBipodPos(Vector(0, 0, 0))
+    self:SetBipodAngle(Angle(0, 0, 0))
 
     if game.SinglePlayer() and CLIENT then return end
 

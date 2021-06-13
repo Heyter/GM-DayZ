@@ -21,6 +21,7 @@ function ArcCW:SendBullet(bullet, attacker)
     net.WriteFloat(bullet.Gravity)
     net.WriteUInt((bullet.Profile - 1) or 1, 3)
     net.WriteBool(bullet.PhysBulletImpact)
+    net.WriteEntity(bullet.Weapon)
 
     if attacker and attacker:IsValid() and attacker:IsPlayer() and !game.SinglePlayer() then
         net.SendOmit(attacker)
@@ -37,13 +38,13 @@ function ArcCW:ShootPhysBullet(wep, pos, vel, prof)
     local num = wep:GetBuff_Override("Override_Num") or wep.Num
     local bullet = {
         DamageMax = wep:GetDamage(0) / num,
-        DamageMin = wep:GetDamage(wep:GetBuff("Range")) / num,
+        DamageMin = wep:GetDamage(math.huge) / num,
         Range = wep:GetBuff("Range"),
-        DamageType = wep:GetBuff_Override("Override_DamageType") or wep.DamageType,
+        DamageType = wep:GetBuff_Override("Override_DamageType", wep.DamageType),
         Penleft = wep:GetBuff("Penetration"),
         Penetration = wep:GetBuff("Penetration"),
-        ImpactEffect = wep:GetBuff_Override("Override_ImpactEffect") or wep.ImpactEffect,
-        ImpactDecal = wep:GetBuff_Override("Override_ImpactDecal") or wep.ImpactDecal,
+        ImpactEffect = wep:GetBuff_Override("Override_ImpactEffect", wep.ImpactEffect),
+        ImpactDecal = wep:GetBuff_Override("Override_ImpactDecal", wep.ImpactDecal),
         PhysBulletImpact = pbi == nil and true or pbi,
         Gravity = wep:GetBuff("PhysBulletGravity"),
         Num = num,
@@ -57,15 +58,24 @@ function ArcCW:ShootPhysBullet(wep, pos, vel, prof)
         WeaponClass = wep:GetClass(),
         Weapon = wep,
         Attacker = wep:GetOwner(),
+        Filter = {wep:GetOwner()},
         Damaged = {},
         Burrowing = false,
         Dead = false,
         Profile = prof or wep:GetBuff_Override("Override_PhysTracerProfile") or wep.PhysTracerProfile or 0
     }
 
-    if wep:GetOwner() and wep:GetOwner():IsNPC() then
+    table.Add(bullet.Filter, wep.Shields or {})
+
+    local owner = wep:GetOwner()
+
+    if owner and owner:IsNPC() then
         bullet.DamageMax = bullet.DamageMax * GetConVar("arccw_mult_npcdamage"):GetFloat()
         bullet.DamageMin = bullet.DamageMin * GetConVar("arccw_mult_npcdamage"):GetFloat()
+    end
+
+    if SERVER and owner and owner:IsPlayer() then
+        table.Add(bullet.Filter, ArcCW:GetVehicleFilter(owner) or {})
     end
 
     if bit.band( util.PointContents( pos ), CONTENTS_WATER ) == CONTENTS_WATER then
@@ -74,10 +84,10 @@ function ArcCW:ShootPhysBullet(wep, pos, vel, prof)
 
     table.insert(ArcCW.PhysBullets, bullet)
 
-    if wep:GetOwner():IsPlayer() then
+    if wep:GetOwner():IsPlayer() and SERVER then
         local ping = wep:GetOwner():Ping() / 1000
-        ping = math.Clamp(ping, 0, 0.3)
-        local timestep = 0.025
+        ping = math.Clamp(ping, 0, 0.5)
+        local timestep = engine.TickInterval()
 
         while ping > 0 do
             ArcCW:ProgressPhysBullet(bullet, math.min(timestep, ping))
@@ -86,6 +96,8 @@ function ArcCW:ShootPhysBullet(wep, pos, vel, prof)
     end
 
     if SERVER then
+        ArcCW:ProgressPhysBullet(bullet, FrameTime())
+
         ArcCW:SendBullet(bullet, wep:GetOwner())
     end
 end
@@ -100,6 +112,7 @@ net.Receive("arccw_sendbullet", function(len, ply)
     local grav = net.ReadFloat()
     local profile = net.ReadUInt(3) + 1
     local impact = net.ReadBool()
+    local weapon = net.ReadEntity()
     local ent = nil
 
     if game.SinglePlayer() then
@@ -120,6 +133,7 @@ net.Receive("arccw_sendbullet", function(len, ply)
         Gravity = grav,
         Profile = profile,
         PhysBulletImpact = impact,
+        Weapon = weapon,
     }
 
     if bit.band( util.PointContents( pos ), CONTENTS_WATER ) == CONTENTS_WATER then
@@ -166,6 +180,13 @@ function ArcCW:ProgressPhysBullet(bullet, timestep)
     local drag = bullet.Drag * spd * spd * (1 / 150000)
     local gravity = timestep * GetConVar("arccw_bullet_gravity"):GetFloat() * (bullet.Gravity or 1)
 
+    local attacker = bullet.Attacker
+
+    if !IsValid(attacker) then
+        bullet.Dead = true
+        return
+    end
+
     if bullet.Underwater then
         drag = drag * 3
     end
@@ -188,12 +209,20 @@ function ArcCW:ProgressPhysBullet(bullet, timestep)
             bullet.Dead = true
         end
     else
+        if attacker:IsPlayer() then
+            attacker:LagCompensation(true)
+        end
+
         local tr = util.TraceLine({
             start = oldpos,
             endpos = newpos,
-            filter = bullet.Attacker,
+            filter = bullet.Filter,
             mask = MASK_SHOT
         })
+
+        if attacker:IsPlayer() then
+            attacker:LagCompensation(false)
+        end
 
         if SERVER then
             debugoverlay.Line(oldpos, tr.HitPos, 5, Color(100,100,255), true)
@@ -219,11 +248,9 @@ function ArcCW:ProgressPhysBullet(bullet, timestep)
             bullet.Travelled = bullet.Travelled + (oldpos - tr.HitPos):Length()
             bullet.Pos = tr.HitPos
             -- if we're the client, we'll get the bullet back when it exits.
-            local attacker = bullet.Attacker
-            local eid = tr.Entity:EntIndex()
 
-            if !IsValid(attacker) then
-                attacker = game.GetWorld()
+            if attacker:IsPlayer() then
+                attacker:LagCompensation(true)
             end
 
             if SERVER then
@@ -232,9 +259,7 @@ function ArcCW:ProgressPhysBullet(bullet, timestep)
                 debugoverlay.Cross(tr.HitPos, 5, 5, Color(255,200,100), true)
             end
 
-            if attacker:IsPlayer() then
-                attacker:LagCompensation(true)
-            end
+            local eid = tr.Entity:EntIndex()
 
             if CLIENT then
                 -- do an impact effect and forget about it
@@ -249,12 +274,20 @@ function ArcCW:ProgressPhysBullet(bullet, timestep)
                     })
                 end
                 bullet.Dead = true
-                return
-            elseif SERVER then
                 if IsValid(bullet.Weapon) then
                     bullet.Weapon:GetBuff_Hook("Hook_PhysBulletHit", {bullet = bullet, tr = tr})
                 end
+                return
+            elseif SERVER then
+                local dmgtable
+                if IsValid(bullet.Weapon) then
+                    bullet.Weapon:GetBuff_Hook("Hook_PhysBulletHit", {bullet = bullet, tr = tr})
+
+                    dmgtable = bullet.Weapon.BodyDamageMults
+                    dmgtable = bullet.Weapon:GetBuff_Override("Override_BodyDamageMults") or dmgtable
+                end
                 if bullet.PhysBulletImpact then
+
                     local delta = bullet.Travelled / (bullet.Range / ArcCW.HUToM)
                     delta = math.Clamp(delta, 0, 1)
                     local dmg = Lerp(delta, bullet.DamageMax, bullet.DamageMin)
@@ -301,6 +334,17 @@ function ArcCW:ProgressPhysBullet(bullet, timestep)
                                 else
                                     ctr.Entity:Ignite(1, 0)
                                 end
+                            end
+
+                            if dmgtable then
+                                local hg = ctr.HitGroup
+                                local gam = ArcCW.LimbCompensation[engine.ActiveGamemode()] or ArcCW.LimbCompensation[1]
+                                if dmgtable[hg] then
+                                    cdmg:ScaleDamage(dmgtable[hg])
+                                end
+
+                                -- cancelling gmod's stupid default values
+                                if GetConVar("arccw_bodydamagemult_cancel"):GetBool() and gam[hg] then cdmg:ScaleDamage(gam[hg]) end
                             end
 
                             ArcCW.TryBustDoor(ctr.Entity, cdmg)
@@ -419,8 +463,10 @@ function ArcCW:DrawPhysBullets()
         render.SetMaterial(head)
         render.DrawSprite(i.Pos, size, size, col)
 
-        render.SetMaterial(tracer)
-        render.DrawBeam(i.Pos, i.Pos - i.Vel:GetNormalized() * math.min(i.Vel:Length() * 0.02, 512), size * 0.75, 0, 1, col)
+        if !GetConVar("arccw_fasttracers"):GetBool() then
+            render.SetMaterial(tracer)
+            render.DrawBeam(i.Pos, i.Pos - i.Vel:GetNormalized() * math.min(i.Vel:Length() * 0.02, 512), size * 0.75, 0, 1, col)
+        end
 
         -- cam.End3D()
     end

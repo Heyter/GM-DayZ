@@ -1,6 +1,7 @@
 AddCSLuaFile()
 
 SWEP.Spawnable = false -- this obviously has to be set to true
+SWEP.AutoSpawnable = nil -- TTT weapon autospawn. ArcCW weapons automatically spawn in TTT as long as SWEP.Spawnable is set to true
 SWEP.Category = "ArcCW - Firearms" -- edit this if you like
 SWEP.AdminOnly = false
 
@@ -17,14 +18,15 @@ SWEP.UseHands = true
 
 SWEP.ViewModel = "" -- I mean, you probably have to edit these too
 SWEP.WorldModel = ""
-SWEP.MirrorWorldModel = nil -- must have the same bones as the viewmodel. Use with MirrorWMVM
 
---[[
-SWEP.WorldModelOffset = {
-    pos        =    Vector(0, 0, 0),
-    ang        =    Angle(0, 0, 0),
-    bone    =    "ValveBiped.Bip01_R_Hand",
-    scale   =   1
+SWEP.MirrorVMWM = nil -- Copy the viewmodel, along with all its attachments, to the worldmodel. Super convenient!
+SWEP.MirrorWorldModel = nil -- Use this to set the mirrored viewmodel to a different model, without any floating speedloaders or cartridges you may have. Needs MirrorVMWM
+
+--[[SWEP.WorldModelOffset = {
+    pos = Vector(0, 0, 0),
+    ang = Angle(0, 0, 0),
+    bone = "ValveBiped.Bip01_R_Hand",
+    scale = 1
 }]]
 
 SWEP.PresetBase = nil -- make this weapon share saves with this one.
@@ -42,6 +44,8 @@ SWEP.WorldModelOffset = nil
 --     ang = Angle(0, 0, 0)
 -- }
 
+SWEP.NoHideLeftHandInCustomization = false
+
 SWEP.Damage = 26
 SWEP.DamageMin = 10 -- damage done at maximum range
 SWEP.DamageRand = 0 -- damage will vary randomly each shot by this fraction
@@ -49,13 +53,25 @@ SWEP.RangeMin = 0 -- how far bullets will retain their maximum damage for
 SWEP.Range = 200 -- in METRES
 SWEP.Penetration = 4
 SWEP.DamageType = DMG_BULLET
+SWEP.DamageTypeHandled = false -- set to true to have the base not do anything with damage types
+-- this includes: igniting if type has DMG_BURN; adding DMG_AIRBOAT when hitting helicopter; adding DMG_BULLET to DMG_BUCKSHOT
+
 SWEP.ShootEntity = nil -- entity to fire, if any
-SWEP.MuzzleVelocity = 400 -- projectile muzzle velocity
--- IN M/S
+SWEP.MuzzleVelocity = 400 -- projectile muzzle velocity in m/s
 SWEP.PhysBulletMuzzleVelocity = nil -- override phys bullet muzzle velocity
 SWEP.PhysBulletDrag = 1
 SWEP.PhysBulletGravity = 1
 SWEP.PhysBulletDontInheritPlayerVelocity = true
+
+SWEP.BodyDamageMults = nil
+-- if a limb is not set the damage multiplier will default to 1
+-- that means gmod's stupid default limb mults will **NOT** apply
+-- {
+--     [HITGROUP_HEAD] = 1.25,
+--     [HITGROUP_CHEST] = 1,
+--     [HITGROUP_LEFTARM] = 0.9,
+--     [HITGROUP_RIGHTARM] = 0.9,
+-- }
 
 SWEP.AlwaysPhysBullet = false
 SWEP.NeverPhysBullet = false
@@ -72,7 +88,7 @@ SWEP.PhysTracerProfile = 0 -- color for phys tracer.
 
 SWEP.TracerNum = 1 -- tracer every X
 SWEP.TracerFinalMag = 0 -- the last X bullets in a magazine are all tracers
-SWEP.Tracer = nil -- override tracer (hitscan) effect
+SWEP.Tracer = "arccw_tracer" -- override tracer (hitscan) effect
 SWEP.TracerCol = Color(255, 255, 255)
 SWEP.HullSize = 0 -- HullSize used by FireBullets
 
@@ -89,7 +105,7 @@ SWEP.AmmoPerShot = 1
 SWEP.InfiniteAmmo = false -- weapon can reload for free
 SWEP.BottomlessClip = false -- weapon never has to reload
 
-SWEP.DoNotEquipmentAmmo = false -- do not automatically give this weapon unique ammo
+SWEP.DoNotEquipmentAmmo = false -- do not automatically give this weapon unique ammo when arccw_equipmentammo is used
 
 SWEP.ShotgunReload = false -- reloads like shotgun instead of magazines
 SWEP.HybridReload = false -- reload normally when empty, reload like shotgun when part full
@@ -120,6 +136,10 @@ SWEP.RecoilRise = 1
 SWEP.MaxRecoilBlowback = -1
 SWEP.VisualRecoilMult = 1.25
 SWEP.RecoilPunch = 1.5
+SWEP.RecoilPunchBackMax = 1
+SWEP.RecoilPunchBackMaxSights = nil -- may clip with scopes
+
+SWEP.Sway = 0
 
 SWEP.ShotgunSpreadDispersion = false -- dispersion will cause pattern to increase instead of shifting
 SWEP.ShotgunSpreadPattern = nil
@@ -198,7 +218,7 @@ SWEP.FiremodeSound = "weapons/arccw/firemode.wav"
 SWEP.MeleeSwingSound = "weapons/arccw/melee_lift.wav"
 SWEP.MeleeMissSound = "weapons/arccw/melee_miss.wav"
 SWEP.MeleeHitSound = "weapons/arccw/melee_hitworld.wav"
-SWEP.MeleeHitNPCSound = "physics/body/body_medium_break2.wav"
+SWEP.MeleeHitNPCSound = "weapons/arccw/melee_hitbody.wav"
 SWEP.EnterBipodSound = "weapons/arccw/bipod_down.wav"
 SWEP.ExitBipodSound = "weapons/arccw/bipod_up.wav"
 SWEP.SelectUBGLSound =  "weapons/arccw/ubgl_select.wav"
@@ -218,7 +238,7 @@ SWEP.ShellEjectPosCorrection = nil
 SWEP.ShellScale = 1
 SWEP.ShellPhysScale = 1
 SWEP.ShellPitch = 100
-SWEP.ShellSounds = ArcCW.ShellSoundsTable
+SWEP.ShellSounds = "autocheck"--ArcCW.ShellSoundsTable
 SWEP.ShellRotate = 0
 SWEP.ShellTime = 0.5
 
@@ -226,6 +246,7 @@ SWEP.MuzzleEffectAttachment = 1 -- which attachment to put the muzzle on
 SWEP.CaseEffectAttachment = 2 -- which attachment to put the case effect on
 SWEP.ProceduralViewBobAttachment = nil -- attachment on which coolview is affected by, default is muzzleeffect
 SWEP.CamAttachment = nil -- if set, this attachment will control camera movement
+SWEP.MuzzleFlashColor = Color(244, 209, 66)
 
 SWEP.SpeedMult = 0.9
 SWEP.SightedSpeedMult = 0.75
@@ -247,10 +268,15 @@ SWEP.CaseBGs = {}
 SWEP.StripperClipBGs = {}
 
 SWEP.KeepBaseIrons = false -- do not override iron sights when scope installed
+SWEP.BaseIronsFirst = false -- If a sight keeps base irons, irons comes first
 
 SWEP.IronSightStruct = {
     Pos = Vector(-8.728, -13.702, 4.014),
     Ang = Angle(-1.397, -0.341, -2.602),
+    Midpoint = { -- Where the gun should be at the middle of it's irons
+        Pos = Vector(0, 30, -5),
+        Ang = Angle(0, 0, -45),
+    },
     Magnification = 1,
     BlackBox = false,
     ScopeTexture = nil,
@@ -275,12 +301,25 @@ SWEP.ProceduralIronFire = false
 SWEP.SightTime = 0.33
 SWEP.SprintTime = 0
 
+-- If Jamming is enabled, a heat meter will gradually build up until it reaches HeatCapacity.
+-- Once that happens, the gun will overheat, playing an animation. If HeatLockout is true, it cannot be fired until heat is 0 again.
 SWEP.Jamming = false
 SWEP.HeatCapacity = 200 -- rounds that can be fired non-stop before the gun jams, playing the "fix" animation
 SWEP.HeatDissipation = 2 -- rounds' worth of heat lost per second
 SWEP.HeatLockout = false -- overheating means you cannot fire until heat has been fully depleted
 SWEP.HeatDelayTime = 0.5
 SWEP.HeatFix = false -- when the "fix" animation is played, all heat is restored.
+
+-- If Malfunction is enabled, the gun has a random chance to be jammed
+-- after the gun is jammed, it won't fire unless reload is pressed, which plays the "unjam" animation
+-- if no "unjam", "fix", or "cycle" animations exist, the weapon will reload instead
+SWEP.Malfunction = false
+SWEP.MalfunctionJam = true -- After a malfunction happens, the gun will dryfire until reload is pressed. If unset, instead plays animation right after.
+SWEP.MalfunctionTakeRound = true -- When malfunctioning, a bullet is consumed.
+SWEP.MalfunctionWait = 0.5 -- The amount of time to wait before playing malfunction animation (or can reload)
+SWEP.MalfunctionMean = nil -- The mean number of shots between malfunctions, will be autocalculated if nil
+SWEP.MalfunctionVariance = 0.25 -- The fraction of mean for variance. e.g. 0.2 means 20% variance
+SWEP.MalfunctionSound = "weapons/arccw/malfunction.wav"
 
 SWEP.HoldtypeHolstered = "passive"
 SWEP.HoldtypeActive = "shotgun"
@@ -513,10 +552,11 @@ SWEP.Attachments = {}
 -- you can append suffixes for different states
 -- append list:
 
--- _iron, _sights, or _sight    for sighted variation
--- _sprint                        for sprinting variation
+-- _iron, _sights, or _sight     for sighted variation
+-- _sprint                       for sprinting variation
 -- _bipod                        for bipod variation
 -- _empty                        for empty variation
+-- _jammed                       for jammed variation
 
 -- this does not apply to reload animations.
 
@@ -617,6 +657,9 @@ SWEP.BurstCount = 0
 SWEP.AnimQueue = {}
 SWEP.FiremodeIndex = 1
 SWEP.UnReady = true
+SWEP.EventTable = {
+    [1] = {} -- for every overlapping one, a new one is made -- checked to be removed afterwards, except 1
+}
 
 SWEP.ProneMod_DisableTransitions = true
 
@@ -666,11 +709,6 @@ include("sh_bipod.lua")
 include("sh_grenade.lua")
 include("sh_ttt.lua")
 include("sh_util.lua")
-
--- Jamming
-include("sh_jamming.lua")
-AddCSLuaFile("sh_jamming.lua")
-
 AddCSLuaFile("sh_model.lua")
 AddCSLuaFile("sh_timers.lua")
 AddCSLuaFile("sh_think.lua")
@@ -691,6 +729,7 @@ AddCSLuaFile("sh_grenade.lua")
 AddCSLuaFile("sh_ttt.lua")
 AddCSLuaFile("sh_util.lua")
 
+AddCSLuaFile("cl_customize2.lua")
 AddCSLuaFile("cl_viewmodel.lua")
 AddCSLuaFile("cl_scope.lua")
 AddCSLuaFile("cl_crosshair.lua")
@@ -703,6 +742,7 @@ AddCSLuaFile("cl_presets.lua")
 AddCSLuaFile("cl_light.lua")
 
 if CLIENT then
+    include("cl_customize2.lua")
     include("cl_viewmodel.lua")
     include("cl_scope.lua")
     include("cl_crosshair.lua")
@@ -723,23 +763,34 @@ function SWEP:SetupDataTables()
     self:NetworkVar("Int", 4, "NthReload")
     self:NetworkVar("Int", 5, "NthShot")
 
+    -- 2 = insert
+    -- 3 = cancelling
+    -- 4 = insert empty
+    -- 5 = cancelling empty
+    self:NetworkVar("Int", 6, "ShotgunReloading")
+    self:NetworkVar("Int", 7, "MagUpCount")
+
     self:NetworkVar("Bool", 0, "HeatLocked")
     self:NetworkVar("Bool", 1, "NeedCycle")
     self:NetworkVar("Bool", 2, "InBipod")
     self:NetworkVar("Bool", 3, "InUBGL")
     self:NetworkVar("Bool", 4, "InCustomize")
     self:NetworkVar("Bool", 5, "GrenadePrimed")
-    self:NetworkVar("Bool", 6, "ReqEnd")
+    self:NetworkVar("Bool", 6, "MalfunctionJam")
 
     self:NetworkVar("Float", 0, "Heat")
     self:NetworkVar("Float", 1, "WeaponOpDelay")
     self:NetworkVar("Float", 2, "ReloadingREAL")
     self:NetworkVar("Float", 3, "MagUpIn")
     self:NetworkVar("Float", 4, "NextPrimaryFireSlowdown")
+    self:NetworkVar("Float", 5, "NextIdle")
+    self:NetworkVar("Float", 6, "Holster_Time")
 
-	-- jaming
-	self:NetworkVar("Bool", 7, "Jammed")
-	self:NetworkVar("Float", 5, "JamFactor")
+    self:NetworkVar("Vector", 0, "BipodPos")
+
+    self:NetworkVar("Angle", 0, "BipodAngle")
+
+    self:NetworkVar("Entity", 0, "Holster_Entity")
 end
 
 function SWEP:OnRestore()
@@ -762,7 +813,7 @@ function SWEP:SetReloading( v )
         if v then
             self:SetReloadingREAL(math.huge)
         else
-            self:SetReloadingREAL(0)
+            self:SetReloadingREAL(-math.huge)
         end
     elseif isnumber(v) and v > self:GetReloadingREAL() then
         self:SetReloadingREAL( v )
@@ -793,13 +844,11 @@ end
 
 function SWEP:SetState(v)
     self:SetNWState(v)
-    -- if CLIENT then
-    --     self.State = v
-    -- end
+    if !game.SinglePlayer() and CLIENT then self.State = v end
 end
 
 function SWEP:GetState(v)
-    -- if CLIENT and self.State then return self.State end
+    if !game.SinglePlayer() and CLIENT and self.State then return self.State end
     return self:GetNWState(v)
 end
 
@@ -812,11 +861,15 @@ function SWEP:IsProne()
 end
 
 function SWEP:BarrelHitWall()
-    if GetConVar("arccw_override_nearwall"):GetBool() then
+    if self.BarrelLength > 0 and GetConVar("arccw_override_nearwall"):GetBool() then
         local offset = self.BarrelOffsetHip
 
         if vrmod and vrmod.IsPlayerInVR(self:GetOwner()) then
             return 0 -- Never block barrel in VR
+        end
+
+        if self:GetOwner():IsPlayer() and self:GetOwner():InVehicle() then
+            return 0
         end
 
         if self:GetState() == ArcCW.STATE_SIGHTS then
@@ -843,7 +896,7 @@ function SWEP:BarrelHitWall()
             mask = mask
         })
 
-        if tr.Hit and not tr.Entity.ArcCWProjectile then
+        if tr.Hit and !tr.Entity.ArcCWProjectile then
             local l = (tr.HitPos - src):Length()
             l = l
             return 1 - math.Clamp(l / (self.BarrelLength + self:GetBuff_Add("Add_BarrelLength")), 0, 1)

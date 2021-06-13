@@ -6,7 +6,6 @@ local SetMat     = rnd.SetMaterial
 local DrawBeam   = rnd.DrawBeam
 local DrawSprite = rnd.DrawSprite
 local cam        = cam
-local IgnoreZ    = cam.IgnoreZ
 
 local lasermat = Material("arccw/laser")
 local flaremat = Material("effects/whiteflare")
@@ -14,8 +13,6 @@ local delta    = 1
 
 function SWEP:DoLaser(world)
     world = world or false
-
-    -- if !self:GetNWBool("laserenabled", true) then return end
 
     if world then
         cam.Start3D()
@@ -98,7 +95,11 @@ function SWEP:DrawLaser(laser, model, color, world)
 
         delta = Lerp(0, delta, canlaser and self:GetSightDelta() or 1)
 
-        if self.GuaranteeLaser then delta = 1 end
+        if self.GuaranteeLaser then
+            delta = 1
+        else
+            delta = self:GetSightDelta()
+        end
 
         dir = Lerp(delta, eyeang:Forward(), dir)
     end
@@ -142,13 +143,13 @@ function SWEP:DrawLaser(laser, model, color, world)
 
     if solid then return end
 
-    local width = m_rand(0.05, 0.1) * strength
+    local width = m_rand(0.05, 0.1) * strength * 1
 
-    if !behav or world then
-        if hit then
-            SetMat(lasermat)
-            DrawBeam(pos, btr.HitPos, width, 1, 0, color)
-        end
+    if (!behav or world) and hit then
+        SetMat(lasermat)
+        local a = 200
+        DrawBeam(pos, btr.HitPos, width*0.3, 1, 0, Color(a, a, a, a))
+        DrawBeam(pos, btr.HitPos, width, 1, 0, color)
     end
 
     if hit and !tr.HitSky then

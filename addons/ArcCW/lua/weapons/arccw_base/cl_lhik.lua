@@ -14,7 +14,12 @@ SWEP.LHIKAnimationTime = 0
 SWEP.LHIKCamAng = Angle(0, 0, 0)
 SWEP.LHIKGunAng = Angle(0, 0, 0)
 
-function SWEP:DoLHIKAnimation(key, time)
+function SWEP:DoLHIKAnimation(key, time, spbitch)
+    if game.SinglePlayer() and !spbitch then
+        timer.Simple(0, function() if IsValid(self) then self:DoLHIKAnimation(key, time, true) end end)
+        return
+    end
+
     local lhik_model
     local LHIK_GunDriver
     local LHIK_CamDriver
@@ -82,6 +87,7 @@ end
 SWEP.LHIKDelta = {}
 SWEP.LHIKDeltaAng = {}
 SWEP.ViewModel_Hit = Vector(0, 0, 0)
+SWEP.Customize_Hide = 0
 
 function SWEP:GetLHIKAnim()
     local cyc = (UnPredictedCurTime() - self.LHIKAnimationStart) / self.LHIKAnimationTime
@@ -95,10 +101,18 @@ end
 function SWEP:DoLHIK()
     local justhide = false
     local lhik_model = nil
+    local hide_component = false
     local delta = 1
 
     local vm = self:GetOwner():GetViewModel()
 
+    if !self.NoHideLeftHandInCustomization and !self:GetBuff_Override("Override_NoHideLeftHandInCustomization") then
+        if self:GetState() == ArcCW.STATE_CUSTOMIZE and !ArcCW.Inv_Hidden then
+            self.Customize_Hide = math.Approach(self.Customize_Hide, 1, FrameTime() / 0.25)
+        else
+            self.Customize_Hide = math.Approach(self.Customize_Hide, 0, FrameTime() / 0.25)
+        end
+    end
 
     for i, k in pairs(self.Attachments) do
         if !k.Installed then continue end
@@ -223,6 +237,15 @@ function SWEP:DoLHIK()
         delta = 1
     end
 
+    if delta == 1 and self.Customize_Hide > 0 then
+        if !lhik_model or !IsValid(lhik_model) then
+            justhide = true
+            delta = math.min(self.Customize_Hide, delta)
+        else
+            hide_component = true
+        end
+    end
+
     if justhide then
         for _, bone in pairs(ArcCW.LHIKBones) do
             local vmbone = vm:LookupBone(bone)
@@ -238,7 +261,7 @@ function SWEP:DoLHIK()
 
             local newtransform = Matrix()
 
-            newtransform:SetTranslation(LerpVector(delta, vm_pos, EyePos() - (EyeAngles():Up() * 12) - (EyeAngles():Forward() * 2)))
+            newtransform:SetTranslation(LerpVector(delta, vm_pos, vm_pos - (EyeAngles():Up() * 12) - (EyeAngles():Forward() * 12) - (EyeAngles():Right() * 4)))
             newtransform:SetAngles(vm_ang)
 
             vm:SetBoneMatrix(vmbone, newtransform)
@@ -263,7 +286,9 @@ function SWEP:DoLHIK()
 
         key = tranim or key
 
-        self:DoLHIKAnimation(key, 1)
+        if key and key != "DoNotPlayIdle" then 
+            self:DoLHIKAnimation(key, 1)
+        end
 
         self.LHIKAnimation_IsIdle = true
     end
@@ -304,6 +329,11 @@ function SWEP:DoLHIK()
         end
 
         self.LHIKDelta[lhikbone] = lhik_model:WorldToLocal(lhik_pos)
+
+        if hide_component then
+            local new_pos = newtransform:GetTranslation()
+            newtransform:SetTranslation(LerpVector(self.Customize_Hide, new_pos, new_pos - (EyeAngles():Up() * 12) - (EyeAngles():Forward() * 12) - (EyeAngles():Right() * 4)))
+        end
 
         local matrix = Matrix(newtransform)
 

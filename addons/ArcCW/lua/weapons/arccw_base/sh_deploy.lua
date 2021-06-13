@@ -2,31 +2,45 @@ function SWEP:Deploy()
     if !IsValid(self:GetOwner()) or self:GetOwner():IsNPC() then
         return
     end
+    if self.UnReady then
+        local sp = game.SinglePlayer()
+
+        if sp then
+            if SERVER then
+                self:CallOnClient("LoadPreset", "autosave")
+            else
+                self:LoadPreset("autosave")
+            end
+        else
+            if SERVER then
+                -- the server... can't get the client's attachments in time.
+                -- can make it so client has to do a thing and tell the server it's ready,
+                -- and that's probably what i'll do later.
+            else
+                self:LoadPreset("autosave")
+            end
+        end
+    end
 
     self:InitTimers()
-
-    self.FullyHolstered = false
 
     self:SetShouldHoldType()
 
     self:SetReloading(false)
     self:SetState(0)
     self:SetInUBGL(false)
+    self:SetMagUpCount(0)
     self:SetMagUpIn(0)
+    self:SetShotgunReloading(0)
+    self:SetHolster_Time(0)
+    self:SetHolster_Entity(NULL)
 
     self.LHIKAnimation = nil
 
     self:SetBurstCount(0)
 
-    -- Remove me shall I interfere
-    --[[if CLIENT then
-        if ArcCW.LastWeapon != self then
-            self:LoadPreset("autosave")
-        end
-
-        ArcCW.LastWeapon = self
-    end]]
-
+    self:CallOnClient("FuckingKillMe")
+    self:FuckingKillMe()
     -- Don't play anim if in vehicle. This can be caused by HL2 level changes
 
     if !self:GetOwner():InVehicle() then
@@ -36,20 +50,20 @@ function SWEP:Deploy()
         local d_anim = self:SelectAnimation("draw")
 
         if self.Animations[r_anim] and self.UnReady then
-            self:PlayAnimation(r_anim, 1, true, 0, true)
+            self:PlayAnimation(r_anim, 1, true, 0, false)
 
-            self:SetReloading(CurTime() + self:GetAnimKeyTime(r_anim))
+            self:SetReloading(CurTime() + self:GetAnimKeyTime(r_anim, true))
 
             prd = self.Animations[r_anim].ProcDraw
-        else
-            self:PlayAnimation(d_anim, self:GetBuff_Mult("Mult_DrawTime"), true, 0, true)
+        elseif self.Animations[d_anim] then
+            self:PlayAnimation(d_anim, self:GetBuff_Mult("Mult_DrawTime"), true, 0, false)
 
-            self:SetReloading(CurTime() + (self:GetAnimKeyTime(d_anim) * self:GetBuff_Mult("Mult_DrawTime")))
+            self:SetReloading(CurTime() + (self:GetAnimKeyTime(d_anim, true) * self:GetBuff_Mult("Mult_DrawTime")))
 
             prd = self.Animations[d_anim].ProcDraw
         end
 
-        if prd then
+        if prd or (!self.Animations[r_anim] and !self.Animations[d_anim]) then
             self:ProceduralDraw()
         end
     end
@@ -97,6 +111,9 @@ function SWEP:InitialDefaultClip()
     if engine.ActiveGamemode() == "darkrp" then return end -- DarkRP is god's second biggest mistake after gmod
 
     if self:GetOwner() and self:GetOwner():IsPlayer() then
+        if self:HasBottomlessClip() and self:Clip1() > 0 then
+            self:SetClip1(0)
+        end
         if self.ForceDefaultAmmo then
             self:GetOwner():GiveAmmo(self.ForceDefaultAmmo, self.Primary.Ammo)
         elseif engine.ActiveGamemode() != "terrortown" then
@@ -140,7 +157,7 @@ function SWEP:Initialize()
         end
 
         -- Check for incompatibile addons once 
-        if LocalPlayer().ArcCW_IncompatibilityCheck != true then
+        if LocalPlayer().ArcCW_IncompatibilityCheck != true and game.SinglePlayer() then
             LocalPlayer().ArcCW_IncompatibilityCheck = true
             local incompatList = {}
             local addons = engine.GetAddons()
@@ -175,8 +192,6 @@ function SWEP:Initialize()
     self:SetClip2(0)
     self:SetLastLoad(self:Clip1())
 
-    self:SetNWBool("laserenabled", true) -- J
-
     self.Attachments["BaseClass"] = nil
 
     self:SetHoldType(self.HoldtypeActive)
@@ -196,143 +211,117 @@ function SWEP:Initialize()
     self:AdjustAtts()
 end
 
-SWEP.FullyHolstered = false
-SWEP.HolsterSwitchTo = nil
-
 function SWEP:Holster(wep)
+    if !IsFirstTimePredicted() then return end
     if self:GetOwner():IsNPC() then return end
-    if wep == self then return end
-    if self:GetBurstCount() > 0 and self:Clip1() > 0 then return false end
-    if self.FullyHolstered then return true end
 
-    local skip = GetConVar("arccw_holstering"):GetBool()
+    if CLIENT and self:GetOwner() == LocalPlayer() and ArcCW.InvHUD then ArcCW.InvHUD:Remove() end
+
+    if self:GetBurstCount() > 0 and self:Clip1() > 0 then return false end
 
     if CLIENT and LocalPlayer() != self:GetOwner() then
         return
     end
 
-    if game.SinglePlayer() and self:GetOwner():IsValid() and SERVER then
-        self:CallOnClient("Holster")
-    end
+    self:CallOnClient("FuckingKillMe")
+    self:FuckingKillMe()
 
-    if self:GetGrenadePrimed() then
-        self:Throw()
-    end
+    if wep == self then self:Deploy() return false end
+    if self:GetHolster_Time() > CurTime() then return false end
 
-    self.Sighted = false
-    self.Sprinted = false
-    self:SetMagUpIn(0)
+    -- Props deploy to NULL, finish holster on NULL too
+    if (self:GetHolster_Time() != 0 and self:GetHolster_Time() <= CurTime()) or !IsValid(wep) then
+        self:SetHolster_Time(0)
+        self:SetHolster_Entity(NULL)
+        self:FinishHolster()
+        return true
+    else
+        self:SetHolster_Entity(wep)
 
-    if CLIENT and LocalPlayer() == self:GetOwner() then
-        self:ToggleCustomizeHUD(false)
-    end
+        if self:GetGrenadePrimed() then
+            self:Throw()
+        end
 
-    if !self.FullyHolstered then
-        self.HolsterSwitchTo = wep
-    end
+        self.Sighted = false
+        self.Sprinted = false
+        self:SetShotgunReloading(0)
+        self:SetMagUpCount(0)
+        self:SetMagUpIn(0)
 
-    local time = 0.25
-    if skip then
+        local time = 0.25
         local anim = self:SelectAnimation("holster")
         if anim then
+            time = self:GetAnimKeyTime(anim)
             self:PlayAnimation(anim, self:GetBuff_Mult("Mult_DrawTime"), true, nil, nil, nil, true)
-            time = self:GetAnimKeyTime(anim) * self:GetBuff_Mult("Mult_DrawTime")
+            self:SetHolster_Time(CurTime() + time * self:GetBuff_Mult("Mult_DrawTime"))
         else
-            if CLIENT then
-                self:ProceduralHolster()
-            end
-            time = time * self:GetBuff_Mult("Mult_DrawTime")
+            self:ProceduralHolster()
+            self:SetHolster_Time(CurTime() + time * self:GetBuff_Mult("Mult_DrawTime"))
         end
+        self:SetReloading(CurTime() + time * self:GetBuff_Mult("Mult_DrawTime"))
+        self:SetWeaponOpDelay(CurTime() + time * self:GetBuff_Mult("Mult_DrawTime"))
     end
-
-    if !skip then time = 0 end
-
-    if !self.FullyHolstered then
-
-        self:SetReloading(CurTime() + time * 1.1)
-        self:SetTimer(time, function()
-            self:SetReqEnd(true)
-            self:KillTimers()
-
-            self.FullyHolstered = true
-
-            self:Holster(self.HolsterSwitchTo)
-
-            if CLIENT then
-                if isstring(self.HolsterSwitchTo) then
-                    self.HolsterSwitchTo = LocalPlayer():GetWeapon(self.HolsterSwitchTo)
-                end
-                if IsValid(self.HolsterSwitchTo) then
-                    input.SelectWeapon(self.HolsterSwitchTo)
-                end
-
-                self:KillFlashlights()
-            else
-                if SERVER then
-                    if self:GetBuff_Override("UBGL_UnloadOnDequip") then
-                        local clip = self:Clip2()
-
-                        local ammo = self:GetBuff_Override("UBGL_Ammo") or "smg1_grenade"
-
-                        if IsValid(self:GetOwner()) then
-                            self:GetOwner():GiveAmmo(clip, ammo, true)
-                        end
-
-                        self:SetClip2(0)
-                    end
-
-                    self:KillShields()
-
-                    if IsValid(self:GetOwner()) and IsValid(self.HolsterSwitchTo) then
-                        self:GetOwner():SelectWeapon(self.HolsterSwitchTo:GetClass())
-                    end
-
-                    local vm = self:GetOwner():GetViewModel()
-
-                    if IsValid(vm) then
-                        for i = 0, vm:GetNumBodyGroups() do
-                            vm:SetBodygroup(i, 0)
-                        end
-                        vm:SetSkin(0)
-                    end
-
-                    if self.Disposable and self:Clip1() == 0 and self:Ammo1() == 0 then
-                        self:GetOwner():StripWeapon(self:GetClass())
-                    end
-                end
-            end
-        end)
-    end
-
-    -- return true
-
-    if !skip then return true end
-
-    local vm = self:GetOwner():GetViewModel()
-
-    vm:SetPlaybackRate(1)
-
-    return self.FullyHolstered
 end
 
+function SWEP:FinishHolster()
+    self:KillTimers()
+
+    if CLIENT then
+        self:KillFlashlights()
+    else
+        if self:GetBuff_Override("UBGL_UnloadOnDequip") then
+            local clip = self:Clip2()
+
+            local ammo = self:GetBuff_Override("UBGL_Ammo") or "smg1_grenade"
+
+            if IsValid(self:GetOwner()) then
+                self:GetOwner():GiveAmmo(clip, ammo, true)
+            end
+
+            self:SetClip2(0)
+        end
+
+        self:KillShields()
+
+        local vm = self:GetOwner():GetViewModel()
+        if IsValid(vm) then
+            for i = 0, vm:GetNumBodyGroups() do
+                vm:SetBodygroup(i, 0)
+            end
+            vm:SetSkin(0)
+            vm:SetPlaybackRate(1)
+        end
+
+        if self.Disposable and self:Clip1() == 0 and self:Ammo1() == 0 then
+            self:GetOwner():StripWeapon(self:GetClass())
+        end
+    end
+end
+
+-- doesn't work if they dont call in prediction blah blah
+
 function SWEP:ProceduralDraw()
-    if game.SinglePlayer() and self:GetOwner():IsValid() then
+    if SERVER and self:GetOwner():IsValid() then
         self:CallOnClient("ProceduralDraw")
     end
 
     self.InProcDraw = true
     self.ProcDrawTime = CurTime()
-    self:SetTimer(0.25, function()
-        self.InProcDraw = false
-    end)
 end
 
 function SWEP:ProceduralHolster()
+    if SERVER and self:GetOwner():IsValid() then
+        self:CallOnClient("ProceduralHolster")
+    end
+
     self.InProcHolster = true
     self.ProcHolsterTime = CurTime()
-    self:SetTimer(0.25 * self:GetBuff_Mult("Mult_HolsterTime"), function()
-        self.InProcHolster = false
-    end)
+end
+
+function SWEP:FuckingKillMe()
+    table.Empty(self.EventTable)
+    self.InProcDraw = false
+    self.InProcHolster = false
 end
 
 function SWEP:ProceduralBash()

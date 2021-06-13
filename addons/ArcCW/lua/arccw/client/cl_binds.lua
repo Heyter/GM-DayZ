@@ -51,7 +51,7 @@ end
 
 local function SendNet(string, bool)
     net.Start(string)
-    if bool then net.WriteBool(bool) end
+    if bool != nil then net.WriteBool(bool) end
     net.SendToServer()
 end
 
@@ -96,7 +96,7 @@ local function ArcCW_PlayerBindPress(ply, bind, pressed)
     local alt
     bind, alt = ArcCW_TranslateBindToEffect(bind)
 
-    if bind == "firemode" and (alt or !GetConVar("arccw_altfcgkey"):GetBool()) then
+    if bind == "firemode" and (alt or !GetConVar("arccw_altfcgkey"):GetBool()) and !ply:KeyDown(IN_USE) then
         if wep:GetBuff_Override("UBGL") and !alt and !GetConVar("arccw_altubglkey"):GetBool() then
             if lastpressZ >= CurTime() - 0.25 then
                 DoUbgl(wep)
@@ -126,7 +126,7 @@ local function ArcCW_PlayerBindPress(ply, bind, pressed)
         end
 
         block = true
-    elseif bind == "inv" and !ply:KeyDown(IN_USE) and GetConVar("arccw_enable_customization"):GetInt() >= 0 then
+    elseif bind == "inv" and !ply:KeyDown(IN_USE) and GetConVar("arccw_enable_customization"):GetInt() > -1 then
 
         local state = wep:GetState() != ArcCW.STATE_CUSTOMIZE
 
@@ -157,6 +157,7 @@ local function ArcCW_PlayerBindPress(ply, bind, pressed)
             end
         elseif bind == "switchscope" then
             wep:SwitchActiveSights()
+            block = true
         end
     end
 

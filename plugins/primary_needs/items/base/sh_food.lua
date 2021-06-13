@@ -104,6 +104,8 @@ ITEM.functions.use = {
 			end
 		end
 
+		item:PlayerDropItem(client)
+
 		return item:UseStackItem()
 	end,
 

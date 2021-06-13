@@ -24,6 +24,7 @@ function ArcCW.LoadAttachmentType(att)
 
         att.ID = ArcCW.NumAttachments
 
+        if genAttCvar:GetBool() and !att.DoNotRegister and !att.InvAtt and !att.Free then
             local attent = {}
             attent.Base = "arccw_att_base"
             attent.Icon = att.Icon
@@ -41,10 +42,19 @@ function ArcCW.LoadAttachmentType(att)
             end
 
             scripted_ents.Register( attent, "acwatt_" .. shortname )
+        end
 
         ArcCW.NumAttachments = ArcCW.NumAttachments + 1
 
         hook.Run("ArcCW_OnAttLoad", att)
+    end
+end
+
+local function VerifyBlacklist()
+    for attName, v in pairs(ArcCW.AttachmentBlacklistTable) do
+        if !ArcCW.AttachmentTable[attName] then
+            ArcCW.AttachmentBlacklistTable[attName] = nil
+        end
     end
 end
 
@@ -53,7 +63,9 @@ local function ArcCW_SendBlacklist(ply)
         -- Only load if table is empty, bruh
         if table.IsEmpty(ArcCW.AttachmentBlacklistTable) then
             ArcCW.AttachmentBlacklistTable = util.JSONToTable(file.Read("arccw_blacklist.txt") or "") or {}
-            print("Loaded " .. table.Count(ArcCW.AttachmentBlacklistTable) .. " blacklisted ArcCW attachments.")
+            local curcount = table.Count(ArcCW.AttachmentBlacklistTable)
+            VerifyBlacklist()
+            print("Loaded " .. table.Count(ArcCW.AttachmentBlacklistTable) .. " active (" .. curcount .. " total) blacklisted ArcCW attachments.")
         end
         if ArcCW.AttachmentBlacklistTable and player.GetCount() > 0 then
             timer.Simple(0, function()

@@ -1,6 +1,6 @@
 local playerMeta = FindMetaTable("Player")
 
-function playerMeta:GetTraceEntity(distance, mode)
+function playerMeta:GetTrace(distance, mode)
 	distance = distance or 96
 	mode = mode or 1
 
@@ -12,10 +12,10 @@ function playerMeta:GetTraceEntity(distance, mode)
 	if (mode == 2) then
 		data.mask = MASK_SHOT_HULL
 
-		return util.TraceHull(data).Entity
+		return util.TraceHull(data)
 	end
 
-	return util.TraceLine(data).Entity
+	return util.TraceLine(data)
 end
 
 function playerMeta:GetWeaponAmmo(item)

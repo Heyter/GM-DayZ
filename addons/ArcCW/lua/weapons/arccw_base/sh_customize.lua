@@ -138,11 +138,19 @@ end
 function SWEP:ValidateAttachment(attname, attslot, i)
     if !self:IsValid() or !self.Attachments then return false end
     local atttbl = ArcCW.AttachmentTable[attname]
+    if !atttbl then return true, nil, nil, nil end
 
+    attslot = attslot or self.Attachments[i]
+
+    local show = true
     local showqty = true
     local installed = false
-    local blocked = atttbl and !self:CheckFlags(atttbl.ExcludeFlags, atttbl.RequireFlags)
+    local blocked = !self:CheckFlags(atttbl.ExcludeFlags, atttbl.RequireFlags)
     local owned = self:PlayerOwnsAtt(attname)
+
+    if !ArcCW:SlotAcceptsAtt(attslot.Slot or "", self, attname) then
+        blocked = true
+    end
 
     if !atttbl or atttbl.Free then
         showqty = false
@@ -152,9 +160,9 @@ function SWEP:ValidateAttachment(attname, attslot, i)
         showqty = false
     end
 
-    if !owned then
-        showqty = false
-    end
+    -- if !owned then
+    --     showqty = false
+    -- end
 
     if GetConVar("arccw_attinv_lockmode"):GetBool() then
         showqty = false
@@ -168,31 +176,6 @@ function SWEP:ValidateAttachment(attname, attslot, i)
         installed = true
     end
 
-    for _, slot in pairs(attslot.MergeSlots or {}) do
-        if !slot then continue end
-        if !self.Attachments[slot] then continue end
-        if !blocked and ArcCW:SlotAcceptsAtt(self.Attachments[slot], self, attname) and
-                !self:CheckFlags(self.Attachments[slot].ExcludeFlags, self.Attachments[slot].RequireFlags) and
-                !orighas then
-            blocked = true
-            if self.Attachments[slot].HideIfBlocked then
-                return false
-            end
-        end
-        if self.Attachments[slot].Installed == attname then
-            installed = true
-            break
-        end
-    end
-
-    if blocked and atttbl and atttbl.HideIfBlocked then
-        return false
-    end
-
-    if !owned and atttbl and atttbl.HideIfUnavailable then
-        return false
-    end
-
     if attname == "" and !attslot.Installed then
         installed = true
 
@@ -204,7 +187,37 @@ function SWEP:ValidateAttachment(attname, attslot, i)
         end
     end
 
-    return true, installed, blocked, showqty
+    for _, slot in pairs(attslot.MergeSlots or {}) do
+        if !slot then continue end
+        if !self.Attachments[slot] then continue end
+        if !blocked and ArcCW:SlotAcceptsAtt(self.Attachments[slot], self, attname) and
+                !self:CheckFlags(self.Attachments[slot].ExcludeFlags, self.Attachments[slot].RequireFlags) and
+                !orighas then
+            blocked = true
+            if self.Attachments[slot].HideIfBlocked then
+                show = false
+            end
+            break
+        end
+        if self.Attachments[slot].Installed == attname then
+            installed = true
+            break
+        end
+    end
+
+    if blocked and atttbl and atttbl.HideIfBlocked then
+        show = false
+    end
+
+    if !owned and atttbl and atttbl.HideIfUnavailable then
+        show = false
+    end
+
+    if !owned and GetConVar("arccw_attinv_hideunowned"):GetBool() then
+        show = false
+    end
+
+    return show, installed, blocked, showqty
 end
 
 function SWEP:OpenCustomizeHUD()
@@ -212,33 +225,48 @@ function SWEP:OpenCustomizeHUD()
         ArcCW.InvHUD:Show()
         -- ArcCW.InvHUD:RequestFocus()
     else
-        self:CreateCustomizeHUD()
+        if GetConVar("arccw_dev_cust2beta"):GetBool() then self:CreateCustomize2HUD() else self:CreateCustomizeHUD() end
         gui.SetMousePos(ScrW() / 2, ScrH() / 2)
     end
 
+    ArcCW.Inv_Hidden = false
     gui.EnableScreenClicker(true)
 
     if GetConVar("arccw_cust_sounds"):GetBool() then surface.PlaySound("weapons/arccw/extra.wav") end
 
 end
 
-function SWEP:CloseCustomizeHUD()
+function SWEP:CloseCustomizeHUD( hide )
     if IsValid(ArcCW.InvHUD) then
-        ArcCW.InvHUD:Hide()
-        ArcCW.InvHUD:Clear()
-        ArcCW.InvHUD:Remove()
-        gui.EnableScreenClicker(false)
-        if vrmod and vrmod.MenuExists( "ArcCW_Customize" ) then
-            vrmod.MenuClose( "ArcCW_Customize" )
+        if !GetConVar("arccw_dev_cust2beta"):GetBool() then
+            ArcCW.InvHUD:Hide()
+            ArcCW.InvHUD:Clear()
+            if vrmod and vrmod.MenuExists( "ArcCW_Customize" ) then
+                vrmod.MenuClose( "ArcCW_Customize" )
+            end
+            if !hide then
+                ArcCW.InvHUD:Remove()
+            end
+        else
+            -- The new hud fades out instead of commiting sudoku, only do this if we're debugging
+            if GetConVar("arccw_dev_removeonclose"):GetBool() then
+                ArcCW.InvHUD:Remove()
+            end
         end
+
+        if !hide then
+            gui.EnableScreenClicker(false)
+        end
+        ArcCW.Inv_Hidden = false
 
         if GetConVar("arccw_cust_sounds"):GetBool() then surface.PlaySound("weapons/arccw/extra2.wav") end
     end
 end
 
-local defaultatticon = Material("hud/atts/default.png", "mips")
-local blockedatticon = Material("hud/atts/blocked.png", "mips")
+local defaultatticon = Material("arccw/hud/atts/default.png", "smooth mips")
+local blockedatticon = Material("arccw/hud/atts/blocked.png", "smooth mips")
 local activeslot = nil
+local bird = Material("arccw/hud/arccw_bird.png", "mips smooth")
 
 SWEP.InAttMenu = false
 
@@ -280,6 +308,10 @@ function SWEP:CreateCustomizeHUD()
             gui.EnableScreenClicker(false)
             span:Remove()
         end
+
+        if --[[self:GetState() != ArcCW.STATE_CUSTOMIZE or]] self:GetReloading() then
+            span:Remove()
+        end
     end
     ArcCW.InvHUD.ActiveWeapon = self
     ArcCW.InvHUD.OnRemove = function()
@@ -301,6 +333,8 @@ function SWEP:CreateCustomizeHUD()
                 self:ToggleCustomizeHUD(false)
             end
         end
+
+        gui.EnableScreenClicker(false)
     end
 
     if GetConVar("arccw_attinv_onlyinspect"):GetBool() then
@@ -708,6 +742,7 @@ function SWEP:CreateCustomizeHUD()
             triv_pic:SetText("")
             triv_pic.Paint = function(span, w, h)
                 local img = atttbl.Icon or defaultatticon
+                if !img or img:IsError() then img = bird end
 
                 surface.SetDrawColor(fg_col)
                 surface.SetMaterial(img)
@@ -736,7 +771,7 @@ function SWEP:CreateCustomizeHUD()
 
         local neutrals = atttbl.Desc_Neutrals or {}
 
-        local pros, cons = ArcCW:GetProsCons(atttbl, self.Attachments[slot].ToggleNum)
+        local pros, cons = ArcCW:GetProsCons(self, atttbl, self.Attachments[slot].ToggleNum)
 
         if (pros and #pros or 0) > 0 then
 
@@ -982,10 +1017,10 @@ function SWEP:CreateCustomizeHUD()
 
                         if spaa.AttName == "" then
                             self:DetachAllMergeSlots(span.AttIndex)
-                        elseif span.AttSlot.Installed != spaa.AttName then
-							self:DetachAllMergeSlots(span.AttIndex, true)
-							self:Attach(aslot, spaa.AttName)
-						end
+                        else
+                            self:DetachAllMergeSlots(span.AttIndex, true)
+                            self:Attach(aslot, spaa.AttName)
+                        end
                     elseif kc2 == MOUSE_RIGHT and spaa.AttName != "" then
                         if span.AttSlot.Installed == spaa.AttName then
                             -- Unequip
@@ -1111,8 +1146,14 @@ function SWEP:CreateCustomizeHUD()
 
                     -- surface.DrawText(txt)
 
+                    local icon = k.DefaultAttIcon or defaultatticon
+                    if atttbl then
+                        icon = atttbl.Icon
+                    end
+                    if (!icon or icon:IsError()) then icon = bird end
+
                     surface.SetDrawColor(Bfg_col)
-                    surface.SetMaterial(atttbl.Icon or k.DefaultAttIcon or defaultatticon)
+                    surface.SetMaterial(icon)
                     surface.DrawTexturedRect(h / 4, 0, h, h)
 
                     if blocked then
@@ -1228,6 +1269,7 @@ function SWEP:CreateCustomizeHUD()
 
                     if atttbl.Icon then
                         att_icon = atttbl.Icon
+                        if (!att_icon or att_icon:IsError()) then att_icon = bird end
                     end
                 end
             end
@@ -1263,6 +1305,7 @@ function SWEP:CreateCustomizeHUD()
 
                     if atttbl.Icon then
                         att_icon = atttbl.Icon
+                        if (!att_icon or att_icon:IsError()) then att_icon = bird end
                     end
                 end
 
@@ -1519,7 +1562,7 @@ function SWEP:CreateCustomizeHUD()
             local gw, gh = w - (2 * sidegap), h - smallgap - ScreenScaleMulti(6)
 
             local dmgmax = math.Round(self:GetDamage(0))
-            local dmgmin = math.Round(self:GetDamage(self.Range))
+            local dmgmin = math.Round(self:GetDamage(math.huge))
 
             local grsh = math.max(dmgmax, dmgmin)
 

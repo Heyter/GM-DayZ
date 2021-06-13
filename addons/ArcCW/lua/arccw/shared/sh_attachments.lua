@@ -21,12 +21,13 @@ function ArcCW:PlayerCanAttach(ply, wep, attname, slot, detach)
     return (ret == nil and true) or ret
 end
 
-function ArcCW:GetAttsForSlot(slot, wep)
+function ArcCW:GetAttsForSlot(slot, wep, random)
     local ret = {}
 
-    for id, _ in pairs(ArcCW.AttachmentTable) do
+    for id, atttbl in pairs(ArcCW.AttachmentTable) do
 
         if !ArcCW:SlotAcceptsAtt(slot, wep, id) then continue end
+        if random and atttbl.NoRandom then continue end
 
         table.insert(ret, id)
     end
@@ -50,9 +51,10 @@ function ArcCW:SlotAcceptsAtt(slot, wep, att)
 
     if atttbl.Hidden or atttbl.Blacklisted or ArcCW.AttachmentBlacklistTable[att] then return false end
 
-	if (atttbl.NotForNPC or atttbl.NotForNPCs) and wep.Owner and wep.Owner:IsNPC() then
-		return false
-	end
+    if (atttbl.NotForNPC or atttbl.NotForNPCs) and wep.Owner and wep.Owner:IsNPC() then
+        return false
+    end
+    if atttbl.AdminOnly and IsValid(wep:GetOwner()) and !(wep:GetOwner():IsPlayer() and wep:GetOwner():IsAdmin()) then return false end
 
     if wep.RejectAttachments and wep.RejectAttachments[att] then return false end
 
@@ -97,6 +99,7 @@ function ArcCW:WeaponAcceptsAtt(wep, att)
 end
 
 function ArcCW:PlayerGetAtts(ply, att)
+    if !IsValid(ply) then return 0 end
     if GetConVar("arccw_attinv_free"):GetBool() then return 999 end
 
     if att == "" then return 999 end
@@ -134,6 +137,8 @@ function ArcCW:PlayerGiveAtt(ply, att, amt)
     local atttbl = ArcCW.AttachmentTable[att]
 
     if !atttbl then print("Invalid att " .. att) return end
+    if atttbl.Free then return end -- You can't give a free attachment, silly
+    if atttbl.AdminOnly and !(ply:IsPlayer() and ply:IsAdmin()) then return false end
 
     if atttbl.InvAtt then att = atttbl.InvAtt end
 
@@ -144,6 +149,7 @@ function ArcCW:PlayerGiveAtt(ply, att, amt)
         ply.ArcCW_AttInv[att] = (ply.ArcCW_AttInv[att] or 0) + amt
     end
 end
+
 
 function ArcCW:PlayerTakeAtt(ply, att, amt)
     amt = amt or 1
@@ -157,20 +163,21 @@ function ArcCW:PlayerTakeAtt(ply, att, amt)
     end
 
     local atttbl = ArcCW.AttachmentTable[att]
+    if !atttbl or atttbl.Free then return end
 
     if atttbl.InvAtt then att = atttbl.InvAtt end
 
     ply.ArcCW_AttInv[att] = ply.ArcCW_AttInv[att] or 0
 
+    if ply.ArcCW_AttInv[att] < amt then
+        return false
+    end
+
+    ply.ArcCW_AttInv[att] = ply.ArcCW_AttInv[att] - amt
     if ply.ArcCW_AttInv[att] <= 0 then
-        return
+        ply.ArcCW_AttInv[att] = nil
     end
-
-    ply.ArcCW_AttInv[att] = (ply.ArcCW_AttInv[att] or 0) - amt
-
-    if ply.ArcCW_AttInv[att] < 0 then
-        ply.ArcCW_AttInv[att] = 0
-    end
+    return true
 end
 
 if CLIENT then
@@ -241,6 +248,12 @@ net.Receive("arccw_sendattinv", function(len, ply)
 
         LocalPlayer().ArcCW_AttInv[att] = acount
     end
+
+    -- This function will not exist until initialized (by having an ArcCW weapon exist)!
+    -- It also obviously needs menu2 open
+    if ArcCW.InvHUD_FormAttachmentSelect and IsValid(ArcCW.InvHUD) and IsValid(ArcCW.InvHUD_Menu2) then
+        ArcCW.InvHUD_FormAttachmentSelect()
+    end
 end)
 
 net.Receive("arccw_sendatthp", function(len, ply)
@@ -285,7 +298,7 @@ end)
 net.Receive("arccw_rqwpnnet", function(len, ply)
     local wpn = net.ReadEntity()
 
-    if (!IsValid(wpn) or !wpn.ArcCW) then return end
+    if !wpn.ArcCW then return end
 
     wpn:NetworkWeapon(ply)
 end)

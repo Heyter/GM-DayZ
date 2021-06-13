@@ -79,7 +79,7 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 							self:GetOwner():SetLocalVar("WeaponDurability", durability)
 						end
 
-						self:SetJamFactor(math.Clamp(100 - durability, self.JamChance, 100))
+						--self:SetJamFactor(math.Clamp(100 - durability, self.JamChance, 100))
 					end
 
 					self.ShotsFired = 0
@@ -109,7 +109,8 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 								-- end
 							end
 						else
-							self:SetJammed(true)
+							--self:SetJammed(true)
+							self.NextMalfunction = 999999
 						end
 					end
 				end

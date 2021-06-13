@@ -36,7 +36,7 @@ if (CLIENT) then
 				end
 
 				local x, y
-				local lastEntity = LocalPlayer():GetTraceEntity(160, 2)
+				local lastEntity = LocalPlayer():GetTrace(160, 2).Entity
 
 				if (lastEntity and lastEntity == entity) then
 					x, y = ScrW() / 2, ScrH() / 2

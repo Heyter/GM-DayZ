@@ -189,19 +189,20 @@ function SWEP:DrawFlashlightsWM()
         if !k.Installed then continue end
         local atttbl = ArcCW.AttachmentTable[k.Installed]
 
-        if !self:GetBuff_Stat("Flashlight", i) then continue end
+        if !atttbl or !self:GetBuff_Stat("Flashlight", i) then continue end
 
         local maxz = atttbl.FlashlightFarZ or 512
         local bone = atttbl.FlashlightBone or "laser"
         local col = atttbl.FlashlightColor or Color(255, 255, 255)
 
+        if !k.WElement then continue end
         local model = k.WElement.Model
 
         local pos, ang, dir
 
         if !model then
-            pos = self:GetOwner():EyePos()
-            ang = self:GetOwner():EyeAngles()
+            pos = owner:EyePos()
+            ang = owner:EyeAngles()
             dir = ang:Forward()
         else
             local att = model:LookupAttachment(bone or "laser")
@@ -210,7 +211,7 @@ function SWEP:DrawFlashlightsWM()
 
             if att == 0 then
                 pos = model:GetPos()
-                ang = owner:EyeAngles()
+                ang = IsValid(owner) and owner:EyeAngles() or model:GetAngles()
                 dir = ang:Forward()
                 dir_2 = ang:Up()
             else
@@ -315,6 +316,23 @@ function SWEP:DrawFlashlightsVM()
                 local attdata  = model:GetAttachment(att)
                 pos, ang = attdata.Pos, attdata.Ang
             end
+        end
+
+        local tr = util.TraceLine({
+            start = self:GetOwner():EyePos(),
+            endpos = self:GetOwner():EyePos() - ang:Right() * 128,
+            mask = MASK_OPAQUE,
+            filter = LocalPlayer(),
+        })
+        if tr.Fraction < 1 then -- We need to push the flashlight back
+            local tr2 = util.TraceLine({
+                start = self:GetOwner():EyePos(),
+                endpos = self:GetOwner():EyePos() + ang:Right() * 128,
+                mask = MASK_OPAQUE,
+                filter = LocalPlayer(),
+            })
+            -- push it as back as the area behind us allows
+            pos = pos + ang:Right() * 128 * math.min(1 - tr.Fraction, tr2.Fraction)
         end
 
         ang:RotateAroundAxis(ang:Up(), 90)

@@ -46,7 +46,7 @@ else
 		})
 
 		function PLUGIN:PreDrawOutlines()
-			local entity = LocalPlayer():GetTraceEntity(120)
+			local entity = LocalPlayer():GetTrace(120).Entity
 
 			if (IsValid(entity) and Schema.outlineItems[entity:GetClass()]) then
 				color = ix.option.Get("colorOutlineItems", color_white)

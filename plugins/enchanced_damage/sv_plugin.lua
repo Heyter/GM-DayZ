@@ -149,7 +149,7 @@ function ix.bleeding.Timer(client, level, isRise)
 			end
 
 			client:SetHealth(amt)
-			if (self:GetLocalVar("extra_health")) then client:AddExtraHealth(-client.bleeding.loss) end
+			if (client:GetLocalVar("extra_health")) then client:AddExtraHealth(-client.bleeding.loss) end
 
 			if (client.bleeding.riseTime and client.bleeding.riseTime < CurTime()) then
 				ix.bleeding.Timer(client, client:GetNetVar("bleeding", 1) + 1, true)
@@ -160,9 +160,9 @@ function ix.bleeding.Timer(client, level, isRise)
 	end)
 end
 
-function playerMeta:SetBleeding(damage, bForce, inflictor)
-	if (!damage) then return end
-	if (!bForce and hook.Run("PlayerShouldTakeDamage", self, self) == false) then return end
+function playerMeta:SetBleeding(damage, bNotShouldTakeDamage, inflictor)
+	if (!damage or damage <= 0) then return end
+	if (!bNotShouldTakeDamage and hook.Run("PlayerShouldTakeDamage", self, self) == false) then return end
 	if (damage >= self:GetMaxHealth() or self:GetHealth() - damage <= 0) then return end
 
 	local bleeding = self:GetNetVar("bleeding")

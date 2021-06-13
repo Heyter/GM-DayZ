@@ -37,7 +37,7 @@ function ix.arccw_support.Attach(itemWeapon, attID)
 			weapon = client:GetWeapon(itemWeapon.class)
 		end
 
-		if (IsValid(weapon)) then
+		if (IsValid(weapon) and weapon.ixItem and weapon.ixItem == itemWeapon) then
 			weapon:Attach(slot, attID)
 			client:EmitSound("weapons/crossbow/reload1.wav")
 
@@ -98,7 +98,7 @@ function ix.arccw_support.Detach(itemWeapon, attID)
 			weapon = client:GetWeapon(itemWeapon.class)
 		end
 
-		if (IsValid(weapon)) then
+		if (IsValid(weapon) and weapon.ixItem and weapon.ixItem == itemWeapon) then
 			weapon:Detach(slot)
 			client:EmitSound("weapons/crossbow/reload1.wav")
 

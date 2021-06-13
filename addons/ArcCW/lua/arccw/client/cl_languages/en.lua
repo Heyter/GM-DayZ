@@ -18,6 +18,7 @@ L["arccw.menus.ammo"]                     = "Ammo"
 L["arccw.menus.dev"]                      = "Developer"
 L["arccw.menus.xhair"]                    = "Crosshair"
 L["arccw.menus.bullet"]                   = "Bullet Physics"
+L["arccw.bullet_help"]                    = "\nEnabling physical bullets in multiplayer may reduce the reliability of hit detection."
 -- ArcCW_Options_Ammo
 L["arccw.cvar.ammo_detonationmode"]       = "Ammo Detonation"
 L["arccw.cvar.ammo_detonationmode.desc"]  = "-1 - don't explode\n 0 - simple explosion\n 1 - fragmentation\n 2 - frag + burning"
@@ -32,7 +33,7 @@ L["arccw.cvar.hud_showhealth"]            = "Show Health"
 L["arccw.cvar.hud_showhealth.desc"]       = "Draw a custom health & armor counter."
 L["arccw.cvar.hud_showammo"]              = "Show Ammo"
 L["arccw.cvar.hud_showammo.desc"]         = "Custom ammo counter with firemode info and weapon name."
-L["arccw.3d2d"]                           = "\n3D2D HUD"
+L["arccw.3d2d"]                           = "\n3D2D HUD" -- Obsolete
 L["arccw.cvar.hud_3dfun"]                 = "Use 3D2D Ammo HUD"
 L["arccw.cvar.hud_3dfun.desc"]            = "Use a 3D2D ammo counter."
 L["arccw.cvar.hud_3dfun_decay"]           = "HUD Decay Time"
@@ -59,6 +60,7 @@ L["arccw.cvar.bullet_imaginary.desc"]     = "Bullets will appear to continue to 
 -- ArcCW_Options_Client
 L["arccw.cvar.automaticreload"]           = "Automatic Reload"
 L["arccw.cvar.automaticreload.desc"]      = "Automatically reload when your clip is empty."
+L["arccw.cvar.toggleads"]                 = "Toggle Aim"
 L["arccw.cvar.altfcgkey"]                 = "USE + RELOAD Toggles Firemode"
 L["arccw.cvar.altubglkey"]                = "USE + RMB Toggles Underbarrel"
 L["arccw.cvar.altsafety"]                 = "Hold Walk to Toggle Safety"
@@ -90,8 +92,9 @@ L["arccw.cvar.cheapscopes.desc"]          = "A cheaper PIP scope implementation 
 --L["arccw.cvar.flatscopes.desc"]           = "For the ultimate performance gain.\nUse a traditional-style scope implementation that's not very impressive, but actually saves performance relative to even being unscoped."
 L["arccw.cvar.muzzleeffects"]             = "Enable World Muzzle Effects"
 L["arccw.cvar.fastmuzzles"]               = "Low Performance Muzzle Effects"
+L["arccw.cvar.fasttracers"]               = "Low Performance Tracer Effects"
 L["arccw.cvar.shelleffects"]              = "Enable World Case Effects"
-L["arccw.cvar.att_showothers"]            = "Show World Attachments"
+L["arccw.cvar.att_showothers"]            = "Show Others' Attachments"
 L["arccw.cvar.shelltime"]                 = "Case Lifetime"
 L["arccw.cvar.blur"]                      = "Customization Blur"
 L["arccw.cvar.blur_toytown"]              = "Aim Blur"
@@ -133,6 +136,7 @@ L["arccw.cvar.crosshair_dot"]             = "Show Center Dot"
 L["arccw.cvar.crosshair_shotgun"]         = "Use Shotgun Prongs"
 L["arccw.cvar.crosshair_equip"]           = "Use Equipment Prongs"
 L["arccw.cvar.crosshair_static"]          = "Static Crosshair"
+L["arccw.cvar.crosshair_trueaim"]          = "Accurate Crosshair"
 L["arccw.cvar.crosshair_clump"]           = "Use CW2-Style Clump Circle"
 L["arccw.cvar.crosshair_clump_outline"]   = "Clump Circle Outline"
 L["arccw.cvar.crosshair_clump_always"]    = "Clump Circle Always On"
@@ -154,6 +158,7 @@ L["arccw.cvar.mult_sighttime"]            = "ADS Time"
 L["arccw.cvar.mult_defaultclip"]          = "Default Clip"
 L["arccw.cvar.mult_attchance"]            = "Random Att. Chance"
 L["arccw.cvar.mult_heat"]                 = "Heat Gain"
+L["arccw.cvar.mult_sway"]                 = "Aim Sway"
 L["arccw.cvar.mult_shootwhilesprinting"]  = "Shoot While Sprinting"
 -- ArcCW_Options_Atts
 L["arccw.attdesc1"]                       = "ArcCW supports attachment inventory style behaviour (Like ACT3) as well as attachment locking style behaviour (Like CW2.0) as well as giving everyone all attachments for free (Like TFA Base)."
@@ -222,13 +227,13 @@ L["arccw.cvar.ttt_inforoundstart"]        = "Enable round startup info"
 L["arccw.cvar.ammo_replace"]              = "Replace HL2 Ammo Entities"
 
 -- 2020-11-25
-L["arccw.cvar.hud_3dfun_lite"]            = "Minimal 3D2D counter"
-L["arccw.cvar.hud_3dfun_lite.desc"]       = "Counter will only show up when pressing the Reload key."
+L["arccw.cvar.hud_3dfun_lite"]            = "Minimal Mode"
+L["arccw.cvar.hud_3dfun_lite.desc"]       = "HUD will only show up when pressing RELOAD. Hold WALK to not reload when doing so."
 L["arccw.cvar.hud_3dfun_right"]           = "3D2D Offset Right"
 L["arccw.cvar.hud_3dfun_forward"]         = "3D2D Offset Forward"
 L["arccw.cvar.hud_3dfun_up"]              = "3D2D Offset Up"
-L["arccw.cvar.hud_3dfun_ammotype"]        = "3D2D Ammo Type"
-L["arccw.cvar.hud_3dfun_ammotype.desc"]   = "3D2D counter will also show weapon's current ammo type."
+L["arccw.cvar.hud_3dfun_ammotype"]        = "Show Ammo Type"
+L["arccw.cvar.hud_3dfun_ammotype.desc"]   = "Ammo HUD will also show weapon's current ammo type."
 
 -- 2021-01-03
 L["arccw.combobox.disabled"]              = "0 - Disabled"
@@ -287,8 +292,42 @@ L["arccw.cvar.mult_crouchdisp"]           = "Crouched Dispersion"
 L["arccw.cvar.mult_crouchrecoil"]         = "Crouched Recoil"
 
 -- 2021-2-19
-L["arccw.cvar.dev_debug"]           = "Debug Menu"
-L["arccw.cvar.dev_debug.desc"]         = "Disabled by default.\nDraws a debug menu over your screen where you can view certain elements blah blah?"
+L["arccw.cvar.dev_debug"]                 = "Debug Menu"
+L["arccw.cvar.dev_debug.desc"]            = "Disabled by default.\nDraws a debug menu over your screen where you can view certain elements blah blah?"
 
-L["arccw.cvar.attinv_sound"]           = "Menu Toggle Sound"
+L["arccw.cvar.attinv_sound"]              = "Menu Toggle Sound"
 L["arccw.cvar.attinv_sound.desc"]         = "Sounds for opening and closing the customization menu.\nIf it's really not your thing."
+
+-- 2021-3-2
+L["arccw.ammohud"]                        = "\nAmmo HUD" -- Obsoletes "3D2D HUD" since they're basically the same now"
+L["arccw.cvar.hud_fcgbars"]               = "Show Firemode Bars"
+L["arccw.bind.toggle_att"]                = "Toggle Attachments"
+
+-- 2021-05-05
+L["arccw.cvar.attinv_gamemodebuttons"]    = "Gamemode-specific buttons"
+L["arccw.cvar.attinv_gamemodebuttons.desc"] = "Shows helpful functions for gamemodes like TTT and DarkRP.\nIn addition to using these, you can hold USE to access original keybinds as well."
+
+-- 2021-05-13
+L["arccw.cvar.mult_malfunction"] = "Malfunction Chance"
+L["arccw.cvar.malfunction"]    = "Malfunction Mode"
+L["arccw.cvar.malfunction.0"]   = "0 - Force disable on all guns"
+L["arccw.cvar.malfunction.1"]    = "1 - Enabled"
+L["arccw.cvar.malfunction.2"]    = "2 - Force enable on all guns"
+
+-- 2021-05-26
+L["arccw.cvar.mult_meleedamage"] = "Melee Damage"
+L["arccw.cvar.mult_meleetime"] = "Melee Time"
+
+-- 2021-05-27
+L["arccw.cvar.ammonames"] = "Custom Ammo Names"
+L["arccw.cvar.ammonames.desc"] = "Replaces default ammo type names with custom ones that are a bit more realistic (such as Pulse Ammo to Rifle Ammo). Also replaces references everywhere else!"
+L["arccw.cvar.att_showground"]            = "Show Ground Attachments"
+
+-- 2021-06-02
+L["arccw.cvar.mult_bottomlessclip"] = "Bottomless Clip"
+L["arccw.cvar.mult_infiniteammo"] = "Infinite Ammo"
+
+-- 2021-06-07
+
+L["#arccw.cvar.bodydamagecancel"] = "Cancel Body Damage"
+L["#arccw.cvar.bodydamagecancel.desc"] = "When a weapon specifies limb damage modifiers, cancel Gmod's default multipliers. Disable when you have another mod that does this."

@@ -6,24 +6,42 @@ local lastUBGL = 0
 local LastAttack2 = false
 
 function SWEP:Think()
+    if IsValid(self:GetOwner()) and self:GetClass() == "arccw_base" then
+        self:Remove()
+        return
+    end
+
     local owner = self:GetOwner()
 
     if !IsValid(owner) or owner:IsNPC() then return end
+
+    for i, v in ipairs(self.EventTable) do
+        for ed, bz in pairs(v) do
+            if ed <= CurTime() then
+                self:PlayEvent(bz)
+                self.EventTable[i][ed] = nil
+                --print(CurTime(), "Event completed at " .. i, ed)
+                if table.IsEmpty(v) and i != 1 then self.EventTable[i] = nil --[[print(CurTime(), "No more events at " .. i .. ", killing")]] end
+            end
+        end
+    end
+
+    if CLIENT and (!game.SinglePlayer() and IsFirstTimePredicted() or true)
+            and self:GetOwner() == LocalPlayer() and ArcCW.InvHUD
+            and !ArcCW.Inv_Hidden and ArcCW.Inv_Fade == 0 then
+        ArcCW.InvHUD:Remove()
+        ArcCW.Inv_Fade = 0.01
+    end
 
     local vm = owner:GetViewModel()
 
     self.BurstCount = self:GetBurstCount()
 
-    if owner:KeyPressed(IN_ATTACK) then
-        self:SetReqEnd(true)
-    end
-
-    if CLIENT then
-        if ArcCW.LastWeapon != self then
-            self:LoadPreset("autosave")
-        end
-
-        ArcCW.LastWeapon = self
+    local sg = self:GetShotgunReloading()
+    if (sg == 2 or sg == 4) and owner:KeyPressed(IN_ATTACK) then
+        self:SetShotgunReloading(sg + 1)
+    elseif (sg >= 2) and self:GetReloadingREAL() <= CurTime() then
+        self:ReloadInsert((sg >= 4) and true or false)
     end
 
     self:InBipod()
@@ -92,7 +110,7 @@ function SWEP:Think()
         end
     end
 
-    if game.SinglePlayer() or IsFirstTimePredicted() then
+    if IsFirstTimePredicted() then
         if self:InSprint() and (!self.Sprinted or self:GetState() != ArcCW.STATE_SPRINT) then
             self:EnterSprint()
         elseif !self:InSprint() and (self.Sprinted or self:GetState() == ArcCW.STATE_SPRINT) then
@@ -143,7 +161,8 @@ function SWEP:Think()
 
         -- no it really doesn't, past me
         local sighted = self:GetState() == ArcCW.STATE_SIGHTS
-        local toggle = self:GetOwner():GetInfoNum("arccw_toggleads", 0) >= 1
+        local toggle = owner:GetInfoNum("arccw_toggleads", 0) >= 1
+        local suitzoom = owner:KeyDown(IN_ZOOM)
         local sp_cl = game.SinglePlayer() and CLIENT
 
         -- if in singleplayer, client realm should be completely ignored
@@ -151,21 +170,23 @@ function SWEP:Think()
             if owner:KeyPressed(IN_ATTACK2) then
                 if sighted then
                     self:ExitSights()
-                else
+                elseif !suitzoom then
                     self:EnterSights()
                 end
+            elseif suitzoom and sighted then
+                self:ExitSights()
             end
         elseif !toggle then
-            if owner:KeyDown(IN_ATTACK2) and !sighted then
+            if (owner:KeyDown(IN_ATTACK2) and !suitzoom) and !sighted then
                 self:EnterSights()
-            elseif !owner:KeyDown(IN_ATTACK2) and sighted then
+            elseif (!owner:KeyDown(IN_ATTACK2) or suitzoom) and sighted then
                 self:ExitSights()
             end
         end
 
     end
 
-    if (CLIENT or game.SinglePlayer()) and (IsFirstTimePredicted() or game.SinglePlayer()) then
+    if CLIENT and (game.SinglePlayer() and true or IsFirstTimePredicted()) then
         self:ProcessRecoil()
     end
 
@@ -260,8 +281,15 @@ function SWEP:Think()
     -- self:RefreshBGs()
 
     if self:GetMagUpIn() != 0 and CurTime() > self:GetMagUpIn() then
-        self:WhenTheMagUpIn()
+        self:ReloadTimed()
         self:SetMagUpIn( 0 )
+    end
+
+    if self:HasBottomlessClip() and self:Clip1() >= 0 and self:Clip1() != 999999 then
+        self:Unload()
+        self:SetClip1(999999)
+    elseif !self:HasBottomlessClip() and self:Clip1() == 999999 then
+        self:SetClip1(0)
     end
 
     self:GetBuff_Hook("Hook_Think")
@@ -270,30 +298,30 @@ function SWEP:Think()
     --if SERVER or !game.SinglePlayer() then
         self:ProcessTimers()
     --end
+
+    -- Only reset to idle if we don't need cycle. empty idle animation usually doesn't play nice
+    if self:GetNextIdle() != 0 and self:GetNextIdle() <= CurTime() and !self:GetNeedCycle()
+            and self:GetHolster_Time() == 0 and self:GetShotgunReloading() == 0 then
+        self:SetNextIdle(0)
+        self:PlayIdleAnimation(true)
+    end
 end
+
+local lst = SysTime()
 
 function SWEP:ProcessRecoil()
     local owner = self:GetOwner()
-    local ft = FrameTime()
+    local ft = (SysTime() - (lst or SysTime())) * GetConVar("host_timescale"):GetFloat()
     local newang = owner:EyeAngles()
-    local r = self.RecoilAmount -- self:GetNWFloat("recoil", 0)
-    local rs = self.RecoilAmountSide -- self:GetNWFloat("recoilside", 0)
+    -- local r = self.RecoilAmount -- self:GetNWFloat("recoil", 0)
+    -- local rs = self.RecoilAmountSide -- self:GetNWFloat("recoilside", 0)
 
     local ra = Angle(0, 0, 0)
 
-    ra = ra + ((self:GetBuff_Override("Override_RecoilDirection") or self.RecoilDirection) * self.RecoilAmount * 0.5)
-    ra = ra + ((self:GetBuff_Override("Override_RecoilDirectionSide") or self.RecoilDirectionSide) * self.RecoilAmountSide * 0.5)
+    ra = ra + (self:GetBuff_Override("Override_RecoilDirection", self.RecoilDirection) * self.RecoilAmount * 0.5)
+    ra = ra + (self:GetBuff_Override("Override_RecoilDirectionSide", self.RecoilDirectionSide) * self.RecoilAmountSide * 0.5)
 
     newang = newang - ra
-
-    -- self.RecoilAmount = r - math.Clamp(ft * 20, 0, r)
-    -- self.RecoilAmountSide = rs - math.Clamp(ft * 20, 0, rs)
-
-    self.RecoilAmount = math.Approach(self.RecoilAmount, 0, ft * 20 * r)
-    self.RecoilAmountSide = math.Approach(self.RecoilAmountSide, 0, ft * 20 * rs)
-
-    -- self:SetNWFloat("recoil", r - (FrameTime() * r * 50))
-    -- self:SetNWFloat("recoilside", rs - (FrameTime() * rs * 50))
 
     local rpb = self.RecoilPunchBack
     local rps = self.RecoilPunchSide
@@ -310,6 +338,8 @@ function SWEP:ProcessRecoil()
     if rpu != 0 then
         self.RecoilPunchUp = math.Approach(rpu, 0, ft * rpu * 5)
     end
+
+    lst = SysTime()
 end
 
 function SWEP:InSprint()

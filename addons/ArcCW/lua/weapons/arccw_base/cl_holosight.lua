@@ -63,7 +63,7 @@ local rtmat = GetRenderTarget("arccw_rtmat", rtsize, rtsize, false)
 local rtmat_cheap = GetRenderTarget("arccw_rtmat_cheap", ScrW(), ScrH(), false)
 local rtmat_spare = GetRenderTarget("arccw_rtmat_spare", ScrW(), ScrH(), false)
 
--- local shadow = Material("hud/scopes/shadow.png")
+-- local shadow = Material("arccw/hud/scopes/shadow.png")
 
 local thermal = Material("models/debug/debugwhite")
 local colormod = Material("pp/colour")
@@ -401,8 +401,8 @@ hook.Add("RenderScene", "ArcCW", function()
     wpn:FormRTScope()
 end)
 
-local black = Material("hud/black.png")
-local defaultdot = Material("hud/scopes/dot.png")
+local black = Material("arccw/hud/black.png")
+local defaultdot = Material("arccw/hud/scopes/dot.png")
 
 function SWEP:DrawHolosight(hs, hsm, hsp, asight)
     -- holosight structure
@@ -575,6 +575,19 @@ function SWEP:DrawHolosight(hs, hsm, hsp, asight)
 
     pos = pos + (dir * d)
 
+    local pos2 = pos + (dir * -8)
+
+    local a = pos:ToScreen()
+    local x = a.x
+    local y = a.y
+
+    local a2 = pos2:ToScreen()
+    local x2 = a2.x
+    local y2 = a2.y
+
+    local off_x = x2 - (ScrW() / 2)
+    local off_y = y2 - (ScrH() / 2)
+
     --pos = pos + Vector(ArcCW.StrafeTilt(self), 0, 0)
 
     -- local corner1, corner2, corner3, corner4
@@ -619,8 +632,8 @@ function SWEP:DrawHolosight(hs, hsm, hsp, asight)
 
             local ts = cpos:ToScreen()
 
-            local sx = ts.x - (sw / 2)
-            local sy = ts.y - (sh / 2)
+            local sx = ts.x - (sw / 2) - off_x
+            local sy = ts.y - (sh / 2) - off_y
 
             render.SetMaterial(black)
             render.DrawScreenQuad()
@@ -632,8 +645,8 @@ function SWEP:DrawHolosight(hs, hsm, hsp, asight)
             local sw = ScrH()
             local sh = sw
 
-            local sx = (ScrW() - sw) / 2
-            local sy = (ScrH() - sh) / 2
+            local sx = ((ScrW() - sw) / 2) - off_x
+            local sy = ((ScrH() - sh) / 2) - off_x
 
             render.SetMaterial(black)
             render.DrawScreenQuad()
@@ -671,10 +684,6 @@ function SWEP:DrawHolosight(hs, hsm, hsp, asight)
     --     render.DrawSprite( pos, size * hss * hsx, size * hss * hsy, Color(255, 255, 255, 255) )
     -- end
 
-    local a = pos:ToScreen()
-    local x = a.x
-    local y = a.y
-
     cam.Start2D()
 
     if hs.HolosightBlackbox then
@@ -689,9 +698,13 @@ function SWEP:DrawHolosight(hs, hsm, hsp, asight)
 
     local hss = size * 32 * math.min(ScrW(), ScrH()) / 800
 
+    --local thej = self.TheJ.anga + LocalPlayer():GetViewPunchAngles() + self:GetOurViewPunchAngles()
+                    -- AYE, UR ACTIVE ANG BEIN TWISTED DUNT GIVE AUH SHET
+
     surface.SetMaterial(hs.HolosightReticle or defaultdot)
     surface.SetDrawColor(hsc or Color(255, 255, 255))
     surface.DrawTexturedRect(x - (hss / 2), y - (hss / 2), hss, hss)
+    --surface.DrawTexturedRectRotated(x, y, hss, hss, -thej.r or 0)
 
     if !hs.HolosightNoFlare then
         render.SetStencilPassOperation(STENCIL_KEEP)
@@ -702,10 +715,11 @@ function SWEP:DrawHolosight(hs, hsm, hsp, asight)
         local hss2 = hss
 
         if !hs.HolosightFlare then
-            hss2 = hss2 * 0.75
+            hss2 = hss - 2
         end
 
         surface.DrawTexturedRect(x - (hss2 / 2), y - (hss2 / 2), hss2, hss2)
+        --surface.DrawTexturedRectRotated(x, y, hss2, hss2, -thej.r or 0)
 
         render.SetStencilReferenceValue(ref)
     end
