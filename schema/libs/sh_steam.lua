@@ -1,9 +1,12 @@
 ix.steam = ix.steam or {}
 
 if (CLIENT) then
+	file.CreateDir("helix/avatars")
+	ix.steam.avatars = ix.steam.avatars or {}
+	ix.steam.users = ix.steam.users or {}
+
 	function ix.steam.GetAvatar(steamID64)
-		file.CreateDir("helix/avatars")
-		ix.steam.avatars = ix.steam.avatars or {}
+		steamID64 = tostring(steamID64)
 
 		if (ix.steam.avatars[steamID64]) then
 			return ix.steam.avatars[steamID64]
@@ -18,7 +21,7 @@ if (CLIENT) then
 		end
 
 		http.Fetch("https://steamcommunity.com/profiles/" .. steamID64 .. "?xml=1", function(content)
-			local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>") or "http://i.imgur.com/ovW4MBM.png"
+			local avatar = content:match("<avatarFull><!%[CDATA%[(.-)%]%]></avatarFull>") or "https://i.imgur.com/ovW4MBM.png"
 
 			http.Fetch(avatar, function(body)
 				file.Write(path, body)
@@ -29,6 +32,23 @@ if (CLIENT) then
 		end)
 
 		return false
+	end
+
+	function ix.steam.GetNickName(steamID64)
+		if (ix.steam.users[steamID64]) then
+			return ix.steam.users[steamID64]
+		end
+
+		http.Fetch("https://steamcommunity.com/profiles/" .. steamID64 .. "?xml=1", function(content)
+			local name = content:match("<steamID><!%[CDATA%[(.-)%]%]></steamID>")
+
+			if (name) then
+				ix.steam.users[steamID64] = name
+				return name
+			end
+
+			return nil
+		end)
 	end
 
 	concommand.Add("ix_flush_avatars", function()

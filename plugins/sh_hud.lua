@@ -82,7 +82,7 @@ else
 		surface.CreateFont("ixDHUDNum", {
 			font = "Jura",
 			extended = true,
-			size = ix.util.ScreenScaleH(12),
+			size = ix.util.ScreenScaleH(13),
 			weight = 100,
 		})
 
@@ -187,7 +187,7 @@ else
 		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen * math.min(maxHP, self.awto) / maxHP, h - sscale(5))
 
 		HP = math.Clamp(math.Round(self.awto), 0, maxHP)
-		local xHP = ix.util.DrawText(HP .. "%", x + sscale(8) + tx, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
+		local xHP = ix.util.DrawText(HP .. "%", x + sscale(8) + tx, y + h * 0.5 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
 
 		if (LocalPlayer():ExtraHealth() > 0) then
 			ix.util.DrawText(Format("(+%d)", LocalPlayer():ExtraHealth()), x + sscale(8) + tx + (xHP + sscale(4)), y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")

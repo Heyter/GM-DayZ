@@ -236,15 +236,15 @@ function PLUGIN:InitPostEntity()
 				if (item and item.isArcCW and item.isWeapon) then
 					item.class = class
 
-					if (item.description == "") then
+					if (#item.description == 0) then
 						item.description = v.Trivia_Desc or ""
 					end
 
-					if (item.model == "") then
+					if (#item.model == 0) then
 						item.model = v.WorldModel or "models/weapons/w_pistol.mdl"
 					end
 
-					if (item.name == "") then
+					if (#item.name == 0) then
 						item.name = v.PrintName or v.TrueName
 					end
 
@@ -302,11 +302,11 @@ function PLUGIN:InitPostEntity()
 			item.name = oldItem and item.name or v.PrintName or v.ShortName
 
 			if (oldItem) then
-				if (item.description == "") then
+				if (#item.description == 0) then
 					item.description = v.Description
 				end
 
-				if (item.model == "") then
+				if (#item.model == 0) then
 					item.model = v.Model or "models/Items/BoxMRounds.mdl"
 				end
 			else
