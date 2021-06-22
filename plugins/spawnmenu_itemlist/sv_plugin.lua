@@ -7,7 +7,7 @@ end
 
 net.Receive('MenuItemSpawn', function(len, client)
 	local uniqueID = net.ReadString()
-	if not isstring(uniqueID) or not check(client) then return end
+	if !check(client) then return end
 
 	if (ix.item.list[uniqueID]) then
 		local vStart = client:GetShootPos()

@@ -65,23 +65,49 @@ if (CLIENT) then
 			description = data.description
 		})
 
-		for steamid, rank in ipairs(data.members or {}) do
+		for steamid, rank in pairs(data.members or {}) do
 			squad.members[steamid] = rank
 		end
 
 		if (IsValid(ix.gui.squad)) then
-			// TODO: Удалить/добавить участника
+			ix.gui.squad.data = squad
+			ix.gui.squad:SetMembers(squad, true)
 		end
 	end)
 
 	net.Receive("ixSquadKick", function()
-		local squad_id = net.ReadUInt(10)
-		if (!ix.squad.list[squad_id]) then return end
+		local id = net.ReadString()
+		if (!ix.squad.list[id]) then return end
 
-		if (ix.squad.list[squad_id].members[LocalPlayer():SteamID64()]) then
-			ix.squad.list[squad_id].members[LocalPlayer():SteamID64()] = nil
+		if (net.ReadBool()) then
+			if (IsValid(ix.gui.squad)) then
+				ix.gui.squad:Remove()
+				ix.gui.squad = nil
+			end
+
+			ix.squad.list[id] = nil
+			LocalPlayer():Notify("The leader has disbanded the squad!")
+		elseif (ix.squad.list[id]) then
+			if (ix.squad.list[id].members[LocalPlayer():SteamID64()]) then
+				ix.squad.list[id].members[LocalPlayer():SteamID64()] = nil
+				LocalPlayer():Notify("You were kicked out of the squad!")
+			end
+
+			local panel = ix.gui.squad
+			if (IsValid(panel) and panel.data.members[LocalPlayer():SteamID64()]) then
+				ix.gui.squad.data = ix.squad.list[id]
+				ix.gui.squad:SetMembers(ix.gui.squad.data, true)
+			end
 		end
-
-		// TODO: if IsValid(panel)
 	end)
 end
+
+ix.command.Add("accept_squad", {
+	description = "Accept an invitation to the squad.",
+	OnRun = function(self, client)
+		if (!istable(client.squad_invite) or client.squad_invite[1] < CurTime()) then return end
+
+		ix.squad.AddMember(client, Player(client.squad_invite[2]))
+		return
+	end
+})

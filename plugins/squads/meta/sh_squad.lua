@@ -18,7 +18,7 @@ end
 function META:GetReceivers()
 	local receivers = {}
 
-	for _, v in ipairs(player.GetAll()) do
+	for _, v in ipairs(player.GetHumans()) do
 		if (IsValid(v) and self.members[v:SteamID64()]) then
 			receivers[#receivers + 1] = v
 		end
@@ -28,15 +28,7 @@ function META:GetReceivers()
 end
 
 function META:GetRank(client)
-	local steamID64 = client:SteamID64()
-
-	if (self.owner == steamID64) then
-		return 2
-	elseif (self.members[steamID64] and client:GetCharacter():GetSquadOfficer() != 0) then
-		return 1
-	end
-
-	return false
+	return self.members[client:SteamID64()]
 end
 
 function META:IsLeader(client)

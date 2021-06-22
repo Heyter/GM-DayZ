@@ -12,22 +12,33 @@ end
 function PLUGIN:PlayerLoadedCharacter(client, character)
 	timer.Simple(0.25, function()
 		ix.squad.Restore(character:GetSquadID(), client:SteamID64(), function(squad)
-			squad:Sync(client)
+			if (squad) then
+				squad:Sync(client)
+			else
+				character:SetSquadID("NULL")
+				character:SetSquadOfficer(0)
+			end
 		end)
 	end)
 end
 
 function PLUGIN:PreCharacterDeleted(client, character)
-	local id = character:GetSquadID()
-	if (id == "NULL") then return end
+	local squad = ix.squad.list[character:GetSquadID()]
+	local steamID64 = client:SteamID64()
 
-	local squad = ix.squad.list[id]
+	if (squad and squad.members[steamID64]) then
+		if (squad.owner == steamID64) then
+			ix.squad.Disband(steamID64, squad:GetReceivers())
+			squad = nil
+		else
+			squad.members[steamID64] = nil
+			squad:Sync()
 
-	if (squad and squad.members[client:SteamID64()]) then
-		squad.members[client:SteamID64()] = nil
-		squad:Sync()
-
-		ix.squad.list[id] = squad
+			net.Start("ixSquadKick")
+				net.WriteString(squad.owner)
+				net.WriteBool(false)
+			net.Send(client)
+		end
 	end
 end
 
@@ -81,8 +92,13 @@ net.Receive("ixSquadSettings", function(_, client)
 
 		if (data.description) then
 			local desc = string.Trim(tostring(data.description))
-			if (!desc:find("%s+") or !desc:find("%S") or desc:gsub("%s", ""):utf8len() > 2049) then
-				data.description = nil
+
+			if (!desc:find("%S") or desc:gsub("%s", ""):utf8len() > 2049) then
+				if (desc:utf8len() < 1) then
+					squad.description = ""
+				else
+					data.description = nil
+				end
 			else
 				squad.description = desc
 			end
@@ -108,4 +124,55 @@ net.Receive("ixSquadSettings", function(_, client)
 			squad:Sync()
 		end
 	end
+end)
+
+net.Receive("ixSquadInvite", function(_, client)
+	local id = client:GetCharacter() and client:GetCharacter():GetSquadID()
+	if (!id or id == "NULL") then return end
+
+	local squad = ix.squad.list[id]
+	if (!squad) then return end
+
+	local target = net.ReadEntity()
+
+	if (IsValid(target) and client:GetPos():DistToSqr(target:GetPos()) < 160 * 160) then
+		target:NotifyLocalized("%s invites you to his squad %s. Type in chat /accept_squad", client:Nick(), squad.name)
+		target.squad_invite = {CurTime() + 30, client:UserID()}
+	end
+end)
+
+net.Receive("ixSquadKickMember", function(_, client)
+	if ((client.ixSquadKickTry or 0) < CurTime()) then
+		client.ixSquadKickTry = CurTime() + 2
+	else
+		return
+	end
+
+	local steamID64 = net.ReadString()
+	if (!isstring(steamID64) or #steamID64 == 0) then return end
+
+	local index = nil
+	for _, v in ipairs(player.GetAll()) do
+		if (IsValid(v) and v:SteamID64() == steamID64) then
+			index = v
+			break
+		end
+	end
+
+	if (index) then
+		ix.squad.KickMember(index, client)
+	else
+		// ix.squad.KickMember_Offline(v, client)
+		// TODO: Вне-сети исключение игроков по SteamID64
+	end
+end)
+
+net.Receive("ixSquadDisband", function(_, client)
+	if ((client.ixSquadKickTry or 0) < CurTime()) then
+		client.ixSquadKickTry = CurTime() + 2
+	else
+		return
+	end
+
+	ix.squad.KickMember(client, client)
 end)

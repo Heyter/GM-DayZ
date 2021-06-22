@@ -64,6 +64,7 @@ function PANEL:Init()
 	self.holder_name = "Input squad name"
 	self.netData = {}
 	self.categoryPanels = {}
+	self.memberTags = {}
 
 	self.lblTitle:SetFont("MapFont")
 	self.lblTitle.UpdateColours = function(label)
@@ -99,7 +100,7 @@ function PANEL:IsOfficer()
 	return self.officer
 end
 
-function PANEL:SetMembers(data)
+function PANEL:SetMembers(data, bNotTnitLeftSide)
 	local text_rank
 	local localSteamID64 = LocalPlayer():SteamID64()
 
@@ -108,6 +109,8 @@ function PANEL:SetMembers(data)
 	self:AddCategory("Members")
 
 	for sid, rank in pairs(data.members) do
+		if (self.memberTags[sid]) then continue end
+
 		text_rank = "Members"
 
 		if (rank == 2) then
@@ -120,13 +123,7 @@ function PANEL:SetMembers(data)
 
 		local nametag = self.categoryPanels[text_rank][1]:Add("ixSquadMemberTag")
 		nametag.name:SetFont("squadNameTag")
-		nametag:SetAvatar(sid, function()
-			local panel = self.categoryPanels[text_rank]
-
-			if (panel and IsValid(panel[2])) then
-				panel[2]:SetLabel(Format("%s: %d", text_rank, #panel[2].Contents:GetChildren()))
-			end
-		end)
+		nametag:SetAvatar(sid)
 		nametag:SizeToContents()
 		nametag.Paint = function(t, w, h)
 			if (t:IsHovered()) then
@@ -142,6 +139,8 @@ function PANEL:SetMembers(data)
 			surface.DrawRect(0, 0, w, h)
 		end
 
+		self.memberTags[sid] = nametag
+
 		if (sid == localSteamID64) then
 			if (rank == 2) then
 				self.leader = true
@@ -152,7 +151,9 @@ function PANEL:SetMembers(data)
 	end
 
 	self.data = data
-	self:InitLeftSide(data)
+	if (!bNotTnitLeftSide) then
+		self:InitLeftSide(data)
+	end
 end
 
 function PANEL:InitLeftSide(data)
@@ -218,11 +219,8 @@ function PANEL:InitLeftSide(data)
 	logo_lbl:SetTextColor(color_white)
 	logo_lbl:Dock(TOP)
 
-    self.squadImg = self.logoSideLeft:Add("DImageButton")
-	self.squadImg:SetSize(128, 128)
-	self.squadImg:Dock(LEFT)
-
 	if (self:IsLeader()) then
+		self.squadImg = self.logoSideLeft:Add("DImageButton")
 		self.squadImg.DoClick = function(t)
 			Derma_StringRequest(
 				"Squad Logo", 
@@ -250,8 +248,11 @@ function PANEL:InitLeftSide(data)
 			)
 		end
 	else
-		self.squadImg.DoClick = function() end
+		self.squadImg = self.logoSideLeft:Add("DImage")
 	end
+
+	self.squadImg:SetSize(128, 128)
+	self.squadImg:Dock(LEFT)
 
     ix.util.FetchImage(data.logo or "ovW4MBM", function(mat) -- squad logo
 		self.squadImg:SetMaterial(mat or Material("icon16/cross.png"))
@@ -304,8 +305,12 @@ function PANEL:InitRightSide(data)
 
 		for _, v in ipairs(player.GetAll()) do
 			if (IsValid(v) and v != LocalPlayer() and LocalPlayer():GetPos():DistToSqr(v:GetPos()) < 160*160) then
+				if (self.data.members[v:SteamID64()]) then continue end
+
 				menu:AddOption(v:Name(), function()
-					// TODO: реализовать инвайт
+					net.Start("ixSquadInvite")
+						net.WriteEntity(v)
+					net.SendToServer()
 				end)
 			end
 		end
@@ -316,7 +321,7 @@ function PANEL:InitRightSide(data)
 	if (self:IsLeader()) then
 		AddButonFooter(a1, "Change squad color", true, function(t)
 			local color = vgui.Create("DColorCombo")
-			color:SetupCloseButton( function() CloseDermaMenus() end )
+			color:SetupCloseButton(function() CloseDermaMenus() end)
 			color:SetColor(color_white)
 			color.OnValueChanged = function(_, col)
 				self.netData["color"] = col
@@ -329,8 +334,12 @@ function PANEL:InitRightSide(data)
 		end)
 
 		AddButonFooter(a1, "Disband squad", true, function(t)
-			// TODO реализовать роспуск
-			self:Remove()
+			Derma_Query("Are you sure you want to disband squad", "Disband squad", "Yes", function()
+				net.Start("ixSquadDisband")
+				net.SendToServer()
+
+				self:Remove()
+			end, "No")
 		end)
 	end
 
@@ -423,9 +432,13 @@ function PANEL:AddCategory(title)
 				return
 			end
 
-			if (#t.Contents:GetChildren() < 1) then
-				t:Remove()
-				self.categoryPanels[title] = nil
+			if (t.Contents) then
+				if (#t.Contents:GetChildren() < 1) then
+					t:Remove()
+					self.categoryPanels[title] = nil
+				else
+					t:SetLabel(Format("%s: %d", title, #t.Contents:GetChildren()))
+				end
 			end
 		end
 
@@ -491,33 +504,42 @@ function PANEL:OnMousePressed(code)
 		end
 
 		local squad = ix.squad.list[LocalPlayer():GetCharacter():GetSquadID()]
-		if (squad and squad:IsLeader(LocalPlayer()) and squad.members[self.steamid] and LocalPlayer():SteamID64() != self.steamid) then
-			if (squad.members[self.steamid] == 0) then
-				menu:AddSpacer()
-				menu:AddOption("Raise to officer", function()
-					// TODO: сделать повышение до оффицера
-					Derma_Query("Raise", "Are you sure you want to raise?", "Yes", function() print("Raise") end, "No")
-				end):SetImage("icon16/user_go.png")
-			else
-				menu:AddSpacer()
-				menu:AddOption("Demote to member", function()
-					// TODO: сделать понижение до участника
-					Derma_Query("Demote", "Are you sure you want to demote?", "Yes", function() print("Demote") end, "No")
-				end):SetImage("icon16/user.png")
-			end
 
-			menu:AddSpacer()
-			menu:AddOption("Kick member", function()
-				// TODO: сделать исключение участника
-				Derma_Query("Kick member", "Are you sure you want to kick member", "Yes", function() print("Kick member") end, "No")
-			end):SetImage("icon16/user_delete.png")
+		if (squad and squad.members[self.steamid] and LocalPlayer():SteamID64() != self.steamid) then
+			local rank = squad:GetRank(LocalPlayer())
+			if (rank and rank != 0) then
+				if (squad.members[self.steamid] == 0) then
+					menu:AddSpacer()
+					menu:AddOption("Raise to officer", function()
+						// TODO: сделать повышение до оффицера
+						Derma_Query("Are you sure you want to raise?", "Raise", "Yes", function() print("Raise") end, "No")
+					end):SetImage("icon16/user_go.png")
+				else
+					menu:AddSpacer()
+					menu:AddOption("Demote to member", function()
+						// TODO: сделать понижение до участника
+						Derma_Query("Are you sure you want to demote?", "Demote", "Yes", function() print("Demote") end, "No")
+					end):SetImage("icon16/user.png")
+				end
+
+				if (rank != 0 and squad.members[self.steamid] == 0) then
+					menu:AddSpacer()
+					menu:AddOption("Kick member", function()
+						Derma_Query("Are you sure you want to kick member", "Kick member", "Yes", function()
+							net.Start("ixSquadKickMember")
+								net.WriteString(self.steamid)
+							net.SendToServer()
+						end, "No")
+					end):SetImage("icon16/user_delete.png")
+				end
+			end
 		end
 
 		menu:Open()
 	end
 end
 
-function PANEL:SetAvatar(steamid, callback)
+function PANEL:SetAvatar(steamid)
 	self.avatar:SetSteamID(steamid, 32)
 	self.name:SetText(steamid)
 
@@ -536,9 +558,28 @@ function PANEL:SetAvatar(steamid, callback)
 		local name = ix.steam.GetNickName(steamid)
 		if name then self.name:SetText(name) end
 	end
+end
 
-	if (callback) then
-		callback(self.steamName)
+function PANEL:Think()
+	if (self.next_think or 0) < CurTime() then
+
+		local panel = ix.gui.squad
+		if (IsValid(panel) and panel.data and !panel.data.members[self.steamid]) then
+			panel.memberTags[self.steamid] = nil
+
+			if (self.text_rank) then
+				local cat = panel.categoryPanels[self.text_rank]
+
+				if (cat and IsValid(cat[2])) then
+					cat[2]:SetLabel(Format("%s: %d", self.text_rank, #cat[2].Contents:GetChildren()))
+				end
+			end
+
+			self:Remove()
+			return
+		end
+
+		self.next_think = CurTime() + 1
 	end
 end
 

@@ -2,11 +2,14 @@ util.AddNetworkString("ixSquadSync")
 util.AddNetworkString("ixSquadKick")
 util.AddNetworkString("ixSquadSettings")
 util.AddNetworkString("ixSquadCreate")
+util.AddNetworkString("ixSquadInvite")
+util.AddNetworkString("ixSquadKickMember")
+util.AddNetworkString("ixSquadDisband")
 
 ix.util.Include("sv_hooks.lua", "server")
 
 function ix.squad.Restore(id, steamID64, callback)
-	if (id == "NULL") then return end
+	if (!id or id == "NULL") then return end
 
 	local cache = ix.squad.list[id]
 	if (cache and cache["members"][steamID64]) then
@@ -21,12 +24,20 @@ function ix.squad.Restore(id, steamID64, callback)
 			if (istable(result) and #result > 0) then
 				result = result[1]
 
-				local squad = ix.squad.Register(result.owner, result.name, {
-					color = result.color != "NULL" and string.ToColor(result.color) or nil,
-					logo = result.logo != "NULL" and result.logo or nil,
-					description = result.description != "NULL" and result.description or nil
-				})
+				local pack = {}
+				if (result.color and result.color != "NULL") then
+					pack["color"] = string.ToColor(result.color)
+				end
 
+				if (result.logo and result.logo != "NULL") then
+					pack["logo"] = result.logo
+				end
+
+				if (result.description and result.description != "NULL" and #result.description > 0) then
+					pack["description"] = result.description
+				end
+
+				local squad = ix.squad.Register(result.owner, result.name, pack)
 				local subQ = mysql:Select("ix_characters")
 					subQ:Select("steamid")
 					subQ:Select("squad_officer")
@@ -46,6 +57,8 @@ function ix.squad.Restore(id, steamID64, callback)
 						if (callback) then callback(squad) end
 					end)
 				subQ:Execute()
+			elseif (callback) then
+				callback(false)
 			end
 		end)
 	query:Execute()
@@ -83,50 +96,88 @@ function ix.squad.RaiseMember(target, client)
 	end
 end
 
-function ix.squad.AddMember(target, client)
-	local cache = ix.squad.list[client:GetCharacter():GetSquadID()]
-	if (!cache or cache:IsLeader(client) or !cache.members[client:SteamID64()]) then return end
+function ix.squad.AddMember(target, client, bNotNotify)
+	if (IsValid(client) and client:GetCharacter()) then
+		local squad = ix.squad.list[client:GetCharacter():GetSquadID()]
+		if (!squad) then return end
 
-	if (IsValid(target)) then
-		local character = target:GetCharacter()
+		local rank = squad:GetRank(client)
+		if (!rank or rank == 0) then return end
 
-		if (character) then
-			character:SetSquadOfficer(0)
-			character:SetSquadID(cache.owner)
+		if (IsValid(target) and !squad.members[target:SteamID64()]) then
+			local character = target:GetCharacter()
 
-			cache.members[target:SteamID64()] = 0
+			if (character) then
+				character:SetSquadOfficer(0)
+				character:SetSquadID(squad.owner)
 
-			// notify to target.
-			// notify to client. target:Name() succesfully invited to cache.name
+				squad.members[target:SteamID64()] = 0
+				squad:Sync()
+
+				if (!bNotNotify) then
+					client:NotifyLocalized("%s accepted your invitation to the squad.", target:Name())
+					target:NotifyLocalized("You have been added to a squad: %s", squad.name)
+				end
+			end
 		end
 	end
 end
 
-function ix.squad.RemoveMember(target, client)
-	local id = client:GetCharacter():GetSquadID()
-	if (id == "NULL") then return end
+function ix.squad.Disband(id, receivers)
+	if (!id) then return end
 
-	local cache = ix.squad.list[id]
+	local query = mysql:Delete("gmodz_squads")
+		query:Where("owner", id)
+	query:Execute()
 
-	if (cache and cache:GetRank(client)) then
-		local steamID64 = target:SteamID64()
-		local character = target:GetCharacter()
+	if (receivers and #receivers > 0) then
+		local char
+		for _, v in ipairs(receivers) do
+			char = v:GetCharacter()
+			if (!char) then continue end
 
-		if (cache.owner == steamID64) then // овнер распустил клан
-			// ...
-		elseif (character and cache.members[steamID64]) then // выпнули кого-то
-			cache.members[steamID64] = nil
-
-			character:SetSquadID("NULL")
-			character:SetSquadOfficer(0)
+			char:SetSquadID("NULL")
+			char:SetSquadOfficer(0)
 		end
 
-		cache:Sync()
-
 		net.Start("ixSquadKick")
-			net.WriteUInt(id, 10)
-		net.Send(target)
+			net.WriteString(id)
+			net.WriteBool(true)
+		net.Send(receivers)
+	end
 
-		ix.squad.list[id] = cache
+	ix.squad.list[id] = nil
+end
+
+function ix.squad.KickMember(target, client)
+	if (IsValid(client) and client:GetCharacter()) then
+		local squad = ix.squad.list[client:GetCharacter():GetSquadID()]
+		if (!squad) then return end
+
+		local rank = squad:GetRank(client)
+		local steamID64 = target:SteamID64()
+
+		if (rank and rank != 0 and squad.members[steamID64]) then
+			if (rank == 1 and squad.members[steamID64] != 0) then
+				return
+			end
+
+			local character = target:GetCharacter()
+
+			if (steamID64 == client:SteamID64() and squad.owner == steamID64) then
+				ix.squad.Disband(squad.owner, squad:GetReceivers())
+				squad = nil
+			elseif (character) then
+				squad.members[steamID64] = nil
+				character:SetSquadID("NULL")
+				character:SetSquadOfficer(0)
+				squad:Sync()
+
+				net.Start("ixSquadKick")
+					net.WriteString(squad.owner)
+					net.WriteBool(false)
+				net.Send(target)
+			end
+		end
 	end
 end
