@@ -41,7 +41,31 @@ ix.util.Include("sv_plugin.lua")
 if (CLIENT) then
 	function PLUGIN:PlayerBindPress(_, bind, pressed)
 		if (bind:find("gm_showspare2") and pressed) then
-			// ...
+			if (IsValid(ix.gui.squad)) then
+				ix.gui.squad:Remove()
+			end
+
+			local squadID = LocalPlayer():GetCharacter() and LocalPlayer():GetCharacter():GetSquadID()
+
+			if (squadID and squadID == "NULL") then
+				Derma_StringRequest(
+					"Create a squad", 
+					"Enter squad name",
+					"",
+					function(text)
+						if (text and #text > 0 and #text <= 48) then
+							net.Start("ixSquadCreate")
+								net.WriteString(text)
+							net.SendToServer()
+						end
+					end,
+					function() end
+				)
+			elseif (squadID and ix.squad.list[squadID]) then
+				ix.gui.squad = vgui.Create("ixSquadView")
+				ix.gui.squad:SetMembers(ix.squad.list[squadID])
+			end
+
 			return true
 		end
 	end
@@ -53,6 +77,43 @@ if (CLIENT) then
 			extended = true,
 			weight = 500
 		})
+	end
+
+	do
+		local function SquadColor(target)
+			if (!LocalPlayer():GetCharacter() or !IsValid(target)) then return end
+			local sq = ix.squad.list[LocalPlayer():GetCharacter():GetSquadID()]
+			if (sq and sq.members[target:SteamID64()]) then
+				return Color("blue")
+			end
+		end
+
+		hook.Add("GetPlayerColorSB", "SquadColor", SquadColor)
+		hook.Add("GetKillfeedColor", "SquadColor", SquadColor)
+	end
+
+	do
+		local players = {}
+		local sq = nil
+
+		function PLUGIN:PreDrawOutlines()
+			if (!LocalPlayer():GetCharacter()) then return end
+			players = {}
+
+			for _, v in ipairs(player.GetAll()) do
+				if (IsValid(v) and v != LocalPlayer() and v:GetCharacter() and v:Alive()) then
+					sq = ix.squad.list[LocalPlayer():GetCharacter():GetSquadID()]
+
+					if (sq and sq.members[v:SteamID64()]) then
+						players[#players + 1] = v
+					end
+				end
+			end
+
+			if (#players > 0) then
+				outline.Add(players, Color("blue"), OUTLINE_MODE_VISIBLE)
+			end
+		end
 	end
 
 	net.Receive("ixSquadSync", function()
@@ -100,9 +161,24 @@ if (CLIENT) then
 			end
 		end
 	end)
+
+	net.Receive("ixSquadLeave", function()
+		if (IsValid(ix.gui.squad)) then
+			ix.gui.squad:Remove()
+			ix.gui.squad = nil
+		end
+
+		local id = net.ReadString()
+
+		if (ix.squad.list[id]) then
+			ix.squad.list[id] = nil
+
+			LocalPlayer():Notify("You have successfully left the squad.")
+		end
+	end)
 end
 
-ix.command.Add("accept_squad", {
+ix.command.Add("saccept", {
 	description = "Accept an invitation to the squad.",
 	OnRun = function(self, client)
 		if (!istable(client.squad_invite) or client.squad_invite[1] < CurTime()) then return end

@@ -109,7 +109,14 @@ function PANEL:SetMembers(data, bNotTnitLeftSide)
 	self:AddCategory("Members")
 
 	for sid, rank in pairs(data.members) do
-		if (self.memberTags[sid]) then continue end
+		if (IsValid(self.memberTags[sid])) then
+			if (self.memberTags[sid].sq_rank != rank) then
+				self.memberTags[sid]:Remove()
+				self.memberTags[sid] = nil
+			else
+				continue
+			end
+		end
 
 		text_rank = "Members"
 
@@ -125,6 +132,7 @@ function PANEL:SetMembers(data, bNotTnitLeftSide)
 		nametag.name:SetFont("squadNameTag")
 		nametag:SetAvatar(sid)
 		nametag:SizeToContents()
+		nametag.sq_rank = rank
 		nametag.Paint = function(t, w, h)
 			if (t:IsHovered()) then
 				t:SetCursor("hand")
@@ -277,10 +285,6 @@ function PANEL:InitRightSide(data)
 		t:SetFGColor(Color("green"))
 	end
 
-	if (!self:IsLeader() and !self:IsOfficer()) then
-		return
-	end
-
 	-- Actions
 
 	local a1 = self.rightPanel:Add("Panel")
@@ -293,30 +297,31 @@ function PANEL:InitRightSide(data)
 	actions_lbl:SetTextColor(color_white)
 	actions_lbl:Dock(TOP)
 
-	if (self:IsLeader()) then
+--[[ 	if (self:IsLeader()) then
 		AddButonFooter(a1, "Squad logs", true, function(t)
 			// TODO: реализовать логи
-			print(t)
+		end)
+	end ]]
+
+	if (self:IsLeader() or self:IsOfficer()) then
+		AddButonFooter(a1, "Invite member", true, function(t)
+			local menu = DermaMenu()
+
+			for _, v in ipairs(player.GetAll()) do
+				if (IsValid(v) and v != LocalPlayer() and LocalPlayer():GetPos():DistToSqr(v:GetPos()) < 160*160) then
+					if (self.data.members[v:SteamID64()]) then continue end
+
+					menu:AddOption(v:Name(), function()
+						net.Start("ixSquadInvite")
+							net.WriteEntity(v)
+						net.SendToServer()
+					end)
+				end
+			end
+
+			menu:Open()
 		end)
 	end
-
-	AddButonFooter(a1, "Invite member", true, function(t)
-		local menu = DermaMenu()
-
-		for _, v in ipairs(player.GetAll()) do
-			if (IsValid(v) and v != LocalPlayer() and LocalPlayer():GetPos():DistToSqr(v:GetPos()) < 160*160) then
-				if (self.data.members[v:SteamID64()]) then continue end
-
-				menu:AddOption(v:Name(), function()
-					net.Start("ixSquadInvite")
-						net.WriteEntity(v)
-					net.SendToServer()
-				end)
-			end
-		end
-
-		menu:Open()
-	end)
 
 	if (self:IsLeader()) then
 		AddButonFooter(a1, "Change squad color", true, function(t)
@@ -334,12 +339,19 @@ function PANEL:InitRightSide(data)
 		end)
 
 		AddButonFooter(a1, "Disband squad", true, function(t)
-			Derma_Query("Are you sure you want to disband squad", "Disband squad", "Yes", function()
+			Derma_Query("Are you sure you want to disband your squad? This action is permanent!", "Disband squad", "Yes", function()
 				net.Start("ixSquadDisband")
 				net.SendToServer()
 
 				self:Remove()
 			end, "No")
+		end)
+	else
+		AddButonFooter(a1, "Leave squad", true, function(t)
+			net.Start("ixSquadLeave")
+			net.SendToServer()
+
+			self:Remove()
 		end)
 	end
 
@@ -350,7 +362,6 @@ function PANEL:InitRightSide(data)
 		a1:Dock(BOTTOM)
 		a1:DockMargin(0, 4, 0, 4)
 
-		//
 		AddButonFooter(a1, "Edit (max characters: 2048)", nil, function(t)
 			if (IsValid(self.notepad)) then
 				self.notepad:Remove()
@@ -507,25 +518,34 @@ function PANEL:OnMousePressed(code)
 
 		if (squad and squad.members[self.steamid] and LocalPlayer():SteamID64() != self.steamid) then
 			local rank = squad:GetRank(LocalPlayer())
+
 			if (rank and rank != 0) then
-				if (squad.members[self.steamid] == 0) then
-					menu:AddSpacer()
-					menu:AddOption("Raise to officer", function()
-						// TODO: сделать повышение до оффицера
-						Derma_Query("Are you sure you want to raise?", "Raise", "Yes", function() print("Raise") end, "No")
-					end):SetImage("icon16/user_go.png")
-				else
-					menu:AddSpacer()
-					menu:AddOption("Demote to member", function()
-						// TODO: сделать понижение до участника
-						Derma_Query("Are you sure you want to demote?", "Demote", "Yes", function() print("Demote") end, "No")
-					end):SetImage("icon16/user.png")
+				if (squad:IsLeader(LocalPlayer())) then
+					if (squad.members[self.steamid] == 0) then
+						menu:AddSpacer()
+						menu:AddOption("Raise to officer", function()
+							Derma_Query("Are you sure you want to raise?", "Raise", "Yes", function()
+								net.Start("ixSquadRankChange")
+									net.WriteString(self.steamid)
+								net.SendToServer()
+							end, "No")
+						end):SetImage("icon16/user_go.png")
+					else
+						menu:AddSpacer()
+						menu:AddOption("Demote to member", function()
+							Derma_Query("Are you sure you want to demote?", "Demote", "Yes", function()
+								net.Start("ixSquadRankChange")
+									net.WriteString(self.steamid)
+								net.SendToServer()
+							end, "No")
+						end):SetImage("icon16/user.png")
+					end
 				end
 
 				if (rank != 0 and squad.members[self.steamid] == 0) then
 					menu:AddSpacer()
 					menu:AddOption("Kick member", function()
-						Derma_Query("Are you sure you want to kick member", "Kick member", "Yes", function()
+						Derma_Query(Format("Are you sure you want to kick %s from %s?", self.name:GetText(), squad.name), "Kick member", "Yes", function()
 							net.Start("ixSquadKickMember")
 								net.WriteString(self.steamid)
 							net.SendToServer()
@@ -545,7 +565,7 @@ function PANEL:SetAvatar(steamid)
 
 	for _, v in ipairs(player.GetAll()) do
 		if (IsValid(v) and v:SteamID64() == steamid) then
-			self.name:SetTextColor(Color("sky_blue"))
+			self.name:SetTextColor(Color("blue"))
 			self.name:SetText(v:Name())
 			self.steamName = true
 			break
@@ -597,30 +617,3 @@ function PANEL:SizeToContents()
 end
 
 vgui.Register("ixSquadMemberTag", PANEL, "Panel")
-
-concommand.Add("squad_menu", function()
-	if (IsValid(ix.gui.squad)) then
-		ix.gui.squad:Remove()
-	end
-
-	local squadID = LocalPlayer():GetCharacter() and LocalPlayer():GetCharacter():GetSquadID()
-
-	if (squadID and squadID == "NULL") then
-		Derma_StringRequest(
-			"Create a squad", 
-			"Enter squad name",
-			"",
-			function(text)
-				if (text and #text > 0 and #text <= 48) then
-					net.Start("ixSquadCreate")
-						net.WriteString(text)
-					net.SendToServer()
-				end
-			end,
-			function() end
-		)
-	elseif (squadID and ix.squad.list[squadID]) then
-		ix.gui.squad = vgui.Create("ixSquadView")
-		ix.gui.squad:SetMembers(ix.squad.list[squadID])
-	end
-end)

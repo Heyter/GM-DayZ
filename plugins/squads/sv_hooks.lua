@@ -42,6 +42,18 @@ function PLUGIN:PreCharacterDeleted(client, character)
 	end
 end
 
+function PLUGIN:PostPlayerLoadout(client)
+	local character = client:GetCharacter()
+
+	if (character) then
+		local squad = ix.squad.list[character:GetSquadID()]
+		if (!squad or !squad.color) then return end
+
+		local color = squad.color
+		client:SetPlayerColor(Vector(color.r / 255, color.g / 255, color.b / 255))
+	end
+end
+
 net.Receive("ixSquadCreate", function(_, client)
 	if ((client.ixSquadCreateTry or 0) < CurTime()) then
 		client.ixSquadCreateTry = CurTime() + 30
@@ -62,12 +74,13 @@ net.Receive("ixSquadCreate", function(_, client)
 	end
 
 	ix.squad.New(name, client:SteamID64(), function(squad)
-		if (IsValid(client)) then
+		if (IsValid(client) and squad) then
 			character:SetSquadOfficer(0)
 			character:SetSquadID(squad.owner)
 			squad:Sync(client)
 
-			client:NotifyLocalized("The squad has been successfully created: %s", squad.name)
+			client:NotifyLocalized("Squad %s was successfully created!", squad.name)
+			client.ixSquadCreateTry = nil
 		end
 	end)
 end)
@@ -136,7 +149,7 @@ net.Receive("ixSquadInvite", function(_, client)
 	local target = net.ReadEntity()
 
 	if (IsValid(target) and client:GetPos():DistToSqr(target:GetPos()) < 160 * 160) then
-		target:NotifyLocalized("%s invites you to his squad %s. Type in chat /accept_squad", client:Nick(), squad.name)
+		target:NotifyLocalized("%s invites you to his squad %s. Type in chat /saccept", client:Nick(), squad.name)
 		target.squad_invite = {CurTime() + 30, client:UserID()}
 	end
 end)
@@ -151,19 +164,12 @@ net.Receive("ixSquadKickMember", function(_, client)
 	local steamID64 = net.ReadString()
 	if (!isstring(steamID64) or #steamID64 == 0) then return end
 
-	local index = nil
-	for _, v in ipairs(player.GetAll()) do
-		if (IsValid(v) and v:SteamID64() == steamID64) then
-			index = v
-			break
-		end
-	end
+	local index = player.GetBySteamID64(steamID64)
 
 	if (index) then
 		ix.squad.KickMember(index, client)
 	else
-		// ix.squad.KickMember_Offline(v, client)
-		// TODO: Вне-сети исключение игроков по SteamID64
+		ix.squad.KickMember_Offline(steamID64, client)
 	end
 end)
 
@@ -175,4 +181,44 @@ net.Receive("ixSquadDisband", function(_, client)
 	end
 
 	ix.squad.KickMember(client, client)
+end)
+
+net.Receive("ixSquadRankChange", function(_, client)
+	if ((client.ixSquadRankTry or 0) < CurTime()) then
+		client.ixSquadRankTry = CurTime() + 2
+	else
+		return
+	end
+
+	local steamID64 = net.ReadString()
+	if (!isstring(steamID64) or #steamID64 == 0 or steamID64 == client:SteamID64()) then return end
+
+	local index = player.GetBySteamID64(steamID64)
+
+	if (index) then
+		ix.squad.ChangeRank(index, client)
+	else
+		ix.squad.ChangeRank_Offline(steamID64, client)
+	end
+end)
+
+net.Receive("ixSquadLeave", function(_, client)
+	if (IsValid(client)) then
+		local character = client:GetCharacter()
+		if (!character) then return end
+
+		local squad = ix.squad.list[character:GetSquadID()]
+		if (!squad or squad:IsLeader()) then return end
+
+		if (squad.members[client:SteamID64()]) then
+			net.Start("ixSquadLeave")
+				net.WriteString(squad.owner)
+			net.Send(client)
+
+			squad.members[client:SteamID64()] = nil
+			character:SetSquadID("NULL")
+			character:SetSquadOfficer(0)
+			squad:Sync()
+		end
+	end
 end)

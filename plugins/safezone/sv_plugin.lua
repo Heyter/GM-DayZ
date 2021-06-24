@@ -36,11 +36,11 @@ function PLUGIN:PlayerInitialSpawn(client)
 end
 
 -- ShouldCollide ломает физику при опр. условиях.
-function PLUGIN:ShouldCollide(ent1, ent2)
+--[[ function PLUGIN:ShouldCollide(ent1, ent2)
 	if (ent1:IsPlayer() and ent2:IsPlayer()) then
 		if (ent1:IsStuck() and ent2:IsStuck()) then return false end
 		if (ent1:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.OUTSIDE or ent2:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.OUTSIDE) then
 			return false
 		end
 	end
-end
+end ]]

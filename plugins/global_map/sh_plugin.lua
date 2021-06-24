@@ -197,6 +197,21 @@ function map.Open()
 			--end
 		end
 
+		do
+			for _, v in ipairs(player.GetAll()) do
+				if (IsValid(v) and v != LocalPlayer() and v:GetCharacter() and v:Alive()) then
+					local sq = ix.squad.list[LocalPlayer():GetCharacter():GetSquadID()]
+					if (sq and sq.members[v:SteamID64()]) then
+						x, y = map.ToScreen(v:GetPos(), w, h)
+						clr = Color("blue")
+
+						draw.SimpleTextOutlined(v:Name(), "MapFont", x, y - ix.map.iconSize, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+						draw.SimpleTextOutlined(ix.map.signs[1], "MapFont", x, y, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+					end
+				end
+			end
+		end
+
 		if (!SH_SZ or !SH_SZ.SafeZones or #SH_SZ.SafeZones == 0) then return end
 
 		for _, sz in ipairs(SH_SZ.SafeZones) do

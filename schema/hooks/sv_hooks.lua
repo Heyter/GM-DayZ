@@ -96,6 +96,38 @@ function GM:PlayerHurt(client, attacker, health, damage)
 	ix.log.Add(client, "playerHurt", damage, attacker:GetName() ~= "" and attacker:GetName() or attacker:GetClass())
 end
 
+function GM:PlayerSay(client, text, teamChat)
+	if (teamChat and text:find("%S")) then
+		local squad = ix.squad.list[client:GetCharacter():GetSquadID()]
+
+		if (squad) then
+			local receivers = squad:GetReceivers()
+
+			if (#receivers > 0) then
+				ix.chat.Send(client, "radio", text, nil, receivers)
+				return ""
+			end
+		end
+	end
+
+	local chatType, message, anonymous = ix.chat.Parse(client, text, true)
+
+	if (chatType == "ic") then
+		if (ix.command.Parse(client, message)) then
+			return ""
+		end
+	end
+
+	text = ix.chat.Send(client, chatType, message, anonymous)
+
+	if (isstring(text) and chatType != "ic") then
+		ix.log.Add(client, "chat", chatType and chatType:utf8upper() or "??", text)
+	end
+
+	hook.Run("PostPlayerSay", client, chatType, message, anonymous)
+	return ""
+end
+
 function Schema:InitPostEntity()
     local physData = physenv.GetPerformanceSettings()
     physData.MaxVelocity = 2000

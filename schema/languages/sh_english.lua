@@ -52,6 +52,7 @@ LANGUAGE = {
 	tradeChatPrefix = "[Trade] ",
 	globalChatPrefix = "[Global] ",
 	localChatPrefix = "[Local] ",
+	squadChatPrefix = "[Squad] ",
 	onlyEnglishLetters = "Only english is allowed in global chat.",
 	cmdTradeChat = "Sends a message in trade chat.",
 

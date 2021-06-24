@@ -82,6 +82,30 @@ function PLUGIN:InitializedChatClasses()
 		noSpaceAfter = true
 	})
 
+	ix.chat.Register("radio", {
+		bNoIndicator = true,
+		CanSay = function(self, speaker, text)
+			if (speaker.ixLastRadio and CurTime() - speaker.ixLastRadio <= 2) then
+				return false
+			end
+
+			speaker.ixLastRadio = CurTime()
+			return speaker:GetCharacter():GetSquadID() != "NULL"
+		end,
+		OnChatAdd = function(self, speaker, text)
+			local name = IsValid(speaker) and speaker:Name() or "Console"
+			local icon = IsValid(speaker) and ix.chat.GetPlayerIcon(speaker) or ""
+			local flag = ix.geoip:GetMaterial(speaker, false) or ""
+
+			if (#icon > 0) then
+				icon = ix.util.GetMaterial(icon)
+			end
+
+			chat.AddText(Color("blue"), L"squadChatPrefix", icon, flag, clr_gray, name .. ": ", color_white, text)
+		end,
+		noSpaceAfter = true
+	})
+
 	ix.chat.Register("ooc", {
 		CanSay = function(self, speaker, text)
 			-- contains non latin letters

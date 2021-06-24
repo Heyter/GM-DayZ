@@ -18,7 +18,7 @@ if (SERVER) then
 		end
 	end
 
-	-- TODO? Удалить.
+	-- TODO: Удалить.
 	function PLUGIN:PlayerLoadedCharacter(client, char)
 		client:SetUserGroup('superadmin')
 		char:GiveFlags("zptcCrenvV")

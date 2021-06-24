@@ -1,5 +1,6 @@
 ix.allowedHoldableClasses["gmodz_npc_loot"] = true
 
+local v1 = Vector(0, 0, 5000)
 function PLUGIN:OnNPCKilled(npc, attacker, weapon)
 	if (!attacker:IsPlayer()) then return end -- если убийца не игрок
 
@@ -32,9 +33,15 @@ function PLUGIN:OnNPCKilled(npc, attacker, weapon)
 	-- todo: сделать рандом
 	--inventory:Add(uniqueID, quantity, data, nil, nil, true)
 
+	local pos = npc:GetPos()
+	local trace = util.TraceLine({
+		start = pos,
+		endpos = pos - v1
+	})
+
 	-- entity loot
 	local entity = ents.Create("gmodz_npc_loot")
-	entity:SetPos(npc:GetPos() + Vector(0, 0, 32))
+	entity:SetPos(trace.HitPos - trace.HitNormal * entity:OBBMins().z)
 	entity:SetAngles(angle_zero)
 	entity:Spawn()
 

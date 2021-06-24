@@ -93,7 +93,7 @@ if (CLIENT) then
 		end
 	end
 
-	function PLUGIN:ShouldCollide(ent1, ent2)
+--[[ 	function PLUGIN:ShouldCollide(ent1, ent2)
 		if (ent1:IsPlayer() and ent2:IsPlayer()) then
 			if (ent1:IsStuck() and ent2:IsStuck()) then return false end
 
@@ -104,5 +104,5 @@ if (CLIENT) then
 				return false
 			end
 		end
-	end
+	end ]]
 end

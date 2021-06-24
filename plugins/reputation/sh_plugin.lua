@@ -176,11 +176,11 @@ function PLUGIN:MerchantCalculatePrice(client, price, scale, isSellingToVendor)
 		if (repPerc >= 0.6) then
 			if (rep < 0) then -- bandit
 				price = price / ix.config.Get("repMerchantPerc", 0.5)
-				return price
 			else
 				price = price * ix.config.Get("repMerchantPerc", 0.5)
-				return price
 			end
+
+			return price
 		end
 	end
 end

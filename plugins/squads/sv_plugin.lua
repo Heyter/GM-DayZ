@@ -5,6 +5,8 @@ util.AddNetworkString("ixSquadCreate")
 util.AddNetworkString("ixSquadInvite")
 util.AddNetworkString("ixSquadKickMember")
 util.AddNetworkString("ixSquadDisband")
+util.AddNetworkString("ixSquadRankChange")
+util.AddNetworkString("ixSquadLeave")
 
 ix.util.Include("sv_hooks.lua", "server")
 
@@ -81,17 +83,31 @@ function ix.squad.New(name, steamID64, callback)
 	query:Execute()
 end
 
-function ix.squad.RaiseMember(target, client)
-	local cache = ix.squad.list[client:GetCharacter():GetSquadID()]
-	if (!cache or cache:IsLeader(client) or !cache.members[client:SteamID64()]) then return end
+function ix.squad.ChangeRank(target, client)
+	if (IsValid(client) and client:GetCharacter()) then
+		local squad = ix.squad.list[client:GetCharacter():GetSquadID()]
 
-	if (IsValid(target)) then
-		local character = target:GetCharacter()
+		if (squad and squad:IsLeader(client) and IsValid(target)) then
+			local steamID64 = target:SteamID64()
+			local character = target:GetCharacter()
 
-		if (character and character:GetSquadOfficer() == 0) then
-			character:SetSquadOfficer(1)
+			if (squad.members[steamID64] and character) then
+				if (character:GetSquadOfficer() == 0) then
+					character:SetSquadOfficer(1)
+					squad.members[steamID64] = 1
 
-			// notify to target. [ You have been a promoted to officer ]
+					target:Notify("You were promoted to rank officer.")
+					client:NotifyLocalized("Member %s was promoted to rank officer.", target:Name())
+				else
+					character:SetSquadOfficer(0)
+					squad.members[steamID64] = 0
+
+					target:Notify("You were demoted to rank member.")
+					client:NotifyLocalized("Member %s was demoted to rank member.", target:Name())
+				end
+
+				squad:Sync()
+			end
 		end
 	end
 end
@@ -178,6 +194,63 @@ function ix.squad.KickMember(target, client)
 					net.WriteBool(false)
 				net.Send(target)
 			end
+		end
+	end
+end
+
+-- OFFLINE Methods
+function ix.squad.KickMember_Offline(steamID64, client)
+	if (IsValid(client) and client:GetCharacter()) then
+		local squad = ix.squad.list[client:GetCharacter():GetSquadID()]
+		if (!squad) then return end
+
+		local rank = squad:GetRank(client)
+
+		if (rank and rank != 0 and squad.members[steamID64]) then
+			if (rank == 1 and squad.members[steamID64] != 0) then
+				return
+			end
+
+			if (steamID64 == client:SteamID64() and squad.owner == steamID64) then
+				return
+			else
+				squad.members[steamID64] = nil
+				squad:Sync()
+
+				local query = mysql:Update("ix_characters")
+					query:Update("squad_id", "NULL")
+					query:Update("squad_officer", 0)
+					query:Where("schema", Schema.folder)
+					query:Where("steamid", steamID64)
+				query:Execute()
+			end
+		end
+	end
+end
+
+function ix.squad.ChangeRank_Offline(steamID64, client)
+	if (IsValid(client) and client:GetCharacter()) then
+		local squad = ix.squad.list[client:GetCharacter():GetSquadID()]
+
+		if (squad and squad:IsLeader(client) and squad.members[steamID64]) then
+			local is_officer = 0
+
+			if (squad.members[steamID64] == 0) then
+				squad.members[steamID64] = 1
+				client:NotifyLocalized("Member %s was promoted to rank officer.", steamID64)
+				is_officer = 1
+			else
+				squad.members[steamID64] = 0
+				client:NotifyLocalized("Member %s was demoted to rank member.", steamID64)
+			end
+
+			squad:Sync()
+
+			local query = mysql:Update("ix_characters")
+				query:Update("squad_officer", is_officer)
+				query:Where("schema", Schema.folder)
+				query:Where("steamid", steamID64)
+			query:Execute()
 		end
 	end
 end
