@@ -8,6 +8,8 @@ LANGUAGE = {
 	optColorSafezonePlayers = "Цвет игроков в безопасной зоне.",
 	optColorOutlineItems = "Цвет обводки предметов.",
 	optdColorOutlineItems = "Когда смотришь на предмет.",
+	optSquadTeamColor = "Цвет отряда",
+	optdSquadTeamColor = "На карте, в чате и т.д",
 
 	optToggleEffects = "Эффекты от первого лица",
 
@@ -55,6 +57,7 @@ LANGUAGE = {
 	squadChatPrefix = "[Отряд] ",
 	onlyEnglishLetters = "Только английский язык разрешен в глобальном чате.",
 	cmdTradeChat = "Отправить сообщение в торговый чат.",
+	cmdSquadChat = "Отправить сообщение отряду.",
 
 	cmdOOC = "Отправить сообщение в глобальный чат.",
 

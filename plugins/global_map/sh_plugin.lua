@@ -134,8 +134,8 @@ function map.Open()
 		return label:SetTextStyleColor(color_white)
 	end
 
-	frame.OnKeyCodeReleased = function(t, keyCode)
-		if (keyCode == KEY_F2) then
+	frame.OnKeyCodeReleased = function(t, key_code)
+		if (input.LookupKeyBinding(key_code) == "gm_showteam") then
 			ix.map.gui.map = nil
 			t:Remove()
 		end
@@ -203,7 +203,7 @@ function map.Open()
 					local sq = ix.squad.list[LocalPlayer():GetCharacter():GetSquadID()]
 					if (sq and sq.members[v:SteamID64()]) then
 						x, y = map.ToScreen(v:GetPos(), w, h)
-						clr = Color("blue")
+						clr = ix.option.Get("squadTeamColor", Color(51, 153, 255))
 
 						draw.SimpleTextOutlined(v:Name(), "MapFont", x, y - ix.map.iconSize, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
 						draw.SimpleTextOutlined(ix.map.signs[1], "MapFont", x, y, clr, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
@@ -331,10 +331,6 @@ function map.Open()
 		end
 	end
 end
-
-concommand.Add("gmodz_map", function()
-	map.Open()
-end)
 
 -- HOOKS
 function PLUGIN:LoadFonts()

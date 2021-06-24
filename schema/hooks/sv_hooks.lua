@@ -96,19 +96,14 @@ function GM:PlayerHurt(client, attacker, health, damage)
 	ix.log.Add(client, "playerHurt", damage, attacker:GetName() ~= "" and attacker:GetName() or attacker:GetClass())
 end
 
-function GM:PlayerSay(client, text, teamChat)
-	if (teamChat and text:find("%S")) then
-		local squad = ix.squad.list[client:GetCharacter():GetSquadID()]
-
-		if (squad) then
-			local receivers = squad:GetReceivers()
-
-			if (#receivers > 0) then
-				ix.chat.Send(client, "radio", text, nil, receivers)
-				return ""
-			end
-		end
-	end
+local chat_types = {
+	["ic"] = true,
+	["radio"] = true
+}
+function GM:PlayerSay(client, text)
+--[[ 	if (teamChat and ix.chat.Send(client, "radio", text)) then
+		return ""
+	end ]]
 
 	local chatType, message, anonymous = ix.chat.Parse(client, text, true)
 
@@ -120,7 +115,7 @@ function GM:PlayerSay(client, text, teamChat)
 
 	text = ix.chat.Send(client, chatType, message, anonymous)
 
-	if (isstring(text) and chatType != "ic") then
+	if (isstring(text) and !chat_types[chatType]) then
 		ix.log.Add(client, "chat", chatType and chatType:utf8upper() or "??", text)
 	end
 

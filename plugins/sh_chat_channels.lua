@@ -68,7 +68,7 @@ function PLUGIN:InitializedChatClasses()
 		indicator = "chatTalking",
 		OnChatAdd = function(self, speaker, text)
 			local name = IsValid(speaker) and speaker:Name() or "Console"
-			local name_color = IsValid(speaker) and hook.Run("GetPlayerColorSB", speaker) or color_white
+			local name_color = IsValid(speaker) and hook.Run("GetPlayerColorSB", speaker) or clr_gray
 			local icon = IsValid(speaker) and ix.chat.GetPlayerIcon(speaker) or ""
 			local flag = ix.geoip:GetMaterial(speaker, false) or ""
 
@@ -76,7 +76,7 @@ function PLUGIN:InitializedChatClasses()
 				icon = ix.util.GetMaterial(icon)
 			end
 
-			chat.AddText(Color(0, 150, 255), L"localChatPrefix", icon, flag, clr_gray, name .. ": ", name_color, text)
+			chat.AddText(Color(0, 150, 255), L"localChatPrefix", icon, flag, name_color, name .. ": ", color_white, text)
 		end,
 		CanHear = ix.config.Get("chatRange", 280),
 		noSpaceAfter = true
@@ -84,8 +84,13 @@ function PLUGIN:InitializedChatClasses()
 
 	ix.chat.Register("radio", {
 		bNoIndicator = true,
-		CanSay = function(self, speaker, text)
-			if (speaker.ixLastRadio and CurTime() - speaker.ixLastRadio <= 2) then
+		CanHear = function(self, speaker, target)
+			local squad = ix.squad.list[speaker:GetCharacter():GetSquadID()]
+
+			return squad and squad.members[target:SteamID64()]
+		end,
+		CanSay = function(self, speaker)
+			if (!speaker:Alive() or speaker.ixLastRadio and CurTime() - speaker.ixLastRadio <= 2) then
 				return false
 			end
 
@@ -94,16 +99,13 @@ function PLUGIN:InitializedChatClasses()
 		end,
 		OnChatAdd = function(self, speaker, text)
 			local name = IsValid(speaker) and speaker:Name() or "Console"
-			local icon = IsValid(speaker) and ix.chat.GetPlayerIcon(speaker) or ""
 			local flag = ix.geoip:GetMaterial(speaker, false) or ""
 
-			if (#icon > 0) then
-				icon = ix.util.GetMaterial(icon)
-			end
-
-			chat.AddText(Color("blue"), L"squadChatPrefix", icon, flag, clr_gray, name .. ": ", color_white, text)
+			chat.AddText(Color(51, 153, 255), L"squadChatPrefix", flag, clr_gray, name .. ": ", color_white, text)
 		end,
-		noSpaceAfter = true
+		description = "@cmdSquadChat",
+		noSpaceAfter = true,
+		prefix = "/radio",
 	})
 
 	ix.chat.Register("ooc", {

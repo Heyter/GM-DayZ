@@ -173,15 +173,25 @@ function PANEL:InitLeftSide(data)
 		self.entryName:SetTall(32)
 		self.entryName:Dock(TOP)
 		self.entryName:SetUpdateOnType(true)
-		self.entryName.OnValueChange = function(_, value)
+		self.entryName.OnEnter = function(_, value)
 			if (#value > 0 and value != self.data.name) then
 				self.netData["name"] = value:Trim()
 			end
 		end
-		self.entryName.AllowInput = function(t)
-			if (t:GetValue():utf8len() > 48) then
+		self.entryName.AllowInput = function(t, newCharacter)
+			if (string.len(t:GetText() .. newCharacter) > 48) then
 				surface.PlaySound("common/talk.wav")
 				return true
+			end
+		end
+		self.entryName.Think = function(t)
+			local text = t:GetText()
+
+			if (text:utf8len() > 48) then
+				local newText = text:utf8sub(0, 48)
+
+				t:SetText(newText)
+				t:SetCaretPos(newText:utf8len())
 			end
 		end
 		self.entryName.Paint = function(t, w, h)
@@ -380,10 +390,20 @@ function PANEL:InitRightSide(data)
 			self.descNotepad:Dock(FILL)
 			self.descNotepad:SetText(self.entryMessage.text)
 			self.descNotepad:SetUpdateOnType(true)
-			self.descNotepad.AllowInput = function(t)
-				if (t:GetValue():utf8len() > 2048) then
+			self.descNotepad.AllowInput = function(t, newCharacter)
+				if (string.len(t:GetText() .. newCharacter) > 2048) then
 					surface.PlaySound("common/talk.wav")
 					return true
+				end
+			end
+			self.descNotepad.Think = function(t)
+				local text = t:GetText()
+
+				if (text:utf8len() > 2048) then
+					local newText = text:utf8sub(0, 2048)
+
+					t:SetText(newText)
+					t:SetCaretPos(newText:utf8len())
 				end
 			end
 			self.descNotepad.OnValueChange = function(_, value)
@@ -472,6 +492,12 @@ function PANEL:OnRemove()
 		net.Start("ixSquadSettings")
 			net.WriteTable(self.netData)
 		net.SendToServer()
+	end
+end
+
+function PANEL:OnKeyCodeReleased(key_code)
+	if (input.LookupKeyBinding(key_code) == "gm_showspare2") then
+		self:Remove()
 	end
 end
 
@@ -565,7 +591,7 @@ function PANEL:SetAvatar(steamid)
 
 	for _, v in ipairs(player.GetAll()) do
 		if (IsValid(v) and v:SteamID64() == steamid) then
-			self.name:SetTextColor(Color("blue"))
+			self.name:SetTextColor(ix.option.Get("squadTeamColor", Color(51, 153, 255)))
 			self.name:SetText(v:Name())
 			self.steamName = true
 			break

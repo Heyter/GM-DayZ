@@ -5,6 +5,12 @@ PLUGIN.description = "Creation of your super-duper squad."
 ix.squad = ix.squad or {}
 ix.squad.list = ix.squad.list or {}
 
+if (CLIENT) then
+	ix.option.Add("squadTeamColor", ix.type.color, Color(51, 153, 255), {
+		category = "colors"
+	})
+end
+
 ix.char.RegisterVar("squadID", {
 	bNoDisplay = true,
 	isLocal = true,
@@ -41,29 +47,29 @@ ix.util.Include("sv_plugin.lua")
 if (CLIENT) then
 	function PLUGIN:PlayerBindPress(_, bind, pressed)
 		if (bind:find("gm_showspare2") and pressed) then
-			if (IsValid(ix.gui.squad)) then
+			if (!IsValid(ix.gui.squad)) then
+				local squadID = LocalPlayer():GetCharacter() and LocalPlayer():GetCharacter():GetSquadID()
+
+				if (squadID and squadID == "NULL") then
+					Derma_StringRequest(
+						"Create a squad", 
+						"Enter squad name",
+						"",
+						function(text)
+							if (text and #text > 0 and #text <= 48) then
+								net.Start("ixSquadCreate")
+									net.WriteString(text)
+								net.SendToServer()
+							end
+						end,
+						function() end
+					)
+				elseif (squadID and ix.squad.list[squadID]) then
+					ix.gui.squad = vgui.Create("ixSquadView")
+					ix.gui.squad:SetMembers(ix.squad.list[squadID])
+				end
+			else
 				ix.gui.squad:Remove()
-			end
-
-			local squadID = LocalPlayer():GetCharacter() and LocalPlayer():GetCharacter():GetSquadID()
-
-			if (squadID and squadID == "NULL") then
-				Derma_StringRequest(
-					"Create a squad", 
-					"Enter squad name",
-					"",
-					function(text)
-						if (text and #text > 0 and #text <= 48) then
-							net.Start("ixSquadCreate")
-								net.WriteString(text)
-							net.SendToServer()
-						end
-					end,
-					function() end
-				)
-			elseif (squadID and ix.squad.list[squadID]) then
-				ix.gui.squad = vgui.Create("ixSquadView")
-				ix.gui.squad:SetMembers(ix.squad.list[squadID])
 			end
 
 			return true
@@ -81,10 +87,10 @@ if (CLIENT) then
 
 	do
 		local function SquadColor(target)
-			if (!LocalPlayer():GetCharacter() or !IsValid(target)) then return end
+			if (!LocalPlayer():GetCharacter() or !IsValid(target) or target == LocalPlayer()) then return end
 			local sq = ix.squad.list[LocalPlayer():GetCharacter():GetSquadID()]
 			if (sq and sq.members[target:SteamID64()]) then
-				return Color("blue")
+				return ix.option.Get("squadTeamColor", Color(51, 153, 255))
 			end
 		end
 
@@ -111,7 +117,7 @@ if (CLIENT) then
 			end
 
 			if (#players > 0) then
-				outline.Add(players, Color("blue"), OUTLINE_MODE_VISIBLE)
+				outline.Add(players, ix.option.Get("squadTeamColor", Color(51, 153, 255)), OUTLINE_MODE_VISIBLE)
 			end
 		end
 	end

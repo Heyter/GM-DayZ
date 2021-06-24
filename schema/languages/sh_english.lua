@@ -8,6 +8,8 @@ LANGUAGE = {
 	optColorSafezonePlayers = "The color of the players in the safe zone.",
 	optColorOutlineItems = "Outline color for items.",
 	optdColorOutlineItems = "When you look at an item.",
+	optSquadTeamColor = "Squad color",
+	optdSquadTeamColor = "On the map, chat, etc.",
 
 	optToggleEffects = "First Person Effects",
 
@@ -55,6 +57,7 @@ LANGUAGE = {
 	squadChatPrefix = "[Squad] ",
 	onlyEnglishLetters = "Only english is allowed in global chat.",
 	cmdTradeChat = "Sends a message in trade chat.",
+	cmdSquadChat = "Sends a message to the squad.",
 
 	cmdOOC = "Sends a message in global chat.",
 

@@ -96,9 +96,13 @@ net.Receive("ixSquadSettings", function(_, client)
 			local name = tostring(data.name):gsub("\r\n", ""):gsub("\n", "")
 			name = string.Trim(name)
 
-			if (name:utf8len() < 1 or !name:find("%S") or name:gsub("%s", ""):utf8len() > 49) then
+			if (name:utf8len() < 1 or !name:find("%S")) then
 				data.name = nil
 			else
+				if (name:gsub("%s", ""):utf8len() > 48) then
+					name = name:utf8sub(0, 48)
+				end
+
 				squad.name = name
 			end
 		end
@@ -106,13 +110,15 @@ net.Receive("ixSquadSettings", function(_, client)
 		if (data.description) then
 			local desc = string.Trim(tostring(data.description))
 
-			if (!desc:find("%S") or desc:gsub("%s", ""):utf8len() > 2049) then
-				if (desc:utf8len() < 1) then
-					squad.description = ""
-				else
-					data.description = nil
-				end
+			if (!desc:find("%S")) then
+				data.description = nil
 			else
+				if (desc:utf8len() < 1) then
+					desc = ""
+				elseif (desc:gsub("%s", ""):utf8len() > 2048) then
+					desc = desc:utf8sub(0, 2048)
+				end
+
 				squad.description = desc
 			end
 		end
