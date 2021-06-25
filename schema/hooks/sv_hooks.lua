@@ -24,7 +24,7 @@ end
 
 function Schema:PlayerShouldTakeDamage(client, attacker)
 	if (IsValid(attacker) and attacker:IsPlayer()) then
-		if (attacker.protection_time or 0) > CurTime() then
+		if (attacker.protection_time and attacker.protection_time > CurTime()) then
 			attacker.protection_time = nil -- снимаем защиту, если тот кого-то атаковал.
 		elseif (attacker:GetLocalVar("protection")) then
 			return false
@@ -36,10 +36,11 @@ function Schema:PlayerShouldTakeDamage(client, attacker)
 	end
 end
 
+local clear_ents = { ["ix_item"] = true, ["gmodz_grave"] = true, ["gmodz_npc_loot"] = true }
 function Schema:ShutDown()
 	-- save DB space, mate.
 	for _, v in ipairs(ents.GetAll()) do
-		if (v:GetClass() == "ix_item" or v:GetClass() == "gmodz_grave" or v:GetClass() == "gmodz_npc_loot") then
+		if (clear_ents[v:GetClass()]) then
 			v:Remove()
 		end
 
