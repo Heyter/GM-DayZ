@@ -71,13 +71,22 @@ function PLUGIN:GetPlayerDeathSound()
 end
 
 function PLUGIN:CharacterPreSave(character)
-	local time = math.max(0, character:GetPlayer():GetLocalVar("legBroken", 0) - CurTime())
+	local client = character:GetPlayer()
+	if (client.healBody and !client:Alive()) then return end
+
+	local time = math.max(0, client:GetLocalVar("legBroken", 0) - CurTime())
 
 	if (time < 10) then
 		time = nil
 	end
 
 	character:SetData("legBroken", time)
+end
+
+function PLUGIN:OnCharacterDisconnect(client, character)
+	if (!client:Alive()) then
+		character:SetData("legBroken", nil, true)
+	end
 end
 
 function PLUGIN:PlayerLoadedCharacter(client, character)

@@ -3,12 +3,20 @@ local PLUGIN = PLUGIN
 -- HOOKS
 function PLUGIN:CharacterPreSave(character)
 	local client = character:GetPlayer()
-	
+	if (client.refillNeeds and !client:Alive()) then return end
+
 	local savedNeed = math.Clamp(CurTime() - client:GetLocalVar("hunger", 0), 0, ix.config.Get("hungrySeconds", 3500))
 	character:SetData("hunger", savedNeed)
 
 	savedNeed = math.Clamp(CurTime() - client:GetLocalVar("thirst", 0), 0, ix.config.Get("thirstySeconds", 2000))
 	character:SetData("thirst", savedNeed)
+end
+
+function PLUGIN:OnCharacterDisconnect(client, character)
+	if (!client:Alive()) then
+		character:SetData("hunger", nil, true)
+		character:SetData("thirst", nil, true)
+	end
 end
 
 function PLUGIN:PlayerLoadedCharacter(client, character)

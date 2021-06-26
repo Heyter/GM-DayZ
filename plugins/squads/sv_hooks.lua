@@ -111,7 +111,7 @@ net.Receive("ixSquadSettings", function(_, client)
 			local desc = string.Trim(tostring(data.description))
 
 			if (!desc:find("%S")) then
-				data.description = nil
+				squad.description = ""
 			else
 				if (desc:utf8len() < 1) then
 					desc = ""
@@ -123,7 +123,7 @@ net.Receive("ixSquadSettings", function(_, client)
 			end
 		end
 
-		if (data.logoID) then
+		if (isstring(data.logoID)) then
 			squad.logo = data.logoID
 		end
 

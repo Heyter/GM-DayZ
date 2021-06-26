@@ -69,17 +69,26 @@ end
 function PLUGIN:CharacterPreSave(character)
 	local client = character:GetPlayer()
 
-	local reputation = client:GetNetVar("reputation", 0)
-	local penalty = math.max(0, 0 - (CurTime() - client:GetLocalVar("penalty", 0)))
+	if (client:Alive()) then
+		local penalty = math.max(0, 0 - (CurTime() - client:GetLocalVar("penalty", 0)))
 
-	if (penalty < 1) then
-		penalty = nil
+		if (penalty < 1) then
+			penalty = nil
+		end
+
+		character:SetData("penalty", penalty)
 	end
 
-	character:SetData("penalty", penalty)
-
+	local reputation = client:GetNetVar("reputation", 0)
 	if (reputation != 0) then
 		character:SetData("reputation", reputation)
+	end
+end
+
+-- TODO: проверить при выходе будет ли присваиваться penalty
+function PLUGIN:OnCharacterDisconnect(client, character)
+	if (!client:Alive()) then
+		character:SetData("penalty", nil, true)
 	end
 end
 

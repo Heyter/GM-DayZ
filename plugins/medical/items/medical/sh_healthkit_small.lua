@@ -9,3 +9,7 @@ function ITEM:OnCanUse()
 		return false
 	end
 end
+
+if (SERVER) then
+	ITEM.rarity = { common = true }
+end

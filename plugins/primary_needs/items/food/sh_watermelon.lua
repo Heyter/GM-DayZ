@@ -6,3 +6,7 @@ ITEM.hungerAmount = 0.3 -- процент
 ITEM.thirstAmount = 0.3 -- процент
 ITEM.healthAmount = 0
 ITEM.staminaAmount = -100
+
+if (SERVER) then
+	ITEM.rarity = { common = true }
+end

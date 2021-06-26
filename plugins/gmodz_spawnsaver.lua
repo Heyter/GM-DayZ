@@ -9,7 +9,7 @@ function PLUGIN:CharacterPreSave(character)
 
 	-- Check to see if we can get the player's position.
 	if (IsValid(client)) then
-		if (client.bNotSavePosition) then
+		if (client.bNotSavePosition or !client:Alive()) then
 			character:SetData("pos", nil)
 			client.bNotSavePosition = nil
 			return

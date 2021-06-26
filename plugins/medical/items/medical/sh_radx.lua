@@ -14,3 +14,7 @@ else
 		return text
 	end
 end
+
+if (SERVER) then
+	ITEM.rarity = { rare = true }
+end

@@ -88,13 +88,22 @@ function PLUGIN:PlayerSpawn(client)
 end
 
 function PLUGIN:CharacterPreSave(character)
-	local rad = character:GetPlayer():GetRadiationTotal()
+	local client = character:GetPlayer()
+	if (client.resetRadiation and !client:Alive()) then return end
+
+	local rad = client:GetRadiationTotal()
 
 	if (rad < 10) then
 		rad = nil
 	end
 
 	character:SetData("radiation", rad)
+end
+
+function PLUGIN:OnCharacterDisconnect(client, character)
+	if (!client:Alive()) then
+		character:SetData("radiation", nil, true)
+	end
 end
 
 function PLUGIN:PlayerLoadedCharacter(client, character)

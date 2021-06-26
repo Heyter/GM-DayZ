@@ -245,21 +245,27 @@ function PANEL:InitLeftSide(data)
 				"Link to image (only www.imgur.com)",
 				"",
 				function(text)
-					if (#text == 0) then return end
+					if (#text == 0) then
+						self.netData["logoID"] = "ovW4MBM"
 
-					for _, v in ipairs(imgur_patterns) do
-						local logoID = text:match(v)
-
-						if (logoID) then
-							self.netData["logoID"] = logoID
-							break
-						end
-					end
-
-					if (self.netData["logoID"]) then
-						ix.util.FetchImage(self.netData["logoID"], function(mat)
+						ix.util.FetchImage("ovW4MBM", function(mat)
 							self.squadImg:SetMaterial(mat or Material("icon16/cross.png")) -- ix.util.GetMaterial
 						end)
+					else
+						for _, v in ipairs(imgur_patterns) do
+							local logoID = text:match(v)
+
+							if (logoID) then
+								self.netData["logoID"] = logoID
+								break
+							end
+						end
+
+						if (self.netData["logoID"]) then
+							ix.util.FetchImage(self.netData["logoID"], function(mat)
+								self.squadImg:SetMaterial(mat or Material("icon16/cross.png")) -- ix.util.GetMaterial
+							end)
+						end
 					end
 				end,
 				function(text) end

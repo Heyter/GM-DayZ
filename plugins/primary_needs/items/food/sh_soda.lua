@@ -14,3 +14,7 @@ ITEM.iconCam = {
 	ang = Angle(25, 220, 0),
 	fov = 4.292031810357,
 }
+
+if (SERVER) then
+	ITEM.rarity = { common = true }
+end

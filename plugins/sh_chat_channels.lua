@@ -105,7 +105,7 @@ function PLUGIN:InitializedChatClasses()
 		end,
 		description = "@cmdSquadChat",
 		noSpaceAfter = true,
-		prefix = "/radio",
+		prefix = {"/r", "/radio"}
 	})
 
 	ix.chat.Register("ooc", {
