@@ -99,42 +99,48 @@ function SWEP:GetMalfunctionAnimation()
     return anim
 end
 
-function SWEP:DoMalfunction()
+function SWEP:MalfunctionMeanCalculate()
+	local mm
 
+	if self.Jamming then mm = self.HeatCapacity * 4
+	else mm = self.Primary.ClipSize * 8 end
+
+	if self.ManualAction then
+		-- Manual guns are less likely to jam
+		mm = mm * 2
+	else
+		-- Burst and semi only guns are less likely to jam
+		local a, b = false, false
+		for k, v in pairs(self.Firemodes) do
+			if !v.Mode then continue end
+			if v.Mode == 2 then a = true
+			elseif v.Mode < 0 then b = true end
+		end
+		if !a and b then
+			mm = mm * 1.25
+		elseif !a and !b then
+			mm = mm * 1.5
+		end
+	end
+
+	return mm
+end
+
+function SWEP:DoMalfunction()
     if !self:MalfunctionEnabled() then return false end
 
     -- Auto calculated malfunction mean
-    if self.MalfunctionMean == nil then
-        local mm
-        if self.Jamming then mm = self.HeatCapacity * 4
-        else mm = self.Primary.ClipSize * 8 end
-
-        if self.ManualAction then
-            -- Manual guns are less likely to jam
-            mm = mm * 2
-        else
-            -- Burst and semi only guns are less likely to jam
-            local a, b = false, false
-            for k, v in pairs(self.Firemodes) do
-                if !v.Mode then continue end
-                if v.Mode == 2 then a = true
-                elseif v.Mode < 0 then b = true end
-            end
-            if !a and b then
-                mm = mm * 1.25
-            elseif !a and !b then
-                mm = mm * 1.5
-            end
-        end
-        self.MalfunctionMean = mm
+    if self.MalfunctionMean == nil or self.MalfunctionMeanCopy == nil then
+        self.MalfunctionMean = self:MalfunctionMeanCalculate()
+		self.MalfunctionMeanCopy = self.MalfunctionMean
     end
 
     local cvar = math.max(GetConVar("arccw_mult_malfunction"):GetFloat(), 0.00000001)
     local mean = self:GetBuff("MalfunctionMean") / cvar
-    local var = mean * math.Clamp(self:GetBuff("MalfunctionVariance") * math.max(1, math.sqrt(cvar)), 0, 1)
     local count = (self.ShotsSinceMalfunction or 0)
 
     if !self.NextMalfunction then
+		local var = mean * math.Clamp(self:GetBuff("MalfunctionVariance") * math.max(1, math.sqrt(cvar)), 0, 1)
         math.randomseed(math.Round(util.SharedRandom(count, -1337, 1337, !game.SinglePlayer() and self:GetOwner():GetCurrentCommand():CommandNumber() or CurTime()) * (self:EntIndex() % 30241)))
         self.NextMalfunction = math.sqrt(-2 * var * math.log(math.random())) * math.cos(2 * math.pi * math.random())
     end
@@ -142,7 +148,7 @@ function SWEP:DoMalfunction()
     local ret = self:GetBuff_Hook("Hook_Malfunction", count, true)
     if ret != nil then return ret end
 
-   -- print(mean, var, count, self.NextMalfunction)
+	--print(os.date( "%H:%M:%S" , os.time() ), mean, count, self.NextMalfunction, self.NextMalfunction + mean)
     if count >= self.NextMalfunction + mean then
         local ret2 = self:GetBuff_Hook("Hook_OnMalfunction", count, true)
         if ret2 then return false end

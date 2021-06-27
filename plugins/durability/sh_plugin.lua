@@ -52,9 +52,13 @@ function PLUGIN:InitializedPlugins()
 					WEAPON.msg_jammed = L("weaponJammed")
 
 					function WEAPON:Hook_PostFireBullets()
-						if (self:GetOwner():GetLocalVar("WeaponDurability", 100) <= 0) then
-							--self:SetJammed(true)
+						local durability = self:GetOwner():GetLocalVar("WeaponDurability", 100)
+
+						if (durability <= 0) then
 							self.NextMalfunction = 999999
+						else
+							self.MalfunctionMeanCopy = self.MalfunctionMeanCopy or self:MalfunctionMeanCalculate()
+							self.MalfunctionMean = math.max(0, self.MalfunctionMeanCopy * (durability / 100))
 						end
 					end
 				end

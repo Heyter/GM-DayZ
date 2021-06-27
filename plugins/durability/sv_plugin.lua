@@ -33,8 +33,8 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 
 				function ITEM:OnEquipWeapon(client, weapon)
 					if (self.useDurability) then
-						if (self.GetJamChance) then
-							weapon.JamChance = self:GetJamChance()
+						if (self.JamCapacity) then
+							weapon.HeatCapacity = self.JamCapacity
 						end
 
 						client:SetLocalVar("WeaponDurability", self:GetData("durability", 100))
@@ -79,7 +79,8 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 							self:GetOwner():SetLocalVar("WeaponDurability", durability)
 						end
 
-						--self:SetJamFactor(math.Clamp(100 - durability, self.JamChance, 100))
+						self.MalfunctionMeanCopy = self.MalfunctionMeanCopy or self:MalfunctionMeanCalculate()
+						self.MalfunctionMean = math.max(0, self.MalfunctionMeanCopy * (durability / 100))
 					end
 
 					self.ShotsFired = 0

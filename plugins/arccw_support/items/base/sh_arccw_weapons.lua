@@ -9,14 +9,10 @@ ITEM.attachments = {}
 ITEM.isArcCW = true
 
 ITEM.useDurability = true
-ITEM.DegradeRate = 0.5 -- durability
-ITEM.JamChance = 0.04 -- jamming
+ITEM.DegradeRate = 0.5 -- The degrade rate of the durability of the weapon with each shot
+ITEM.JamCapacity = 100 -- Rounds that can be fired non-stop before the gun jams, playing the "fix" animation
 
 ITEM.ammo = nil -- type of the ammo
-
-function ITEM:GetJamChance()
-	return self.JamChance * 50
-end
 
 function ITEM:GetSellPrice(base_price, scale)
 	local attach_modifier = scale * table.Count(self:GetData("mods", {}))
