@@ -27,17 +27,35 @@ end
 
 ix.util.Include("sv_plugin.lua")
 
-function PLUGIN:ScalePlayerDamage(client, hit_group, dmg_info)
-	if (client:IsPlayer()) then
-		if (hit_group == HITGROUP_HEAD) then
-			dmg_info:ScaleDamage(2)
-		elseif (hit_group == HITGROUP_STOMACH) then
-			dmg_info:ScaleDamage(1)
-		elseif (hit_group == HITGROUP_LEFTARM or hit_group == HITGROUP_RIGHTARM) then
-			dmg_info:ScaleDamage(0.5)
-		elseif (hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) then
-			dmg_info:ScaleDamage(0.75)
-		end
+function PLUGIN:ScalePlayerDamage(_, hit_group, dmg_info)
+	if (hit_group == HITGROUP_HEAD) then
+		dmg_info:ScaleDamage(1.5)
+	elseif (hit_group == HITGROUP_CHEST) then
+		dmg_info:ScaleDamage(1)
+	elseif (hit_group == HITGROUP_STOMACH) then
+		dmg_info:ScaleDamage(0.9)
+	elseif (hit_group == HITGROUP_LEFTARM or hit_group == HITGROUP_RIGHTARM) then
+		dmg_info:ScaleDamage(0.8)
+	elseif (hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) then
+		dmg_info:ScaleDamage(0.7)
+	else
+		dmg_info:ScaleDamage(1)
+	end
+end
+
+function PLUGIN:ScaleNPCDamage(entity, hit_group, dmg_info)
+	if (hit_group == HITGROUP_HEAD) then
+		dmg_info:ScaleDamage(entity:Health())
+	elseif (hit_group == HITGROUP_CHEST) then
+		dmg_info:ScaleDamage(1)
+	elseif (hit_group == HITGROUP_STOMACH) then
+		dmg_info:ScaleDamage(0.9)
+	elseif (hit_group == HITGROUP_LEFTARM or hit_group == HITGROUP_RIGHTARM) then
+		dmg_info:ScaleDamage(0.8)
+	elseif (hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) then
+		dmg_info:ScaleDamage(0.7)
+	else
+		dmg_info:ScaleDamage(1)
 	end
 end
 

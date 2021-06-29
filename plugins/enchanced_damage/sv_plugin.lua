@@ -80,7 +80,7 @@ function PLUGIN:CharacterPreSave(character)
 		time = nil
 	end
 
-	character:SetData("legBroken", time)
+	character:SetData("legBroken", time, true)
 end
 
 function PLUGIN:OnCharacterDisconnect(client, character)

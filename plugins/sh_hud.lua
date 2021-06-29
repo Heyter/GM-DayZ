@@ -452,7 +452,7 @@ else
 			local health = client:GetHealth()
 			local maxHealth = client:GetMaxHealth()
 
-			if (health < maxHealth) then
+			if (health < 34) then
 				if (!self.HeartbeatSound) then
 					self.HeartbeatSound = CreateSound(client, "player/heartbeat1.wav")
 				end

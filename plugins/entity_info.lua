@@ -6,6 +6,7 @@ if (CLIENT) then
 	local PLUGIN = PLUGIN
 	local notShouldEnts = {
 		["ix_item"] = true,
+		["ix_money"] = true
 	}
 
 	local lastEntity
@@ -80,6 +81,31 @@ if (CLIENT) then
 					local durabilityColor = Color(2.55 * (100 - durability), 2.55 * durability, 0, 255)
 
 					draw.SimpleTextOutlined(math.Round(durability, 1) .. "%", "ixNoticeFont", x, y+(noticeHeight*index)-(noticeHeight/2), durabilityColor, 1, 1, 1, shadowColor)
+				end
+			elseif (IsValid(entity) and (entity:GetClass() == "ix_money" or entity:GetClass() == "gmodz_npc_loot")) then
+				local x, y
+				local lastEntity = LocalPlayer():GetTrace(160, 2).Entity
+
+				if (lastEntity and lastEntity == entity) then
+					x, y = ScrW() / 2, ScrH() / 2
+				else
+					local position = entity:LocalToWorld(entity:OBBCenter())
+					x, y = position:ToScreen().x, position:ToScreen().y
+				end
+
+				if !(x and y) then continue end
+				local name = ""
+
+				if (entity:GetClass() == "ix_money") then
+					name = ix.currency.Get(entity:GetAmount()) or ""
+				elseif (entity:GetClass() == "gmodz_npc_loot") then
+					name = "Loot"
+				end
+
+				if (#name > 0) then
+					draw.SimpleTextOutlined(name, "ixNoticeFont",
+						x, y-(noticeHeight/2), color_white, 1, 1, 1, shadowColor
+					)
 				end
 			end
 		end

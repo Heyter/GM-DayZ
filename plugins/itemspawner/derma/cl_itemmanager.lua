@@ -39,7 +39,7 @@ function PANEL:Populate(items)
 		self.index.title:SetColor(ix.config.Get("color", Color(255,255,255)))
 
 		self.index.update = self.index.leftPanel:Add("DLabel")
-		self.index.update:SetText("Delay: "..item.delay)
+		self.index.update:SetText("Delay: " .. item.delay .. " min")
 		self.index.update:Dock(TOP)
 		self.index.update:SetFont("ixGenericFont")
 		self.index.update:DockMargin(10, 10, 0, 0)

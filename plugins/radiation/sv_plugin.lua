@@ -97,7 +97,7 @@ function PLUGIN:CharacterPreSave(character)
 		rad = nil
 	end
 
-	character:SetData("radiation", rad)
+	character:SetData("radiation", rad, true)
 end
 
 function PLUGIN:OnCharacterDisconnect(client, character)

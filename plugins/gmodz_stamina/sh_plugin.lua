@@ -100,7 +100,7 @@ if (SERVER) then
 		local client = character:GetPlayer()
 
 		if (IsValid(client)) then
-			character:SetData("stamina", client:GetLocalVar("stm", 0))
+			character:SetData("stamina", client:GetLocalVar("stm", 0), true)
 		end
 	end
 

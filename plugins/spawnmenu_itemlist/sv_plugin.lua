@@ -24,6 +24,8 @@ net.Receive('MenuItemSpawn', function(len, client)
 		angles.y = angles.y + 180
 
 		ix.item.Spawn(uniqueID, HitPos, function(item, entity)
+			entity:SetPos(HitPos + select(2, entity:GetCollisionBounds()))
+
 			client:Notify("You have spawned a " .. item.name .. ".")
 
 			undo.Create("ixItem")

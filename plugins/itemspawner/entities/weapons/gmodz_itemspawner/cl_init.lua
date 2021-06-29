@@ -41,13 +41,13 @@ function SWEP:DrawHUD()
 		local col = color_white
 
 		for _, v2 in ipairs(ents.FindInSphere(v.position, 16)) do
-			if (IsValid(v2) and (v2:IsPlayer() or v2:GetClass() == "ix_item")) then
+			if (IsValid(v2) and (v2:IsPlayer() and v2:GetMoveType() != MOVETYPE_NOCLIP or v2:GetClass() == "ix_item")) then
 				col = Color("red")
 				break
 			end
 		end
 
-		if (LocalPlayer():GetPos():DistToSqr(v.position) < self.nearDist) then
+		if (LocalPlayer():GetMoveType() != MOVETYPE_NOCLIP and LocalPlayer():GetPos():DistToSqr(v.position) < self.nearDist) then
 			col = Color("red")
 		end
 
@@ -55,6 +55,6 @@ function SWEP:DrawHUD()
 		surface.DrawRect(a.x, a.y, 8, 8)
 		draw.SimpleText(v.title, "ixSmallFont", a.x, a.y - 10, col, 1, 1)
 		draw.SimpleText(Format("Rarity: %d%%", v.rarity), "ixSmallFont", a.x, a.y - 10 - ty*0.6, color_white, 1, 1)
-		draw.SimpleText(Format("Delay: %d sec", v.delay), "ixSmallFont", a.x, a.y - 10 - ty - 5, color_white, 1, 1)
+		draw.SimpleText(Format("Delay: %d min", v.delay), "ixSmallFont", a.x, a.y - 10 - ty - 5, color_white, 1, 1)
 	end
 end

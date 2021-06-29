@@ -2,6 +2,8 @@ PLUGIN.name = "Spawn Saver"
 PLUGIN.author = "Chessnut"
 PLUGIN.description = "Saves the position of a character."
 
+if (CLIENT) then return end
+
 -- Called right before the character has its information save.
 function PLUGIN:CharacterPreSave(character)
 	-- Get the player from the character.
@@ -10,7 +12,7 @@ function PLUGIN:CharacterPreSave(character)
 	-- Check to see if we can get the player's position.
 	if (IsValid(client)) then
 		if (client.bNotSavePosition or !client:Alive()) then
-			character:SetData("pos", nil)
+			character:SetData("pos", nil, true)
 			client.bNotSavePosition = nil
 			return
 		end
@@ -21,7 +23,7 @@ function PLUGIN:CharacterPreSave(character)
 			position, eyeAngles = client.ixObsData[1], client.ixObsData[2]
 		end
 		-- Store the position in the character's data.
-		character:SetData("pos", {position, eyeAngles, game.GetMap()})
+		character:SetData("pos", {position, eyeAngles, game.GetMap()}, true)
 	end
 end
 
@@ -41,7 +43,7 @@ function PLUGIN:PlayerLoadedCharacter(client, character, lastChar)
 				end
 
 				-- Remove the position data since it is no longer needed.
-				character:SetData("pos", nil)
+				character:SetData("pos", nil, true)
 			end
 		end
 	end)

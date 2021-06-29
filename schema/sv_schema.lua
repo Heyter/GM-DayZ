@@ -76,7 +76,7 @@ function ixItemENT:Initialize()
 	self:SetModel("models/props_junk/watermelon01.mdl")
 	self:SetSolid(SOLID_VPHYSICS)
 	self:PhysicsInit(SOLID_VPHYSICS)
-	self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+	self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 	self:SetUseType(SIMPLE_USE)
 	self.health = 50
 

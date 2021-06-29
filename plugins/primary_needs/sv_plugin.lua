@@ -6,10 +6,10 @@ function PLUGIN:CharacterPreSave(character)
 	if (client.refillNeeds and !client:Alive()) then return end
 
 	local savedNeed = math.Clamp(CurTime() - client:GetLocalVar("hunger", 0), 0, ix.config.Get("hungrySeconds", 3500))
-	character:SetData("hunger", savedNeed)
+	character:SetData("hunger", savedNeed, true)
 
 	savedNeed = math.Clamp(CurTime() - client:GetLocalVar("thirst", 0), 0, ix.config.Get("thirstySeconds", 2000))
-	character:SetData("thirst", savedNeed)
+	character:SetData("thirst", savedNeed, true)
 end
 
 function PLUGIN:OnCharacterDisconnect(client, character)

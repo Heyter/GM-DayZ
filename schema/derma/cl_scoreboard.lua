@@ -190,6 +190,51 @@ function PANEL:Init()
 				if (IsValid(row) and IsValid(client)) then
 					local menu = DermaMenu()
 
+					if (client != LocalPlayer()) then
+						local pnl = menu:AddOption("", function()
+							client:SetMuted(!client:IsMuted())
+						end)
+
+						pnl:SetImage(client:IsMuted() and "icon16/sound_mute.png" or "icon16/sound.png")
+						row.voice:SetImage(pnl.m_Image.ImageName)
+						pnl:DockPadding(0, 0, 0, 20)
+						pnl.Paint = function(t, w, h)
+							derma.SkinFunc("PaintMenuOption", t, h + 6, h)
+						end
+
+						pnl.Container = pnl:Add("DPanel")
+						pnl.Container:SetPos(27, 0)
+						pnl.Container:SetSize(140, 24)
+						pnl.Container.Paint = function() end
+
+						pnl.Volume = pnl.Container:Add("DNumSlider")
+						pnl.Volume:Dock(FILL)
+						pnl.Volume:SetMinMax(0, 100)
+						pnl.Volume:SetValue(math.ceil(client:GetVoiceVolumeScale() * 100))
+						pnl.Volume:SetDecimals(0)
+						pnl.Volume:SetDark(true)
+						pnl.Volume.Label:Hide()
+						pnl.Volume.Label:SetTextColor(color_white)
+						pnl.Volume.TextArea:SetTextColor(color_white)
+						pnl.Volume.TextArea:SetWide(24)
+						pnl.Volume.OnValueChanged = function(this, value)
+							value = math.floor(value) / 100
+							client:SetVoiceVolumeScale(value)
+
+							if (value > 0) then
+								pnl:SetImage("icon16/sound.png")
+								row.voice:SetImage(pnl.m_Image.ImageName)
+								client:SetMuted(false)
+							else
+								pnl:SetImage("icon16/sound_mute.png")
+								row.voice:SetImage(pnl.m_Image.ImageName)
+								client:SetMuted(true)
+							end
+						end
+						
+						menu:AddPanel(pnl)
+					end
+
 					menu:AddOption(L("viewProfile"), function()
 						if IsValid(client) then client:ShowProfile() end
 					end)
@@ -232,10 +277,16 @@ function PANEL:Init()
 				surface.SetDrawColor(t.m_Color.r, t.m_Color.g, t.m_Color.b, t.m_Color.a)
 				surface.DrawTexturedRect(0, dh * 0.5 - 16 * 0.5 + 1, 16, 16)
 			end
+			row.voice.OnMouseWheeled = function( t, delta )
+				if (!IsValid(client)) then return end
+
+				client:SetVoiceVolumeScale( client:GetVoiceVolumeScale() + ( delta / 100 * 5 ) )
+				t.LastTick = CurTime()
+			end
 		end
 
 		row.Update = function(t)
-			if (IsValid(t.voice)) then
+			if (IsValid(t.voice) and IsValid(client)) then
 				t.voice:SetImage(client:IsMuted() and "icon16/sound_mute.png" or "icon16/sound.png")
 			end
 		end

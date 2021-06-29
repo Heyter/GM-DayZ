@@ -2,14 +2,8 @@ AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("shared.lua")
 include("shared.lua")
 
-ENT.RandomModels = {}
-
-for k = 1, 4 do
-	ENT.RandomModels[k] = Format("models/props_junk/cardboard_box00%da.mdl", k)
-end
-
 function ENT:Initialize()
-	self:SetModel(self.RandomModels[ math.random( #self.RandomModels ) ])
+	self:SetModel("models/props_junk/cardboard_box003a.mdl")
 	self:SetSolid(SOLID_VPHYSICS)
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetCollisionGroup(COLLISION_GROUP_WEAPON)

@@ -6,8 +6,10 @@ PLUGIN.items = PLUGIN.items or {}
 PLUGIN.spawner.positions = PLUGIN.spawner.positions or {}
 PLUGIN.spawnedItems = PLUGIN.spawnedItems or 0
 
-PLUGIN.items.common = PLUGIN.items.common or {}
-PLUGIN.items.rare = PLUGIN.items.rare or {}
+Schema.dropItems = Schema.dropItems or {
+	rare = {},
+	common = {}
+}
 
 util.AddNetworkString("ixItemSpawnerManager")
 util.AddNetworkString("ixItemSpawnerDelete")
@@ -17,15 +19,15 @@ util.AddNetworkString("ixItemSpawnerSpawn")
 util.AddNetworkString("ixItemSpawnerChanges")
 
 function PLUGIN:InitializedPlugins()
-	PLUGIN.items.common = {}
-	PLUGIN.items.rare = {}
+	Schema.dropItems.common = {}
+	Schema.dropItems.rare = {}
 
 	for itemID, v in pairs(ix.item.list) do
 		if (v.rarity and istable(v.rarity)) then
 			if (v.rarity.rare) then
-				PLUGIN.items.rare[#PLUGIN.items.rare + 1] = itemID
+				Schema.dropItems.rare[#Schema.dropItems.rare + 1] = itemID
 			elseif (v.rarity.common) then
-				PLUGIN.items.common[#PLUGIN.items.common + 1] = itemID
+				Schema.dropItems.common[#Schema.dropItems.common + 1] = itemID
 			end
 		end
 	end
@@ -86,43 +88,48 @@ function PLUGIN:ForceSpawn(client, spawner)
 	if !(ix.config.Get("spawnerActive")) then return end
 
 	spawner.lastSpawned = os.time() + (spawner.delay * 60)
-	local rareChance = math.random(100)
-
-	if (rareChance > tonumber(spawner.rarity)) then
-		rareChance = PLUGIN.items.common[ math.random( #PLUGIN.items.common ) ]
-	else
-		rareChance = PLUGIN.items.rare[ math.random( #PLUGIN.items.rare ) ]
-	end
 
 	local near_item = nil
 	for _, v in ipairs(ents.FindInSphere(spawner.position, 16)) do
-		if (IsValid(v) and (v:IsPlayer() or v:GetClass() == "ix_item")) then
+		if (IsValid(v) and (v:IsPlayer() and v:GetMoveType() != MOVETYPE_NOCLIP or v:GetClass() == "ix_item")) then
 			near_item = true
 			break
 		end
 	end
 
 	for _, v in ipairs(player.GetHumans()) do
-		if (IsValid(v) and v:Alive() and v:GetPos():DistToSqr(spawner.position) < nearDist) then
+		if (IsValid(v) and v:GetMoveType() != MOVETYPE_NOCLIP and v:Alive() and v:GetPos():DistToSqr(spawner.position) < nearDist) then
 			near_item = true
 			break
 		end
 	end
 
-	if (!near_item) then
-		ix.item.Spawn(rareChance, spawner.position, function(_, entity)
-			timer.Simple(2, function()
-				if (IsValid(entity)) then
-					local physObj = entity:GetPhysicsObject()
-
-					if (IsValid(physObj)) then
-						physObj:EnableMotion(false)
-						physObj:Sleep()
-					end
-				end
-			end)
-		end)
+	if (near_item) then
+		spawner.lastSpawned = os.time() + 60
+		near_item = nil
+		return
 	end
+
+	local itemID = math.random(100)
+
+	if (itemID > tonumber(spawner.rarity)) then
+		itemID = Schema.dropItems.common[ math.random( #Schema.dropItems.common ) ]
+	else
+		itemID = Schema.dropItems.rare[ math.random( #Schema.dropItems.rare ) ]
+	end
+
+	ix.item.Spawn(itemID, spawner.position, function(_, entity)
+		timer.Simple(2, function()
+			if (IsValid(entity)) then
+				local physObj = entity:GetPhysicsObject()
+
+				if (IsValid(physObj)) then
+					physObj:EnableMotion(false)
+					physObj:Sleep()
+				end
+			end
+		end)
+	end)
 end
 
 timer.Create("ixItemSpawner", 5, 0, function()
@@ -134,14 +141,14 @@ timer.Create("ixItemSpawner", 5, 0, function()
 
 			local near_item = nil
 			for _, v2 in ipairs(ents.FindInSphere(v.position, 16)) do
-				if (IsValid(v2) and (v2:IsPlayer() or v2:GetClass() == "ix_item")) then
+				if (IsValid(v2) and (v2:IsPlayer() and v2:GetMoveType() != MOVETYPE_NOCLIP or v2:GetClass() == "ix_item")) then
 					near_item = true
 					break
 				end
 			end
 
 			for _, v2 in ipairs(player.GetHumans()) do
-				if (IsValid(v2) and v2:Alive() and v2:GetPos():DistToSqr(v.position) < nearDist) then
+				if (IsValid(v2) and v2:GetMoveType() != MOVETYPE_NOCLIP and v2:Alive() and v2:GetPos():DistToSqr(v.position) < nearDist) then
 					near_item = true
 					break
 				end
@@ -153,11 +160,12 @@ timer.Create("ixItemSpawner", 5, 0, function()
 				continue
 			end
 
-			local itemID = nil
-			if (math.random(100) > v.rarity) then
-				itemID = PLUGIN.items.common[ math.random( #PLUGIN.items.common ) ]
+			local itemID = math.random(100)
+
+			if (itemID > v.rarity) then
+				itemID = Schema.dropItems.common[ math.random( #Schema.dropItems.common ) ]
 			else
-				itemID = PLUGIN.items.rare[ math.random( #PLUGIN.items.rare ) ]
+				itemID = Schema.dropItems.rare[ math.random( #Schema.dropItems.rare ) ]
 			end
 
 			if (itemID) then
