@@ -1,6 +1,6 @@
 local PLUGIN = PLUGIN
 
-function PLUGIN:EntityTakeDamage(victim, dmgInfo)
+function PLUGIN:EntityTakeDamage(_, dmgInfo)
 	local attacker = dmgInfo:GetAttacker()
 
 	if (IsValid(attacker) and attacker:IsPlayer()) then

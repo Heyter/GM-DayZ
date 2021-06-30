@@ -49,6 +49,7 @@ function PLUGIN:DoPlayerDeath(client)
 
 	if (!replication) then
 		ix.item.inventories[inventory:GetID()] = nil
+		inventory = nil
 		return
 	end
 

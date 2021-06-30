@@ -32,3 +32,16 @@ end
 function Schema:CanPlayerUseBusiness(client, id)
 	return false
 end
+
+-- PAC3
+function Schema:PrePACConfigApply(client)
+	if (!client:IsSuperAdmin()) then
+		return false, "Permission Denied"
+	end
+end
+
+function Schema:PrePACEditorOpen(client)
+	if (!client:IsSuperAdmin()) then
+		return false
+	end
+end

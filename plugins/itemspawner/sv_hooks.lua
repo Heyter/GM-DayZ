@@ -4,7 +4,6 @@ local PLUGIN = PLUGIN
 PLUGIN.spawner = PLUGIN.spawner or {}
 PLUGIN.items = PLUGIN.items or {}
 PLUGIN.spawner.positions = PLUGIN.spawner.positions or {}
-PLUGIN.spawnedItems = PLUGIN.spawnedItems or 0
 
 Schema.dropItems = Schema.dropItems or {
 	rare = {},

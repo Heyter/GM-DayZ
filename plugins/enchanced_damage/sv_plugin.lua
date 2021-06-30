@@ -42,26 +42,30 @@ function PLUGIN:PlayerSpawn(client)
 	end
 end
 
--- TODO: Возможно стоит перекинуть на EntityTakeDamage т.к урон от взрыва не определяется (он по хитгруппе 0)
-function PLUGIN:PlayerHurt(client, attacker, health, damage)
-	if (damage > 0 and health > 0 and (attacker:IsPlayer() or attacker:IsNPC())) then
+function PLUGIN:PlayerTakeDamage(client, damageInfo)
+	local attacker = damageInfo:GetAttacker()
+
+	if (IsValid(attacker) and (attacker:IsPlayer() or attacker:IsNPC())) then
 		if (attacker:IsPlayer() and hook.Run("PlayerShouldTakeDamage", client, attacker) == false) then return end
 
 		local hit_group = client:LastHitGroup()
-		if (hit_group == 0) then return end -- урон от кулаков, падения (свой хук)
 
-		if ((client.ixNextHurt or 0) < CurTime()) then
-			net.Start("ixHitmarker")
-				net.WriteBool(hit_group == HITGROUP_HEAD)
-			net.Send(client)
+		if (hit_group != 0 or damageInfo:IsExplosionDamage()) then
+			local damage = damageInfo:GetDamage()
 
-			client.ixNextHurt = CurTime() + 0.25
-		end
+			if ((client.ixNextHurt or 0) < CurTime()) then
+				net.Start("ixHitmarker")
+					net.WriteBool(hit_group == HITGROUP_HEAD)
+				net.Send(client)
 
-		client:SetBleeding(damage, nil, attacker)
+				client.ixNextHurt = CurTime() + 0.25
+			end
 
-		if ((hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) and damage > client:GetHealth() / 2 and damage < client:GetHealth()) then
-			client:BreakLeg()
+			client:SetBleeding(damage, nil, attacker)
+
+			if ((hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) and damage > client:GetHealth() / 2 and damage < client:GetHealth()) then
+				client:BreakLeg()
+			end
 		end
 	end
 end

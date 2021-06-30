@@ -22,12 +22,12 @@ function ITEM:GetSellPrice(base_price, scale)
 end
 
 function ITEM:CanSell()
-	return (self:GetData("durability", 100) >= 0)
+	return (self:GetData("durability", 100) > 0)
 end
 
 if (CLIENT) then
 	function ITEM:CanStack(combineItem)
-		return combineItem:GetData("durability", combineItem.ammoAmount) == self:GetData("durability", self.ammoAmount)
+		return combineItem:GetData("durability", 100) == self:GetData("durability", 100)
 			and combineItem:GetData("ammo", 0) == self:GetData("ammo", 0)
 	end
 

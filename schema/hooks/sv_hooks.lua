@@ -137,16 +137,18 @@ function Schema:InitPostEntity()
     game.ConsoleCommand("sv_alltalk 0\n")
 end
 
-function Schema:EntityTakeDamage(target, dmgInfo)
-	if (!IsValid(target) or dmgInfo:GetDamage() == 0) then return end
+function Schema:EntityTakeDamage(entity, dmgInfo)
+	if (!IsValid(entity) or dmgInfo:GetDamage() == 0) then return end
 
-	if (target:IsPlayer()) then
-		local extra_health = target:ExtraHealth()
+	if (entity:IsPlayer()) then
+		local extra_health = entity:ExtraHealth()
 
 		if (extra_health > 0) then
 			dmgInfo:SubtractDamage(extra_health)
-			target:AddExtraHealth(-extra_health)
+			entity:AddExtraHealth(-extra_health)
 		end
+
+		hook.Run("PlayerTakeDamage", entity, dmgInfo)
 
 		if (dmgInfo:GetDamage() <= 0.5) then return true end
 	end

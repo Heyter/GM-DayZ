@@ -79,12 +79,14 @@ function PLUGIN:PlayerLoadedCharacter(client, curChar)
 
 		if (gasItem) then
 			client.ixGasMaskItem = gasItem
+
 			net.Start("ixMaskOn")
 				net.WriteUInt(gasItem:GetID(), 32)
 				net.WriteUInt(gasItem:GetHealth(), 16)
 			net.Send(client)
 		else
 			client.ixGasMaskItem = nil
+
 			net.Start("ixMaskOff")
 			net.Send(client)
 		end
@@ -100,22 +102,20 @@ function PLUGIN:PlayerDeath(client)
 end
 
 -- This hook simulates the damage of the Gas Mask.
-function PLUGIN:EntityTakeDamage(client, dmgInfo)
-	if (client and client:IsPlayer()) then
-		local item = client:GetGasMask()
+function PLUGIN:PlayerTakeDamage(client, dmgInfo)
+	local item = client:GetGasMask()
 
-		if (item and item.isGasMask) then
-			local damage = dmgInfo:GetDamage() * .5
-			item:DamageHealth(damage)
+	if (item and item.isGasMask) then
+		local damage = dmgInfo:GetDamage() * .5
+		item:DamageHealth(damage)
 
-			local crackNums = math.Round((1 - item:GetHealth()/ix.config.Get("gasmask_health", 100))*6)
+		local crackNums = math.Round((1 - item:GetHealth() / ix.config.Get("gasmask_health", 100)) * 6)
 
-			if (item.curCracks and item.curCracks < crackNums) then
-				net.Start("ixMskAdd")
-				net.Send(client)
-			end
-
-			item.curCracks = crackNums
+		if (item.curCracks and item.curCracks < crackNums) then
+			net.Start("ixMskAdd")
+			net.Send(client)
 		end
+
+		item.curCracks = crackNums
 	end
 end
