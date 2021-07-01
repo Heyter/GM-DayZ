@@ -34,17 +34,12 @@ function PLUGIN:OnNPCKilled(npc, attacker, weapon)
 	end
 
 	if (maxItems > 0) then
-		local itemID = nil
-
 		for i = 1, maxItems do
-			if (math.random() < 0.05) then -- 5% percent to drop rare item
-				itemID = Schema.dropItems.rare[ math.random( #Schema.dropItems.rare ) ]
-			else
-				itemID = Schema.dropItems.common[ math.random( #Schema.dropItems.common ) ]
+			local itemID, isRare = Schema.GetRandomItem(0.05)
+			if (!itemID) then continue end
 
-				if (money > 0) then
-					money = money * 2
-				end
+			if (isRare) then
+				money = money * 2
 			end
 
 			inventory:Add(itemID, 1, nil, nil, nil, true)

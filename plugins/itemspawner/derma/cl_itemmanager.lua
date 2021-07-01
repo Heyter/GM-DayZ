@@ -45,7 +45,7 @@ function PANEL:Populate(items)
 		self.index.update:DockMargin(10, 10, 0, 0)
 
 		self.index.rarity = self.index.leftPanel:Add("DLabel")
-		self.index.rarity:SetText(item.rarity .. "%")
+		self.index.rarity:SetText((item.rarity * 100) .. "%")
 		self.index.rarity:Dock(RIGHT)
 		self.index.rarity:SetFont("ixMediumFont")
 		self.index.rarity:DockMargin(0, -60, 0, 0)

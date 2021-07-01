@@ -64,7 +64,7 @@ function PANEL:Setup(item, index)
 	self.rare.label:SetFont("ixMediumFont")
 
 	self.rare.input = self.rare:Add("DTextEntry")
-	self.rare.input:SetText(item.rarity)
+	self.rare.input:SetText((item.rarity * 100))
 	self.rare.input:SetFont("ixMediumFont")
 	self.rare.input:Dock(FILL)
 

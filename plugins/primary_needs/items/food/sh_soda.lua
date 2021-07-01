@@ -17,4 +17,5 @@ ITEM.iconCam = {
 
 if (SERVER) then
 	ITEM.rarity = { common = true }
+	ITEM.rate = 13
 end

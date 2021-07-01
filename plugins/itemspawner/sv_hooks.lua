@@ -5,10 +5,21 @@ PLUGIN.spawner = PLUGIN.spawner or {}
 PLUGIN.items = PLUGIN.items or {}
 PLUGIN.spawner.positions = PLUGIN.spawner.positions or {}
 
-Schema.dropItems = Schema.dropItems or {
-	rare = {},
-	common = {}
-}
+Schema.dropItems = Schema.dropItems or {rare = {}, common = {}}
+
+function Schema.GetRandomItem(chance)
+	local itemID = math.random()
+	local isRare = false
+
+	if (itemID > (chance or 0.05)) then
+		itemID = Schema.dropItems.common[ math.random( #Schema.dropItems.common ) ]
+	else
+		itemID = Schema.dropItems.rare[ math.random( #Schema.dropItems.rare ) ]
+		isRare = true
+	end
+
+	return itemID, isRare
+end
 
 util.AddNetworkString("ixItemSpawnerManager")
 util.AddNetworkString("ixItemSpawnerDelete")
@@ -18,14 +29,15 @@ util.AddNetworkString("ixItemSpawnerSpawn")
 util.AddNetworkString("ixItemSpawnerChanges")
 
 function PLUGIN:InitializedPlugins()
-	Schema.dropItems.common = {}
-	Schema.dropItems.rare = {}
+	Schema.dropItems = {rare = {}, common = {}}
 
 	for itemID, v in pairs(ix.item.list) do
 		if (v.rarity and istable(v.rarity)) then
 			if (v.rarity.rare) then
 				Schema.dropItems.rare[#Schema.dropItems.rare + 1] = itemID
-			elseif (v.rarity.common) then
+			end
+
+			if (v.rarity.common) then
 				Schema.dropItems.common[#Schema.dropItems.common + 1] = itemID
 			end
 		end
@@ -55,7 +67,7 @@ function PLUGIN:AddSpawner(client, position)
 		["delay"] = math.random(respawnTime - offsetTime, respawnTime + offsetTime),
 		["author"] = client:SteamID64(),
 		["position"] = position,
-		["rarity"] = ix.config.Get("spawnerRareItemChance", 0)
+		["rarity"] = ix.config.Get("spawnerRareItemChance", 0) / 100
 	}
 
 	data["lastSpawned"] = os.time() + (data["delay"] * 60)
@@ -66,6 +78,8 @@ function PLUGIN:AddSpawner(client, position)
 	net.Start("ixItemSpawnerDelete")
 		net.WriteTable(PLUGIN.spawner.positions)
 	net.Send(client)
+
+	PLUGIN:SaveData()
 end
 
 function PLUGIN:RemoveSpawner(client, index)
@@ -74,6 +88,7 @@ function PLUGIN:RemoveSpawner(client, index)
 	for k, v in ipairs(PLUGIN.spawner.positions) do
 		if (k == index) then
 			table.remove(PLUGIN.spawner.positions, k)
+			PLUGIN:SaveData()
 			return true
 		end
 	end
@@ -109,26 +124,24 @@ function PLUGIN:ForceSpawn(client, spawner)
 		return
 	end
 
-	local itemID = math.random(100)
+	local itemID = Schema.GetRandomItem(spawner.rarity)
 
-	if (itemID > tonumber(spawner.rarity)) then
-		itemID = Schema.dropItems.common[ math.random( #Schema.dropItems.common ) ]
-	else
-		itemID = Schema.dropItems.rare[ math.random( #Schema.dropItems.rare ) ]
-	end
+	if (itemID) then
+		ix.item.Spawn("adv_toolkit", spawner.position, function(_, entity)
+			timer.Simple(1.5, function()
+				if (IsValid(entity)) then
+					local physObj = entity:GetPhysicsObject()
 
-	ix.item.Spawn(itemID, spawner.position, function(_, entity)
-		timer.Simple(2, function()
-			if (IsValid(entity)) then
-				local physObj = entity:GetPhysicsObject()
-
-				if (IsValid(physObj)) then
-					physObj:EnableMotion(false)
-					physObj:Sleep()
+					if (IsValid(physObj)) then
+						physObj:EnableMotion(false)
+						physObj:Sleep()
+					end
 				end
-			end
+			end)
 		end)
-	end)
+	else
+		spawner.lastSpawned = os.time() + 60
+	end
 end
 
 timer.Create("ixItemSpawner", 5, 0, function()
@@ -159,17 +172,11 @@ timer.Create("ixItemSpawner", 5, 0, function()
 				continue
 			end
 
-			local itemID = math.random(100)
-
-			if (itemID > v.rarity) then
-				itemID = Schema.dropItems.common[ math.random( #Schema.dropItems.common ) ]
-			else
-				itemID = Schema.dropItems.rare[ math.random( #Schema.dropItems.rare ) ]
-			end
+			local itemID = Schema.GetRandomItem(v.rarity)
 
 			if (itemID) then
 				ix.item.Spawn(itemID, v.position, function(_, entity)
-					timer.Simple(2, function()
+					timer.Simple(1.5, function()
 						if (IsValid(entity)) then
 							local physObj = entity:GetPhysicsObject()
 
@@ -180,6 +187,8 @@ timer.Create("ixItemSpawner", 5, 0, function()
 						end
 					end)
 				end)
+			else
+				v.lastSpawned = os.time() + 60
 			end
 		end
 	end
@@ -216,7 +225,7 @@ net.Receive("ixItemSpawnerChanges", function(length, client)
 		if (k == changes[1]) then
 			v.title = changes[2]
 			v.delay = math.Clamp(changes[3], 1, 10000)
-			v.rarity = math.Clamp(changes[4], 0, 100)
+			v.rarity = math.Clamp(changes[4], 0, 100) / 100
 
 			break
 		end

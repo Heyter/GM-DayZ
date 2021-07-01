@@ -10,4 +10,5 @@ ITEM.DegradeRate = 0.02
 
 if (SERVER) then
 	ITEM.rarity = { rare = true }
+	ITEM.rate = 1
 end

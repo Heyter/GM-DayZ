@@ -17,4 +17,5 @@ end
 
 if (SERVER) then
 	ITEM.rarity = { common = true }
+	ITEM.rate = 7
 end

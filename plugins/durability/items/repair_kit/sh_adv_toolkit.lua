@@ -4,6 +4,11 @@ ITEM.description = "A high end set of advanced tools for working on firearms. Un
 
 ITEM.raiseDurability = 30
 
+if (SERVER) then
+	ITEM.rarity = { rare = true }
+	ITEM.rate = 2
+end
+
 if (CLIENT) then
 	function ITEM:ExtendDesc(text)
 		text[1] = Format("This repairs %d%% of a weapon.", self.raiseDurability)

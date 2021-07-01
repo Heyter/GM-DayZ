@@ -6,4 +6,5 @@ ITEM.description =  "Коробка с патронами %s калибра 5,45
 
 if (SERVER) then
 	ITEM.rarity = { common = true }
+	ITEM.rate = 6
 end
