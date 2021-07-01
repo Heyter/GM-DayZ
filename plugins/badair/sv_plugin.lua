@@ -109,6 +109,10 @@ function PLUGIN:PlayerTakeDamage(client, dmgInfo)
 		local damage = dmgInfo:GetDamage() * .5
 		item:DamageHealth(damage)
 
+		if (client:GetHealth() - damage <= 0) then
+			return
+		end
+
 		local crackNums = math.Round((1 - item:GetHealth() / ix.config.Get("gasmask_health", 100)) * 6)
 
 		if (item.curCracks and item.curCracks < crackNums) then

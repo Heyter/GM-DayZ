@@ -53,6 +53,10 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 		if (hit_group != 0 or damageInfo:IsExplosionDamage()) then
 			local damage = damageInfo:GetDamage()
 
+			if (client:GetHealth() - damage <= 0) then
+				return
+			end
+
 			if ((client.ixNextHurt or 0) < CurTime()) then
 				net.Start("ixHitmarker")
 					net.WriteBool(hit_group == HITGROUP_HEAD)

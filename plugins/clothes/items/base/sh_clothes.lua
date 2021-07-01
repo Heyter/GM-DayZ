@@ -7,8 +7,11 @@ ITEM.height = 1
 ITEM.outfitCategory = "hat"
 ITEM.pacData = {}
 
+ITEM.useDurability = true
 ITEM.defDurability = 100
-ITEM.damageReduction = 0 -- 1 = full protection (0 - 1). 0.5 = 50% (half protection)
+-- 1 = full protection (0 - 1). 0.5 = 50% (half protection)
+ITEM.damageReduction = { [HITGROUP_HEAD] = 0 }
+-- слетает предмет с головы когда durability = 0, но применимо лишь для outfitCategory = hat
 ITEM.dropHat = false
 
 --[[
@@ -79,7 +82,7 @@ function ITEM:CanSell()
 	return (self:GetData("durability", self.defDurability) > 0)
 end
 
-function ITEM:RemovePart(client, bRemoveItem)
+function ITEM:RemovePart(client, bDropItem)
 	local char = client:GetCharacter()
 
 	self:SetData("equip", nil)
@@ -93,8 +96,8 @@ function ITEM:RemovePart(client, bRemoveItem)
 
 	self:OnUnequipped(client)
 
-	if (bRemoveItem) then
-		return self:Remove()
+	if (bDropItem) then
+		return self:Transfer(nil, nil, nil, client, nil, true)
 	end
 
 	return true
@@ -118,7 +121,7 @@ ITEM.functions.EquipUn = { -- sorry, for name order.
 		return false
 	end,
 	OnCanRun = function(item)
-		return !IsValid(item.entity) and IsValid(item.player) and item:GetData("equip")
+		return (!IsValid(item.entity) and IsValid(item.player) and item:GetData("equip") == true)
 	end
 }
 
@@ -156,7 +159,7 @@ ITEM.functions.Equip = {
 		return false
 	end,
 	OnCanRun = function(item)
-		return !IsValid(item.entity) and IsValid(item.player) and !item:GetData("equip") and item:CanEquipOutfit()
+		return !IsValid(item.entity) and IsValid(item.player) and item:GetData("equip") != true and item:CanEquipOutfit()
 	end
 }
 
@@ -175,6 +178,8 @@ function ITEM:OnRemoved()
 	if (IsValid(owner) and owner:IsPlayer()) then
 		if (self:GetData("equip")) then
 			self:RemovePart(owner)
+		elseif (owner:GetClothesItem()[self.outfitCategory]) then -- bugfix
+			owner:SetClothesItem(self.outfitCategory, nil)
 		end
 	end
 end
@@ -194,3 +199,66 @@ function ITEM:CanEquipOutfit()
 
 	return self:GetData("durability", self.defDurability or 100) > 0
 end
+
+ITEM.functions.combine = {
+	OnCanRun = function(item, data)
+		if (!data or !data[1] or item.player and (item.player.nextUseItem or 0) > CurTime()) then
+			return false
+		end
+
+		if (CLIENT) then
+			local combineItem = ix.item.instances[data[1]]
+			if (!combineItem) then return false end
+
+			if (combineItem.base == "base_repair_kit") then
+				if (!item.useDurability or item:GetData("durability", 100) >= 100) then return false end
+			end
+		end
+
+		return (!IsValid(item.entity) and item.base == "base_clothes")
+	end,
+	OnRun = function(item, data)
+		if (!IsValid(item.player) or !istable(data) or !data[1]) then return false end
+		local combineItem = ix.item.instances[data[1]]
+		if (!combineItem) then return false end
+
+		if (combineItem.base == "base_repair_kit" and combineItem.isClothesKit and item.useDurability and item:GetData("durability", 100) < 100) then
+			combineItem:UseRepair(item, item.player)
+		end
+
+		return false
+	end,
+}
+
+ITEM.functions.Repair = {
+	name = "Repair",
+	tip = "equipTip",
+	icon = "icon16/bullet_wrench.png",
+	OnRun = function(item)
+		local client = item.player
+		local itemKit = client:GetCharacter():GetInventory():HasItemOfBase("base_repair_kit")
+
+		if (itemKit and itemKit.isClothesKit) then
+			itemKit:UseRepair(item, client)
+			client:SetLocalVar("WeaponDurability", nil)
+
+			itemKit = nil
+		else
+			client:NotifyLocalized('RepairKitWrong')
+		end
+
+		return false
+	end,
+
+	OnCanRun = function(item)
+		if (item.player and (item.player.nextUseItem or 0) > CurTime() or item:GetData("durability", 100) >= 100) then
+			return false
+		end
+
+		if (!item.player:GetCharacter():GetInventory():HasItemOfBase("base_repair_kit")) then
+			return false
+		end
+
+		return true
+	end
+}

@@ -183,7 +183,7 @@ ITEM.functions.combine = {
 			if (ix.arccw_support.Attach(item, combineItem.uniqueID)) then
 				combineItem:Remove()
 			end
-		elseif (combineItem.base == "base_repair_kit" and item.useDurability and item:GetData("durability", 100) < 100) then
+		elseif (combineItem.base == "base_repair_kit" and combineItem.isWeaponKit and item.useDurability and item:GetData("durability", 100) < 100) then
 			combineItem:UseRepair(item, client)
 			client:SetLocalVar("WeaponDurability", nil)
 		end

@@ -1,14 +1,13 @@
-local v1 = Vector(0, 0, 1200)
-local v2 = Vector(0, 0, 700)
-local function DropHat(client, model, dir)
-	local entity = ents.Create("prop_physics")
-	entity:SetModel(model)
+local function DropHat(client, model, itemID, dir)
+	local entity = ents.Create("ix_item")
 	entity:Spawn()
+	entity:SetItem(itemID)
 
-	entity:PhysicsInit(SOLID_VPHYSICS)
-	entity:SetSolid(SOLID_VPHYSICS)
-	entity:SetMoveType(MOVETYPE_VPHYSICS)
-	entity:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+	if (IsValid(client)) then
+		entity.ixSteamID = client:SteamID()
+		entity.ixCharID = client:GetCharacter():GetID()
+		entity:SetNetVar("owner", entity.ixCharID)
+	end
 
 	local boneIndex = client:LookupBone("ValveBiped.Bip01_Head1")
 
@@ -24,25 +23,12 @@ local function DropHat(client, model, dir)
 	end
 
 	local phys = entity:GetPhysicsObject()
+
 	if (IsValid(phys)) then
 		phys:SetMass(10)
-		phys:SetVelocityInstantaneous(client:GetVelocity())
-
-		if (!dir) then
-			phys:ApplyForceCenter(v1)
-		else
-			phys:ApplyForceCenter(v2 + dir * 500)
-		end
-
+		phys:ApplyForceCenter(-client:GetAimVector() * 1000)
 		phys:AddAngleVelocity(VectorRand() * 200)
-		phys:Wake()
 	end
-
-	timer.Simple(7, function()
-		if (IsValid(entity)) then
-			entity:Remove()
-		end
-	end)
 end
 
 function PLUGIN:PlayerTakeDamage(client, damageInfo)
@@ -59,24 +45,34 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 			item = item["hat"]
 		end
 
-		if (item and item.damageReduction) then
-			damage = damage - (item.damageReduction * damage)
+		if (item and istable(item.damageReduction)) then
+			damage = damage - ((item.damageReduction[hit_group] or 0) * damage)
 
 			if (damage == 0) then
 				damageInfo:SetDamage(0)
 				return
 			else
-				damageInfo:SubtractDamage(damage)
+				damageInfo:SetDamage(damage)
 			end
 
 			local durability = math.max(0, item:GetData("durability", item.defDurability or 100) - damage)
 
+			if (client:GetHealth() - damage <= 0) then
+				item:SetData("durability", durability, false)
+				return
+			end
+
 			if (durability <= 0) then
 				if (item.dropHat) then
-					if (item:RemovePart(client, true)) then
-						DropHat(client, item.model)
+					item:SetData("durability", durability, false)
+
+					local success = item:RemovePart(client, true)
+
+					if (success and ix.item.instances[item.id]) then
+						DropHat(client, item.model, item.id)
 					end
 				else
+					item:SetData("durability", durability)
 					item:RemovePart(client)
 				end
 			else

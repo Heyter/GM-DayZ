@@ -16,8 +16,7 @@ if (CLIENT) then
 		end
 	end
 
-	local rangeSize, angleCos = 120, math.cos(math.rad(90))
-	local shadowColor = color_black
+	local rangeSize, angleCos = 200, math.cos(math.rad(90))
 
 	function PLUGIN:HUDPaint()
 		local noticeHeight = draw.GetFontHeight("ixNoticeFont")
@@ -49,7 +48,7 @@ if (CLIENT) then
 				if !(x and y) then continue end
 
 				draw.SimpleTextOutlined(itemName, "ixNoticeFont",
-					x, y-(noticeHeight/2), color_white, 1, 1, 1, shadowColor
+					x, y-(noticeHeight/2), color_white, 1, 1, 1, color_black
 				)
 
 				if (itemTable.useDurability) then
@@ -71,7 +70,7 @@ if (CLIENT) then
 							local modsText = ix.util.WrapText(text, 300, "ixNoticeFont")
 
 							for i, _ in pairs(modsText) do
-								draw.SimpleTextOutlined(modsText[i], "ixNoticeFont", x, y+(noticeHeight*i)-(noticeHeight/2), Color("orange"), 1, 1, 1, shadowColor)
+								draw.SimpleTextOutlined(modsText[i], "ixNoticeFont", x, y+(noticeHeight*i)-(noticeHeight/2), Color("orange"), 1, 1, 1, color_black)
 								index = index + 1
 							end
 						end
@@ -80,7 +79,7 @@ if (CLIENT) then
 					local durability = math.max(0, entity:GetData("durability", 100))
 					local durabilityColor = Color(2.55 * (100 - durability), 2.55 * durability, 0, 255)
 
-					draw.SimpleTextOutlined(math.Round(durability, 1) .. "%", "ixNoticeFont", x, y+(noticeHeight*index)-(noticeHeight/2), durabilityColor, 1, 1, 1, shadowColor)
+					draw.SimpleTextOutlined(math.Round(durability, 1) .. "%", "ixNoticeFont", x, y+(noticeHeight*index)-(noticeHeight/2), durabilityColor, 1, 1, 1, color_black)
 				end
 			elseif (IsValid(entity) and (entity:GetClass() == "ix_money" or entity:GetClass() == "gmodz_npc_loot")) then
 				local x, y
@@ -104,7 +103,7 @@ if (CLIENT) then
 
 				if (#name > 0) then
 					draw.SimpleTextOutlined(name, "ixNoticeFont",
-						x, y-(noticeHeight/2), color_white, 1, 1, 1, shadowColor
+						x, y-(noticeHeight/2), color_white, 1, 1, 1, color_black
 					)
 				end
 			end

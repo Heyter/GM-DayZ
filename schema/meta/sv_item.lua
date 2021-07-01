@@ -156,13 +156,19 @@ function ITEM:Transfer(invID, x, y, client, noReplication, isLogical)
 	end
 end
 
+util.AddNetworkString("ixPlayerDropItem")
+
 function ITEM:PlayerDropItem(client)
 	client = client or self.player
 	if (!IsValid(client)) then return end
 
-	local trace = client:GetEyeTraceNoCursor()
-	local model = self:GetModel() or "models/props_junk/watermelon01.mdl"
+	net.Start("ixPlayerDropItem")
+		net.WriteString(self:GetModel() or "models/props_junk/watermelon01.mdl")
+	net.Send(client)
 
-	ix.util.SpawnProp(model, client:EyePos() + client:GetForward() * 3, trace.Normal * 200, 60)
-	trace, model = nil, nil
+	-- local trace = client:GetEyeTraceNoCursor()
+	-- local model = self:GetModel() or "models/props_junk/watermelon01.mdl"
+
+	-- ix.util.SpawnProp(model, client:EyePos() + client:GetForward() * 2, trace.Normal * 200, 60)
+	-- trace, model = nil, nil
 end

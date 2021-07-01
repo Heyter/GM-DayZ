@@ -4,8 +4,8 @@ ITEM.model = "models/gmodz/equipments/cvc_helmet.mdl"
 ITEM.outfitCategory = "hat"
 
 ITEM.defDurability = 100
-ITEM.damageReduction = 0.15
-ITEM.dropHat = true -- удаляет предмет когда durability = 0, но применимо лишь для hat
+ITEM.damageReduction = { [HITGROUP_HEAD] = 0.45 }
+ITEM.dropHat = true
 
 ITEM.iconCam = {
 	pos = Vector(119.12911987305, 100.74072265625, 78.613121032715),

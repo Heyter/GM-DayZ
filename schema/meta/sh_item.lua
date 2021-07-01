@@ -60,3 +60,20 @@ function ITEM:UseStackItem(bMaxQuantity, callback)
 
 	return false, quantity
 end
+
+if (CLIENT) then
+	net.Receive("ixPlayerDropItem", function()
+		local entity = ents.CreateClientProp(net.ReadString())
+		entity:Spawn()
+		entity:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+		entity:SetAngles(angle_zero)
+		entity:SetPos(LocalPlayer():EyePos() + LocalPlayer():GetForward() * 2)
+
+		local phys = entity:GetPhysicsObject()
+		if (IsValid(phys)) then
+			phys:ApplyForceCenter(LocalPlayer():GetEyeTraceNoCursor().Normal * 200)
+		end
+
+		SafeRemoveEntityDelayed(entity, math.random(10, 60))
+	end)
+end

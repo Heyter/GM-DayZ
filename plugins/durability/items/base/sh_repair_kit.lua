@@ -12,6 +12,8 @@ ITEM.raiseDurability = 25
 -- Only allowed for weapons.
 ITEM.isWeaponKit = true
 
+-- ITEM.isClothesKit = true
+
 ITEM.useSound = "gmodz/durability/repair_weapon.wav"
 -- ITEM.useSound = {"items/medshot4.wav", 60, 100} // soundName, soundLevel, pitchPercent
 ITEM.price = 0
@@ -37,10 +39,6 @@ if (SERVER) then
 			self:Remove()
 		end
 	end
-
-	function ITEM:GetDescription()
-		return Format(self.description, self.raiseDurability)
-	end
 end
 
 if (CLIENT) then
@@ -48,7 +46,7 @@ if (CLIENT) then
 		local text = {}
 
 		if (self.raiseDurability != 0) then
-			text[#text + 1] = Format("%s: %s%d", L"raiseDurability", self.raiseDurability < 0 and "-" or "+", math.abs(self.raiseDurability))
+			text[#text + 1] = Format("%s: %s%d%%", L"raiseDurability", self.raiseDurability < 0 and "-" or "+", math.abs(self.raiseDurability))
 		end
 
 		if (self.ExtendDesc) then

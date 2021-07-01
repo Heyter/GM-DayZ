@@ -28,7 +28,7 @@ function PLUGIN:DoPlayerDeath(client)
 
 	inventory.slots = table.Copy(charInventory.slots)
 
-	if (!table.IsEmpty(inventory.slots)) then
+	if (!table.IsEmpty(inventory:GetItems(true))) then
 		replication = true
 
 		local query = mysql:Update("ix_items")
