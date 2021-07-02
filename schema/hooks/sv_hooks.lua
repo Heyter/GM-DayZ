@@ -154,6 +154,10 @@ function Schema:EntityTakeDamage(entity, dmgInfo)
 	end
 end
 
+function Schema:OnCharacterCreated(client, character)
+	character:SetData("permament_model", character:GetModel(), true)
+end
+
 -- Stack hooks
 util.AddNetworkString("ixItemSplit")
 

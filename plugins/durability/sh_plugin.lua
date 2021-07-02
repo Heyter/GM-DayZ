@@ -74,9 +74,16 @@ function PLUGIN:InitializedPlugins()
 				icon = "icon16/bullet_wrench.png",
 				OnRun = function(item)
 					local client = item.player
-					local itemKit = client:GetCharacter():GetInventory():HasItemOfBase("base_repair_kit")
+					local itemKit
 
-					if (itemKit and itemKit.isWeaponKit) then
+					for _, v in pairs(client:GetCharacter():GetInventory():GetItems(true)) do
+						if (v.base == "base_repair_kit" and v.isWeaponKit) then
+							itemKit = v
+							break
+						end
+					end
+
+					if (itemKit) then
 						itemKit:UseRepair(item, client)
 						client:SetLocalVar("WeaponDurability", nil)
 
@@ -93,8 +100,10 @@ function PLUGIN:InitializedPlugins()
 						return false
 					end
 
-					if (!item.player:GetCharacter():GetInventory():HasItemOfBase("base_repair_kit")) then
-						return false
+					if (CLIENT) then
+						if (!item.player:GetCharacter():GetInventory():HasItemOfBase("base_repair_kit")) then
+							return false
+						end
 					end
 
 					return true

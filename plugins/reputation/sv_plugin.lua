@@ -33,7 +33,10 @@ function PLUGIN:PlayerDeath(victim, _, attacker)
 	end
 
 	timer.Simple(0, function()
-		if (IsValid(victim)) then victim:ResetPenalty() end
+		if (IsValid(victim)) then
+			victim:ResetPenalty()
+			victim.ResetPlayerModel = true
+		end
 	end)
 end
 
@@ -83,15 +86,39 @@ function PLUGIN:CharacterPreSave(character)
 	character:SetData("reputation", reputation, true)
 end
 
-function PLUGIN:OnCharacterDisconnect(client, character)
+function PLUGIN:OnCharacterDisconnect(client)
+	if (client:GetPVPTime() > CurTime()) then
+		client.bNotSavePosition = true
+		client:Kill()
+	end
+
 	if (!client:Alive()) then
 		character:SetData("penalty", nil, true)
 	end
 end
 
-function PLUGIN:OnCharacterDisconnect(client)
-	if (client:GetPVPTime() > CurTime()) then
-		client.bNotSavePosition = true
-		client:Kill()
+function PLUGIN:PostPlayerLoadout(client)
+	if (client.ResetPlayerModel) then
+		local rep = client:GetReputation()
+
+		if (rep < 0) then
+			client:SetModel(Schema.BanditModels[ math.random( #Schema.BanditModels ) ])
+		elseif (rep > 0) then
+			client:SetModel(Schema.HeroModels[ math.random( #Schema.HeroModels ) ])
+		else
+			local model = client:GetCharacter():GetData("permament_model")
+
+			if (!model) then
+				local faction = ix.faction.teams[client:Team()]
+
+				if (faction) then
+					client:SetModel(faction.models[ math.random( #faction.models ) ])
+				end
+			elseif (model and model != client:GetModel()) then
+				client:SetModel(model)
+			end
+		end
+
+		client.ResetPlayerModel = nil
 	end
 end

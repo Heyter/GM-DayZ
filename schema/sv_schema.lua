@@ -47,6 +47,11 @@ function ixItemENT:SetItem(itemID)
 
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetSolid(SOLID_VPHYSICS)
+
+		if (!itemTable.noCollisionGroup) then
+			self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+		end
+
 		self:SetItemID(itemTable.uniqueID)
 		self.ixItemID = itemID
 
@@ -76,7 +81,6 @@ function ixItemENT:Initialize()
 	self:SetModel("models/props_junk/watermelon01.mdl")
 	self:SetSolid(SOLID_VPHYSICS)
 	self:PhysicsInit(SOLID_VPHYSICS)
-	self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 	self:SetUseType(SIMPLE_USE)
 	self.health = 50
 

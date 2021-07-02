@@ -26,7 +26,13 @@ local function DropHat(client, model, itemID, dir)
 
 	if (IsValid(phys)) then
 		phys:SetMass(10)
-		phys:ApplyForceCenter(-client:GetAimVector() * 1000)
+
+		if (dir) then
+			phys:ApplyForceCenter(dir * 1000)
+		else
+			phys:ApplyForceCenter(-client:GetAimVector() * 1000)
+		end
+
 		phys:AddAngleVelocity(VectorRand() * 200)
 	end
 end
@@ -45,8 +51,16 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 			item = item["hat"]
 		end
 
-		if (item and istable(item.damageReduction)) then
-			damage = damage - ((item.damageReduction[hit_group] or 0) * damage)
+		if (!item) then
+			item = item["suit"]
+		end
+
+		if (item) then
+			if (istable(item.damageReduction)) then
+				damage = damage - ((item.damageReduction[hit_group] or 0) * damage)
+			else
+				damage = damage - ((item.damageReduction or 0) * damage)
+			end
 
 			if (damage == 0) then
 				damageInfo:SetDamage(0)
@@ -55,28 +69,30 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 				damageInfo:SetDamage(damage)
 			end
 
-			local durability = math.max(0, item:GetData("durability", item.defDurability or 100) - damage)
+			if (item.useDurability) then
+				local durability = math.max(0, item:GetData("durability", item.defDurability or 100) - damage)
 
-			if (client:GetHealth() - damage <= 0) then
-				item:SetData("durability", durability, false)
-				return
-			end
-
-			if (durability <= 0) then
-				if (item.dropHat) then
+				if (client:GetHealth() - damage <= 0) then
 					item:SetData("durability", durability, false)
+					return
+				end
 
-					local success = item:RemovePart(client, true)
+				if (durability <= 0) then
+					if (item.dropHat) then
+						item:SetData("durability", durability, false)
 
-					if (success and ix.item.instances[item.id]) then
-						DropHat(client, item.model, item.id)
+						local success = item:RemovePart(client, true)
+
+						if (success and ix.item.instances[item.id]) then
+							DropHat(client, item.model, item.id, attacker:GetAimVector())
+						end
+					else
+						item:SetData("durability", durability)
+						item:RemovePart(client)
 					end
 				else
 					item:SetData("durability", durability)
-					item:RemovePart(client)
 				end
-			else
-				item:SetData("durability", durability)
 			end
 		end
 	end

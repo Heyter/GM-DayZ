@@ -92,6 +92,33 @@ do
 	Schema.rankScaleRep = ix.config.Get("maxReputation", 1500) / Schema.rankLevels
 end
 
+Schema.HeroModels = {}
+Schema.BanditModels = {}
+
+for _, v in ipairs({"t_arctic", "t_guerilla", "t_leet", "t_phoenix"}) do
+	local i = #Schema.BanditModels + 1
+	local str = "models/gmodz/characters/" .. v .. ".mdl"
+
+	Schema.BanditModels[i] = Model(str)
+	util.PrecacheModel(Schema.BanditModels[i])
+	i = nil
+
+	ix.anim.SetModelClass(str, "player")
+	str = nil
+end
+
+for _, v in ipairs({"ct_gign", "ct_gsg9", "ct_sas", "ct_urban"}) do
+	local i = #Schema.HeroModels + 1
+	local str = "models/gmodz/characters/" .. v .. ".mdl"
+
+	Schema.HeroModels[i] = Model(str)
+	util.PrecacheModel(Schema.HeroModels[i])
+	i = nil
+
+	ix.anim.SetModelClass(str, "player")
+	str = nil
+end
+
 ix.config.Add("maxReputation", 1500, "Макс. репутация", function(oldValue, newValue)
 	Schema.rankScaleRep = newValue / Schema.rankLevels
 end, {
