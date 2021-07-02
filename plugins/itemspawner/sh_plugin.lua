@@ -8,16 +8,16 @@ CAMI.RegisterPrivilege({
 })
 
 -- Item Spawner Toggle [On/Off]
-ix.config.Add("spawnerActive", true, "Toggle the item spawner.", nil, {
+ix.config.Add("itemSpawnerActive", true, "Toggle the item spawner.", nil, {
 	category = PLUGIN.name
 })
 
-ix.config.Add("spawnerOffsetTime", 10, "The range of item spawns around the timer.", nil, {
+ix.config.Add("spawnerOffsetTime", 1, "The range of item spawns around the timer.", nil, {
 	category = PLUGIN.name,
 	data = { min = 0, max = 999 }
 })
 
-ix.config.Add("spawnerRespawnTime", 30, "Time for an item to spawn at any position.", nil, {
+ix.config.Add("spawnerRespawnTime", 5, "Time for an item to spawn at any position.", nil, {
 	ccategory = PLUGIN.name,
 	data = { min = 1, max = 999 }
 })

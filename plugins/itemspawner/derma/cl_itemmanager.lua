@@ -7,7 +7,7 @@ local PANEL = {}
 function PANEL:Init()
 	self:SetSize(ScrH() * 0.8, ScrH() * 0.8)
 	self:Center()
-	self:SetBackgroundBlur(true)
+	self:SetBackgroundBlur(false)
 	self:SetDeleteOnClose(true)
 	self:MakePopup()
 	self:SetTitle("Item Spawn Manager")

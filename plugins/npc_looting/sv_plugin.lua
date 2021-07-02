@@ -22,7 +22,7 @@ function PLUGIN:OnNPCKilled(npc, attacker, weapon)
 	inventory.isLoot = true
 
 	local maxItems = 0
-	if (math.random() < 0.4) then -- 40% percent
+	if (math.random() < 0.1) then -- 10% шанс дропа вещей
 		maxItems = math.random(0, 3)
 	end
 

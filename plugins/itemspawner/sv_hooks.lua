@@ -99,7 +99,7 @@ end
 local nearDist = math.pow(256, 2)
 function PLUGIN:ForceSpawn(client, spawner)
 	if !(CAMI.PlayerHasAccess(client, "Helix - Item Spawner", nil)) then return end
-	if !(ix.config.Get("spawnerActive")) then return end
+	if !(ix.config.Get("itemSpawnerActive")) then return end
 
 	spawner.lastSpawned = os.time() + (spawner.delay * 60)
 
@@ -127,7 +127,7 @@ function PLUGIN:ForceSpawn(client, spawner)
 	local itemID = Schema.GetRandomItem(spawner.rarity)
 
 	if (itemID) then
-		ix.item.Spawn("adv_toolkit", spawner.position, function(_, entity)
+		ix.item.Spawn(itemID, spawner.position, function(_, entity)
 			timer.Simple(1.5, function()
 				if (IsValid(entity)) then
 					local physObj = entity:GetPhysicsObject()
@@ -145,7 +145,7 @@ function PLUGIN:ForceSpawn(client, spawner)
 end
 
 timer.Create("ixItemSpawner", 5, 0, function()
-	if (table.IsEmpty(PLUGIN.spawner.positions) or !(ix.config.Get("spawnerActive", false))) then return end
+	if (table.IsEmpty(PLUGIN.spawner.positions) or !(ix.config.Get("itemSpawnerActive", false))) then return end
 
 	for _, v in ipairs(PLUGIN.spawner.positions) do
 		if (v.lastSpawned < os.time()) then
