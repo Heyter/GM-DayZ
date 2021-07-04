@@ -48,7 +48,7 @@ function ixItemENT:SetItem(itemID)
 		self:SetSolid(SOLID_VPHYSICS)
 
 		if (!itemTable.noCollisionGroup) then
-			self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+			self:SetCollisionGroup(COLLISION_GROUP_WORLD)
 		end
 
 		self:SetItemID(itemTable.uniqueID)

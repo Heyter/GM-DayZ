@@ -25,7 +25,7 @@ function ENT:Use(activator)
 	if (inventory and !ix.storage.InUse(inventory)) then
 		ix.storage.Open(activator, inventory, {
 			entity = self,
-			name = "NPCBox",
+			name = "Loot",
 			searchTime = 0.5,
 			data = {money = self:GetMoney()}
 		})

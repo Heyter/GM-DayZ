@@ -128,16 +128,14 @@ function PLUGIN:ForceSpawn(client, spawner)
 
 	if (itemID) then
 		ix.item.Spawn(itemID, spawner.position, function(_, entity)
-			timer.Simple(1.5, function()
-				if (IsValid(entity)) then
-					local physObj = entity:GetPhysicsObject()
+			entity:SetPos(spawner.position + Vector(0, 0, -entity:OBBMins().z))
 
-					if (IsValid(physObj)) then
-						physObj:EnableMotion(false)
-						physObj:Sleep()
-					end
-				end
-			end)
+			local physObj = entity:GetPhysicsObject()
+
+			if (IsValid(physObj)) then
+				physObj:EnableMotion(false)
+				physObj:Sleep()
+			end
 		end)
 	else
 		spawner.lastSpawned = os.time() + 60
@@ -176,16 +174,14 @@ timer.Create("ixItemSpawner", 5, 0, function()
 
 			if (itemID) then
 				ix.item.Spawn(itemID, v.position, function(_, entity)
-					timer.Simple(1.5, function()
-						if (IsValid(entity)) then
-							local physObj = entity:GetPhysicsObject()
+					entity:SetPos(v.position + Vector(0, 0, -entity:OBBMins().z))
 
-							if (IsValid(physObj)) then
-								physObj:EnableMotion(false)
-								physObj:Sleep()
-							end
-						end
-					end)
+					local physObj = entity:GetPhysicsObject()
+
+					if (IsValid(physObj)) then
+						physObj:EnableMotion(false)
+						physObj:Sleep()
+					end
 				end)
 			else
 				v.lastSpawned = os.time() + 60

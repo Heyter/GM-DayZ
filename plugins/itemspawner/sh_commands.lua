@@ -7,7 +7,7 @@ ix.command.Add("ItemSpawnerAdd", {
 	superAdminOnly = true,
 	OnRun = function(self, client)
 		local location = client:GetEyeTrace().HitPos
-		location.z = location.z + 10
+		--location.z = location.z + 10
 
 		PLUGIN:AddSpawner(client, location)
 	end

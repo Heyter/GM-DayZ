@@ -280,7 +280,7 @@ ITEM.functions.combine = {
 			if (!combineItem) then return false end
 
 			if (combineItem.base == "base_repair_kit") then
-				if (!item.useDurability or item:GetData("durability", 100) >= 100) then return false end
+				if (!item.useDurability or item:GetData("durability", item.defDurability or 100) >= (item.defDurability or 100)) then return false end
 			end
 		end
 
@@ -291,8 +291,12 @@ ITEM.functions.combine = {
 		local combineItem = ix.item.instances[data[1]]
 		if (!combineItem) then return false end
 
-		if (combineItem.base == "base_repair_kit" and combineItem.isClothesKit and item.useDurability and item:GetData("durability", 100) < 100) then
-			combineItem:UseRepair(item, item.player)
+		if (combineItem.base == "base_repair_kit" and combineItem.isClothesKit) then
+			local maxD = item.defDurability or 100
+
+			if (item.useDurability and item:GetData("durability", maxD) < maxD) then
+				combineItem:UseRepair(item, item.player)
+			end
 		end
 
 		return false
@@ -325,7 +329,9 @@ ITEM.functions.Repair = {
 	end,
 
 	OnCanRun = function(item)
-		if (item.player and (item.player.nextUseItem or 0) > CurTime() or item:GetData("durability", 100) >= 100) then
+		local d = item.defDurability or 100
+
+		if (item.player and (item.player.nextUseItem or 0) > CurTime() or item:GetData("durability", d) >= d) then
 			return false
 		end
 

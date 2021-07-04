@@ -6,6 +6,8 @@ ENT.Author = "STEAM_0:1:29606990"
 ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_BOTH
 
+ENT.bNoPersist = true
+
 function ENT:SetupDataTables()
 	self:NetworkVar("String", 0, "StoredName")
 	self:NetworkVar("String", 1, "StoredID")

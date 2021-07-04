@@ -33,7 +33,7 @@ function SWEP:DrawHUD()
 	if (table.IsEmpty(spawners)) then return false end
 
 	local location = self:GetOwner():GetEyeTrace().HitPos
-	location.z = location.z + 10
+	--location.z = location.z + 10
 
 	for k, v in ipairs(spawners) do
 		if (location:DistToSqr(v.position) > 128 * 128) then continue end

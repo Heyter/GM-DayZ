@@ -20,7 +20,7 @@ end
 function SWEP:PrimaryAttack()
 	if IsFirstTimePredicted() then
 		local location = self:GetOwner():GetEyeTrace().HitPos
-		location.z = location.z + 10
+		--location.z = location.z + 10
 
 		local plugin = ix.plugin.Get("itemspawner")
 
@@ -41,7 +41,7 @@ function SWEP:SecondaryAttack()
 		if (!IsValid(client)) then return false end
 
 		local location = client:GetEyeTrace().HitPos
-		location.z = location.z + 10
+		--location.z = location.z + 10
 
 		local index = nil
 

@@ -11,20 +11,20 @@ net.Receive('MenuItemSpawn', function(len, client)
 
 	if (ix.item.list[uniqueID]) then
 		local vStart = client:GetShootPos()
-		local trace = {}
+		local data = {}
 
-		trace.start = vStart
-		trace.endpos = vStart + (client:GetAimVector() * 2048)
-		trace.filter = client
+		data.start = vStart
+		data.endpos = vStart + (client:GetAimVector() * 2048)
+		data.filter = client
 
-		local HitPos = util.TraceLine(trace).HitPos
-		local angles = (HitPos - client:GetPos()):Angle()
+		local trace = util.TraceLine(data)
+		local angles = (trace.HitPos - client:GetPos()):Angle()
 		angles.r = 0
 		angles.p = 0
 		angles.y = angles.y + 180
 
-		ix.item.Spawn(uniqueID, HitPos, function(item, entity)
-			entity:SetPos(HitPos + select(2, entity:GetCollisionBounds()))
+		ix.item.Spawn(uniqueID, trace.HitPos, function(item, entity)
+			entity:SetPos(trace.HitPos - trace.HitNormal * entity:OBBMins().z)
 
 			client:Notify("You have spawned a " .. item.name .. ".")
 

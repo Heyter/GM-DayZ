@@ -25,7 +25,8 @@ if (SERVER) then
 		client.nextUseItem = CurTime() + 1
 		useSound = useSound or self.useSound
 
-		combineItem:SetData("durability", math.Clamp(combineItem:GetData("durability", 100) + self.raiseDurability, 0, 100))
+		local d = combineItem.defDurability or 100
+		combineItem:SetData("durability", math.Clamp(combineItem:GetData("durability", d) + self.raiseDurability, 0, d))
 
 		if (useSound) then
 			if (isstring(useSound)) then
