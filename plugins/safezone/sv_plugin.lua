@@ -27,13 +27,26 @@ end
 
 function PLUGIN:PlayerExitSafeZone(client)
 	client.protection_time = CurTime() + 10
+	client:ActivateNoCollision(1, COLLISION_GROUP_PLAYER)
+	client:SetAvoidPlayers(true)
 end
 
-function PLUGIN:PlayerInitialSpawn(client)
-	client:SetCustomCollisionCheck(true)
+function PLUGIN:PlayerEnterSafeZone(client)
+	client:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
 	client:SetAvoidPlayers(false)
-	client:CollisionRulesChanged()
+
+	timer.Remove(client:EntIndex() .. "_checkBounds_cycle")
 end
+
+function PLUGIN:PlayerSpawn(client)
+	client:SetAvoidPlayers(true)
+end
+
+--function PLUGIN:PlayerInitialSpawn(client)
+	-- client:SetCustomCollisionCheck(true) -- ShouldCollide
+	-- client:SetAvoidPlayers(true)
+	-- client:CollisionRulesChanged() -- ShouldCollide
+--end
 
 -- ShouldCollide ломает физику при опр. условиях.
 --[[ function PLUGIN:ShouldCollide(ent1, ent2)

@@ -27,7 +27,11 @@ function PLUGIN:OnNPCKilled(npc, attacker, weapon)
 	end
 
 	local money = math.random(100)
-	if (money <= math.random(100) * math.max(1, maxItems)) then
+
+	if ((npc.KillReward or 0) > 0) then
+		replication = true
+		money = npc.KillReward * math.max(1, maxItems)
+	elseif (money <= math.random(100) * math.max(1, maxItems)) then
 		replication = true
 	else
 		money = 0

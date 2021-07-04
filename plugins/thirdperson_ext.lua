@@ -24,6 +24,10 @@ do
 	local dark_red = Color(200, 50, 50)
 
 	function PLUGIN:HUDPaint()
+		if (!LocalPlayer():GetCharacter()) then
+			return
+		end
+
 		if (ix.config.Get("thirdperson") and ix.option.Get("thirdpersonEnabled", false)) then
 			surface.SetDrawColor(dark_red)
 			surface.SetMaterial(blocked_att)

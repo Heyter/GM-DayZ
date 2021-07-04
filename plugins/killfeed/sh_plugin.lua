@@ -123,6 +123,8 @@ if (CLIENT) then
 			KilledByWeapon(death_msg, ent_class, attacker, victim, clrAtt, clrVic, pnl)
 		end
 
+		hook.Run("PostDeathNotice", victim, attacker)
+
 		PLUGIN.DeathNotify:AddItem(pnl)
 	end)
 end

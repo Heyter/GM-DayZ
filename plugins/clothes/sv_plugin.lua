@@ -41,18 +41,16 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 	local attacker = damageInfo:GetAttacker()
 
 	if (IsValid(attacker) and (attacker:IsPlayer() or attacker:IsNPC())) then
-		if (attacker:IsPlayer() and hook.Run("PlayerShouldTakeDamage", client, attacker) == false) then return end
-
 		local hit_group = client:LastHitGroup()
 		local damage = damageInfo:GetDamage()
 		local item = client:GetClothesItem()
+		local isHead = hit_group == HITGROUP_HEAD
 
-		if (hit_group == HITGROUP_HEAD) then
+		if (isHead and item["hat"]) then
 			item = item["hat"]
-		end
-
-		if (!item) then
+		else
 			item = item["suit"]
+			isHead = nil
 		end
 
 		if (item) then
@@ -60,6 +58,21 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 				damage = damage - ((item.damageReduction[hit_group] or 0) * damage)
 			else
 				damage = damage - ((item.damageReduction or 0) * damage)
+			end
+
+			if (isHead) then
+				client:EmitSound("physics/metal/metal_solid_impact_bullet1.wav")
+
+				local eyePos = client:EyePos()
+				local effect = EffectData()
+					effect:SetOrigin(eyePos)
+					effect:SetNormal(eyePos)
+					effect:SetMagnitude(1)
+					effect:SetScale(1)
+					effect:SetRadius(1)
+				util.Effect("Sparks", effect)
+
+				eyePos, effect = nil, nil
 			end
 
 			if (damage == 0) then
@@ -111,7 +124,7 @@ FindMetaTable("Player").GetClothesItem = function(self)
 	return (self.ixClothes or {})
 end
 
---[[ concommand.Add("bot_ads", function()
+concommand.Add("bot_ads", function()
 	if (!IsValid(Entity(2))) then return end
 
 	local inventory = Entity(2):GetCharacter():GetInventory()
@@ -126,4 +139,4 @@ end
 			end
 		end
 	end)
-end) ]]
+end)

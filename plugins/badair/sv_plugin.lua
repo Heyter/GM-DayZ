@@ -102,7 +102,7 @@ function PLUGIN:PlayerDeath(client)
 end
 
 -- This hook simulates the damage of the Gas Mask.
-function PLUGIN:PlayerTakeDamage(client, dmgInfo)
+function PLUGIN:PostPlayerTakeDamage(client, dmgInfo)
 	local item = client:GetGasMask()
 
 	if (item and item.isGasMask) then

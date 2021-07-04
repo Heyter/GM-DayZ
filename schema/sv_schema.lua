@@ -1,7 +1,6 @@
 local GM = GM or GAMEMODE
 
 local entityMeta = FindMetaTable("Entity")
-local playerMeta = FindMetaTable("Player")
 
 --- Clears all of the networked variables.
 -- @realm server
@@ -113,35 +112,6 @@ function ixItemENT:Use(activator, caller)
 
 		itemTable.player = nil
 		itemTable.entity = nil
-	end
-end
-
-function playerMeta:RemoveEquippableItem(item)
-	if (item.Unequip) then
-		item:Unequip(self)
-	elseif (item.RemoveOutfit) then
-		item:RemoveOutfit(self)
-	elseif (item.RemovePart) then
-		item:RemovePart(self)
-	end
-end
-
--- A function to return an entity's collision group.
-function playerMeta:ReturnCollisionGroup(collisionGroup)
-	if (!collisionGroup) then return end
-
-	if (IsValid(self)) then
-		local physicsObject = self:GetPhysicsObject()
-
-		if (IsValid(physicsObject)) then
-			if (!physicsObject:IsPenetrating()) then
-				self:SetCollisionGroup(collisionGroup)
-			else
-				timer.Create("CollisionGroup" .. self:EntIndex(), 1, 1, function()
-					self:ReturnCollisionGroup(collisionGroup)
-				end)
-			end
-		end
 	end
 end
 

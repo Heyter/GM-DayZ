@@ -40,13 +40,14 @@ function PLUGIN:PlayerDeath(victim, _, attacker)
 	end)
 end
 
-function PLUGIN:PlayerHurt(victim, attacker, _, damage)
-	if (damage > 0 and victim:IsPlayer() and attacker:IsPlayer()) then
-		if (attacker == victim or hook.Run("PlayerShouldTakeDamage", victim, attacker) == false) then return end
+function PLUGIN:PlayerTakeDamage(client, damageInfo)
+	local attacker = damageInfo:GetAttacker()
 
+	if (attacker:IsPlayer() and attacker != client) then
 		local tag = ix.config.Get("tagPVP", 120)
+
 		attacker:AddPVPTime(tag)
-		victim:AddPVPTime(tag)
+		client:AddPVPTime(tag)
 	end
 end
 
@@ -62,6 +63,7 @@ function PLUGIN:PlayerLoadedCharacter(client, character, lastChar)
 
 	if (reputation) then
 		local max = ix.config.Get("maxReputation", 1500)
+
 		reputation = math.Clamp(reputation, -max, max)
 		client:SetNetVar("reputation", reputation)
 	else
@@ -86,7 +88,7 @@ function PLUGIN:CharacterPreSave(character)
 	character:SetData("reputation", reputation, true)
 end
 
-function PLUGIN:OnCharacterDisconnect(client)
+function PLUGIN:OnCharacterDisconnect(client, character)
 	if (client:GetPVPTime() > CurTime()) then
 		client.bNotSavePosition = true
 		client:Kill()

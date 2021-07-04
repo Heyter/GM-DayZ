@@ -141,6 +141,8 @@ function Schema:EntityTakeDamage(entity, dmgInfo)
 	if (!IsValid(entity) or dmgInfo:GetDamage() == 0) then return end
 
 	if (entity:IsPlayer()) then
+		if (hook.Run("PlayerShouldTakeDamage", entity, dmgInfo:GetAttacker()) == false) then return true end
+
 		local extra_health = entity:ExtraHealth()
 
 		if (extra_health > 0) then
@@ -151,11 +153,17 @@ function Schema:EntityTakeDamage(entity, dmgInfo)
 		hook.Run("PlayerTakeDamage", entity, dmgInfo)
 
 		if (dmgInfo:GetDamage() <= 0.5) then return true end
+
+		hook.Run("PostPlayerTakeDamage", entity, dmgInfo)
 	end
 end
 
 function Schema:OnCharacterCreated(client, character)
 	character:SetData("permament_model", character:GetModel(), true)
+end
+
+function Schema:PlayerDisconnected(client)
+	timer.Remove(client:EntIndex() .. "_checkBounds_cycle")
 end
 
 -- Stack hooks

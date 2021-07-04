@@ -36,6 +36,13 @@ else
 	function PLUGIN:ShouldHideBars() return true end
 	function PLUGIN:ShouldBarDraw() return false end
 
+	function PLUGIN:PostDeathNotice(victim)
+		local index = victim:EntIndex()
+
+		ix.net[index] = ix.net[index] or {}
+		ix.net[index]["bleeding"] = nil
+	end
+
 	local faded_black = ColorAlpha(color_black, 200)
 
 	-- OUTLINE ITEMS --

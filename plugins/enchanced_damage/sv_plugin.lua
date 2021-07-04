@@ -42,12 +42,10 @@ function PLUGIN:PlayerSpawn(client)
 	end
 end
 
-function PLUGIN:PlayerTakeDamage(client, damageInfo)
+function PLUGIN:PostPlayerTakeDamage(client, damageInfo)
 	local attacker = damageInfo:GetAttacker()
 
 	if (IsValid(attacker) and (attacker:IsPlayer() or attacker:IsNPC())) then
-		if (attacker:IsPlayer() and hook.Run("PlayerShouldTakeDamage", client, attacker) == false) then return end
-
 		local hit_group = client:LastHitGroup()
 
 		if (hit_group != 0 or damageInfo:IsExplosionDamage()) then
