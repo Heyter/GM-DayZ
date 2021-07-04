@@ -258,98 +258,6 @@ function Schema:CreateItemInteractionMenu(iconPanel, _, item)
 	end
 end
 
-function Schema.AddInventoryAmmoButton(panel)
-	local textButton = panel:Add("DButton")
-	textButton:Dock(RIGHT)
-	textButton:SetFont("ixGenericFont")
-	textButton:SetText(L"Ammunition")
-	textButton:SizeToContents()
-	textButton.Paint = function(t, w, h)
-		t.set_color = color_black:Alpha(150)
-
-		if (t:IsHovered()) then
-			t.set_color = ix.config.Get("color"):Alpha(50)
-		end
-
-		surface.SetDrawColor(t.set_color)
-		surface.DrawRect(0, 0, w, h)
-
-		surface.SetDrawColor(ix.config.Get("color"))
-		surface.DrawOutlinedRect(0, 0, w, h)
-	end
-	textButton.DoClick = function(t)
-		if (table.IsEmpty(LocalPlayer():GetAmmo())) then return end
-
-		local function NetInventory(ammoName)
-			if ((LocalPlayer().next_stash_click or 0) < CurTime()) then
-				LocalPlayer().next_stash_click = CurTime() + 0.5
-			else
-				return
-			end
-
-			local itemData = ix.item.list[ammoName]
-			if (!itemData) then return false end
-
-			local inventory = LocalPlayer():GetCharacter():GetInventory()
-
-			if (!inventory:CanItemFitStack(itemData, true)) then
-				local w, h = itemData.width, itemData.height
-				local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
-				local x2, y2
-
-				for x = 1, invW do
-					for y = 1, invH do
-						if (!IsValid(ix.gui.inv1)) then
-							x2, y2 = nil, nil
-							break
-						end
-						if (ix.gui.inv1:IsAllEmpty(x, y, w, h)) then
-							x2 = x
-							y2 = y
-						end
-					end
-				end
-
-				if (IsValid(ix.gui.inv1)) then
-					if !(x2 and y2) then
-						LocalPlayer():NotifyLocalized("noFit")
-						return false
-					end
-				else
-					return false
-				end
-			end
-
-			return true
-		end
-
-		local ammoName
-		local x, y = t:LocalToScreen(0, t:GetTall())
-		local menu = DermaMenu(false, t)
-
-		for ammoID, count in pairs(LocalPlayer():GetAmmo()) do
-			ammoName = game.GetAmmoName(ammoID)
-
-			local item = ix.item.list[ammoName]
-			if (!item or (item.base or "") != "base_arccw_ammo") then continue end
-
-			menu:AddOption(Format("%s (x%d)", ammoName, count), function()
-				local bool = input.IsShiftDown() or input.IsControlDown()
-
-				if (NetInventory(ammoName)) then
-					net.Start("ixRequestDropAmmo")
-						net.WriteString(ammoName)
-						net.WriteBool(bool)
-					net.SendToServer()
-				end
-			end):SetFont("ixToolTipText")
-		end
-
-		menu:SetMinimumWidth(t:GetWide())
-		menu:Open(x, y, false, t)
-	end
-end
-
 hook.Add("CreateMenuButtons", "ixInventory", function(tabs)
 	if (hook.Run("CanPlayerViewInventory") == false) then
 		return
@@ -409,8 +317,6 @@ hook.Add("CreateMenuButtons", "ixInventory", function(tabs)
 
 				LocalPlayer():ConCommand("say /DropMoney " .. amount)
 			end
-
-			Schema.AddInventoryAmmoButton(panel2)
 
 			if (ix.option.Get("openBags", true)) then
 				for _, v in pairs(inventory:GetItems()) do

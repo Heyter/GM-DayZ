@@ -39,6 +39,8 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 
 						client:SetLocalVar("WeaponDurability", self:GetData("durability", 100))
 					end
+
+					client:UpdateInventoryAmmo(weapon.Primary.Ammo)
 				end
 
 				if (ITEM.useDurability) then
@@ -84,6 +86,8 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 					end
 
 					self.ShotsFired = 0
+
+					self:GetOwner():TakeInventoryAmmo(self.Primary.Ammo, self.LastLoadClip1)
 				end
 
 				function WEAPON:Hook_PostFireBullets()

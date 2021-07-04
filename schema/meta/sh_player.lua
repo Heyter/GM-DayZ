@@ -18,7 +18,7 @@ function playerMeta:GetTrace(distance, mode)
 	return util.TraceLine(data)
 end
 
-function playerMeta:GetWeaponAmmo(item)
+function playerMeta:GetItemWeaponAmmo(item)
 	local weapon = self.carryWeapons and self.carryWeapons[item.weaponCategory]
 	local ammo = 0
 

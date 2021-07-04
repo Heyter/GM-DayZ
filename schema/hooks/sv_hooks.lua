@@ -9,7 +9,7 @@ function Schema:PlayerSpray(client)
 	return true
 end
 
-function Schema:PostPlayerLoadout(client, reload)
+function Schema:PostPlayerLoadout(client)
 	client:AllowFlashlight(true)
 	client:SetJumpPower(ix.config.Get("jumpPower", 200))
 end

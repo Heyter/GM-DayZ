@@ -137,7 +137,7 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 				query:Execute()
 			end
 
-			hook.Run("InventoryItemAdded", ix.item.inventories[oldInvID], targetInv, item)
+			hook.Run("InventoryItemAdded", ix.item.inventories[oldInvID], targetInv, item, split)
 
 			return x, y, targetInv:GetID()
 		else
@@ -195,7 +195,7 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 					targetInv:SendSlot(x, y, newItem)
 				end
 
-				hook.Run("InventoryItemAdded", nil, targetInv, newItem)
+				hook.Run("InventoryItemAdded", nil, targetInv, newItem, split)
 			end, characterID, playerID)
 
 			return x, y, targetInv:GetID()

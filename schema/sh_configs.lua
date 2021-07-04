@@ -30,7 +30,8 @@ local noLoad = {
 	stamina = true,
 	doors = true,
 	spawnsaver = true,
-	thirdperson = true
+	thirdperson = true,
+	ammosave = true
 }
 
 function Schema:InitializedPlugins()

@@ -142,14 +142,15 @@ ITEM.functions.empty_clip = {
 
 	OnCanRun = function(itemSelf)
 		if (CLIENT) then
-			return !itemSelf.isGrenade and itemSelf.player:GetWeaponAmmo(itemSelf) >= 1
+			return !itemSelf.isGrenade and itemSelf.player:GetItemWeaponAmmo(itemSelf) >= 1
 		end
 
-		return !itemSelf.isGrenade and itemSelf.isWeapon
+		return !itemSelf.isGrenade and itemSelf.isWeapon and (itemSelf.player.nextUseFunc or 0) < CurTime()
 	end,
 
 	OnRun = function(itemSelf)
-		ix.arccw_support.EmptyClip(itemSelf) -- :)
+		itemSelf.player.nextUseFunc = CurTime() + 1
+		ix.arccw_support.EmptyClip(itemSelf)
 
 		return false
 	end

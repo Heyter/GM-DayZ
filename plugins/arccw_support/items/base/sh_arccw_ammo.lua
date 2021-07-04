@@ -1,19 +1,26 @@
-ITEM.base = "base_ammo"
-ITEM.maxRounds = 30 -- макс. патронов помещаемых в одну коробку (авто.)
-ITEM.maxQuantity = 16 -- макс. кол-во стакнутых коробок
-ITEM.isStackable = true
+ITEM.name = "Ammo Base"
+ITEM.model = "models/Items/BoxSRounds.mdl"
+ITEM.width = 1
+ITEM.height = 1
+ITEM.ammo = "pistol" -- type of the ammo
+ITEM.ammoAmount = 30 -- amount of the ammo
+ITEM.description = "A Box that contains %s of Pistol Ammo"
+ITEM.category = "Ammunition"
+ITEM.useSound = "items/ammo_pickup.wav"
+
+ITEM.maxRounds = 90 -- макс. патронов помещаемых в одну коробку
+
+function ITEM:GetDescription()
+	local rounds = self:GetData("rounds", self.ammoAmount)
+	return Format(self.description, rounds)
+end
 
 if (CLIENT) then
 	function ITEM:PaintOver(item, w, h)
-		local quantity = item:GetData("quantity", 1)
 		local rounds = item:GetData("rounds", item.ammoAmount)
 		local color = ix.util.LerpColorHSV(nil, nil, item.maxRounds, rounds, 0)
 
 		draw.SimpleTextOutlined(rounds, "ixMerchant.Num", 1, 5, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
-
-		if (quantity > 1) then
-			draw.SimpleTextOutlined("x" .. quantity, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
-		end
 	end
 
 	function ITEM:CanTooltip(targetItem)
@@ -40,20 +47,6 @@ else
 	end
 end
 
-ITEM.functions.use = {
-	name = "Load",
-	tip = "useTip",
-	icon = "icon16/add.png",
-	OnRun = function(item)
-		local rounds = item:GetData("rounds", item.ammoAmount)
-
-		item.player:GiveAmmo(rounds, item.ammo)
-		item.player:EmitSound(item.useSound, 110)
-
-		return item:UseStackItem()
-	end
-}
-
 ITEM.functions.combine = {
 	OnRun = function(itemSelf, data)
         local combineItem = ix.item.instances[data[1]]
@@ -68,11 +61,7 @@ ITEM.functions.combine = {
 			if (istable(data) and data[1]) then
 				local combineItem = ix.item.instances[data[1]]
 
-				if (itemSelf.uniqueID != combineItem.uniqueID or 
-					combineItem:GetData("quantity", 1) >= itemSelf.maxQuantity or
-					itemSelf:GetData("quantity", 1) >= itemSelf.maxQuantity) then
-					return false
-				else
+				if (itemSelf.uniqueID == combineItem.uniqueID) then
 					return itemSelf:CanStack(combineItem)
 				end
 			else

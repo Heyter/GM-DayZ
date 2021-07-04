@@ -1,7 +1,6 @@
 local timer, IsValid = timer, IsValid
 
 util.AddNetworkString("ixArcCWAmmoSplit")
-util.AddNetworkString("ixRequestDropAmmo")
 
 function ix.arccw_support.Attach(itemWeapon, attID)
 	if (!itemWeapon or !attID or !itemWeapon.isWeapon or !itemWeapon.attachments) then
@@ -167,11 +166,6 @@ function ix.arccw_support.StackAmmo(itemSelf, combineItem)
 	local rounds = itemSelf:GetData("rounds", itemSelf.ammoAmount)
 	local combineRounds = combineItem:GetData("rounds", combineItem.ammoAmount)
 
-	if (itemSelf.isStackable and combineRounds == rounds and rounds >= maxRounds) then
-		itemSelf:CombineStack(combineItem)
-		return
-	end
-
 	if (combineRounds >= maxRounds or rounds >= maxRounds) then return end
 	local totalRounds = combineRounds + rounds
 
@@ -202,11 +196,17 @@ function ix.arccw_support.EmptyClip(itemSelf)
 		ammo = weapon:Clip1()
 
 		if (ammo > 0) then
-			weapon:SetClip1(0)
-			client:SetAmmo(weapon:Ammo1() + ammo, weapon.Primary.Ammo)
+			local data = { rounds = ammo }
+			ammoID = weapon.Primary.Ammo
 
-			-- itemSelf.data = itemSelf.data or {}
-			-- itemSelf.data.ammo = nil
+			if (!client:GetCharacter():GetInventory():Add(ammoID, 1, data)) then
+				weapon:SetClip1(0)
+				ix.item.Spawn(ammoID, client, nil, nil, data)
+				return
+			end
+
+			client:UpdateInventoryAmmo(ammoID)
+			weapon:SetClip1(0)
 
 			return
 		end
@@ -229,63 +229,6 @@ function ix.arccw_support.EmptyClip(itemSelf)
 	end
 end
 
-net.Receive("ixRequestDropAmmo", function(_, client)
-	if ((client.ixAmmoSplitTry or 0) < CurTime()) then
-		client.ixAmmoSplitTry = CurTime() + 0.33
-	else
-		return
-	end
-
-	if (!client:GetCharacter() or !client:Alive()) then return end
-
-	local ammoName = net.ReadString()
-	if (!isstring(ammoName)) then return end
-
-	local item = ix.item.list[ammoName]
-	if (!item or (item.base or "") != "base_arccw_ammo") then return end
-
-	local ammo = client:GetAmmoCount(ammoName)
-	if (!ammo or ammo <= 0) then return end
-
-	local maxRounds = item.maxRounds
-
-	if (!net.ReadBool()) then
-		local totalAmmo = ammo > maxRounds and maxRounds - ammo or ammo
-
-		if (totalAmmo < 1) then
-			totalAmmo = maxRounds
-		end
-
-		if (client:GetCharacter():GetInventory():Add(ammoName, 1, { rounds = totalAmmo })) then
-			ammo = ammo - maxRounds
-			client:SetAmmo(math.max(ammo, 0), ammoName)
-		end
-
-		totalAmmo = nil
-	else
-		local totalAmmo = math.floor(ammo / maxRounds) -- число полных обойм
-		local result = totalAmmo * maxRounds -- сколько поместилось
-		local data = {}
-
-		if (result < 1) then
-			result = ammo - result -- остаток
-			data["rounds"] = result
-		elseif (result > 0 and totalAmmo >= 2) then
-			data["quantity"] = totalAmmo
-			data["rounds"] = maxRounds
-		end
-
-		if (client:GetCharacter():GetInventory():Add(ammoName, 1, data)) then
-			ammo = ammo - result
-			client:SetAmmo(math.max(ammo, 0), ammoName)
-		end
-
-		totalAmmo, result, data = nil, nil, nil
-	end
-
-	ammo = nil
-end)
-
 net.Receive("ixArcCWAmmoSplit", function(_, client)
 	if ((client.ixAmmoSplitTry or 0) < CurTime()) then
 		client.ixAmmoSplitTry = CurTime() + 0.33
@@ -302,40 +245,21 @@ net.Receive("ixArcCWAmmoSplit", function(_, client)
 	local rounds = item:GetData("rounds", item.ammoAmount)
 	if (rounds <= 1) then return end
 
-	local quantity = item:GetData("quantity", 1)
 	local amount = net.ReadUInt(32)
 
-	amount = math.Clamp(math.Round(tonumber(amount) or 0), 0, quantity >= 2 and quantity or rounds)
-	if (amount == 0) then return end
+	amount = math.Clamp(math.Round(tonumber(amount) or 0), 0, rounds)
+	if (amount == 0 or amount == rounds) then return end
 
-	if (item.isStackable and quantity >= 2) then
-		if (amount == quantity) then return end
+	if (character:GetInventory():Add(item.uniqueID, 1, {rounds = amount}, nil, nil, nil, true)) then
+		amount = rounds - amount
 
-		if (character:GetInventory():Add(item.uniqueID, 1, {quantity = amount}, nil, nil, nil, true)) then
-			amount = quantity - amount
-
-			if (amount < 1) then
-				item:Remove()
-			else
-				item:SetData("quantity", amount)
-			end
+		if (amount <= 0) then
+			item:Remove()
 		else
-			client:NotifyLocalized("noFit")
+			item:SetData("rounds", amount)
 		end
 	else
-		if (amount == rounds) then return end
-
-		if (character:GetInventory():Add(item.uniqueID, 1, {rounds = amount}, nil, nil, nil, true)) then
-			amount = rounds - amount
-
-			if (amount < 1) then
-				item:Remove()
-			else
-				item:SetData("rounds", amount)
-			end
-		else
-			client:NotifyLocalized("noFit")
-		end
+		client:NotifyLocalized("noFit")
 	end
 end)
 
