@@ -166,6 +166,12 @@ function Schema:PlayerDisconnected(client)
 	timer.Remove(client:EntIndex() .. "_checkBounds_cycle")
 end
 
+--[[ function Schema:PlayerInteractItem(client, action)
+	if (action == "drop") then
+		client:ForceSequence("gesture_item_drop", nil) -- 0.41
+	end
+end ]]
+
 -- Stack hooks
 util.AddNetworkString("ixItemSplit")
 

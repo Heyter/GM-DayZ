@@ -1,9 +1,7 @@
-AddCSLuaFile()
+AddCSLuaFile("shared.lua")
+include("shared.lua")
 
-ENT.Base = "sb_advanced_nextbot_base"
 DEFINE_BASECLASS(ENT.Base)
-
-if CLIENT then return end
 
 local UseNodeGraph = CreateConVar(
 	"sb_an_bandit_usenodegraph",
@@ -85,8 +83,6 @@ ENT.RunSpeed = 160
 ENT.WalkSpeed = 100
 
 ENT.AimSpeed = 200
-
-ENT.IsNPCBandit = true
 
 --[[------------------------------------
 	CONFIG END
@@ -377,7 +373,7 @@ ENT.TaskList = {
 
 			if result then
 				self:TaskComplete("movement_randomwalk")
-				self:StartTask("movement_wait", {Time = math.random(1, 10)})
+				self:StartTask("movement_wait", {Time = math.random(5, 30)})
 			elseif result == false then
 				self:TaskFail("movement_randomwalk")
 				self:StartTask("movement_wait")
@@ -420,30 +416,45 @@ function ENT:Initialize()
 	end
 end
 
+-- если есть трение и IsStuck то можно тут проверять
+--[[ function ENT:OnTouch(ent,trace)
+	if IsValid(ent) and trace.Normal == vector_up and !self:PathIsValid() then
+		local dir = self:GetPos()-ent:WorldSpaceCenter()
+		dir.z = 0
+
+		self.EntityStuckMoveTo = self:GetPos()+dir
+	end
+end ]]
+
 function ENT:BehaviourThink()
-	if self:PathIsValid() and !self:DisableBehaviour() and self:HasWeapon() then
+--[[ 	if self.EntityStuckMoveTo then
+		self:Approach(self.EntityStuckMoveTo)
+		self.EntityStuckMoveTo = nil
+	end ]]
+
+	if self:PathIsValid() then
 		local filter = self:GetChildren()
 		filter[#filter+1] = self
 
 		local pos = self:GetShootPos()
-		local endpos = pos+self:GetAimVector()*100
-		local blocker = self:ShootBlocker(pos,endpos,filter)
+		local endpos = pos+self:GetEyeAngles():Forward()*100
+		local ent = self:CheckMovePathBlocked(pos,endpos,filter)
 
-		self.LastShootBlocker = blocker
+		self.LastShootBlocker = ent
 
-		if blocker then
-			local class = blocker:GetClass()
+		if ent then
+			local class = ent:GetClass()
 
-			if class=="prop_door_rotating" and blocker:GetInternalVariable("m_eDoorState")!=2 and (!self.OpenDoorTime or CurTime()-self.OpenDoorTime>2) then
+			if class=="prop_door_rotating" and ent:GetInternalVariable("m_eDoorState")!=2 and (!self.OpenDoorTime or CurTime()-self.OpenDoorTime>2) then
 				self.OpenDoorTime = CurTime()
-				blocker:Fire("Use")
-			elseif (class == "func_door_rotating" or class == "func_door") and blocker:GetInternalVariable("m_toggle_state") == 1 and (!self.OpenDoorTime or CurTime()-self.OpenDoorTime>2) then
+				ent:Fire("Use",nil,0,self,self)
+			elseif (class == "func_door_rotating" or class == "func_door") and ent:GetInternalVariable("m_toggle_state") == 1 and (!self.OpenDoorTime or CurTime()-self.OpenDoorTime>2) then
 				self.OpenDoorTime = CurTime()
-				blocker:Fire("Use")
+				ent:Fire("Use",nil,0,self,self)
 			end
 		end
 	else
-		self.LastShootBlocker = false
+		self.LastShootBlocker = nil
 	end
 
 	//self.OnContactAllowed = true
@@ -468,7 +479,7 @@ function ENT:ShouldAttack(pos)
 
 	if math.deg(math.acos(dir:Dot(self:GetEyeAngles():Forward()))) > 20 then return false end
 
-	if self:ShootBlocker(self:GetShootPos(), pos, function(ent)
+	if self:CheckAttackPathBlocked(self:GetShootPos(), pos, function(ent)
 		if ent == self:GetEnemy() or ent == self then return false end
 		if ent:GetClass() == self:GetClass() or ent.IsBandit then return false end
 
@@ -514,7 +525,7 @@ function ENT:OnInjured(dmg)
 	end
 end
 
-function ENT:ShootBlocker(start,pos,filter)
+function ENT:CheckAttackPathBlocked(start,pos,filter)
 	local tr = util.TraceLine({
 		start = start,
 		endpos = pos,
@@ -523,6 +534,17 @@ function ENT:ShootBlocker(start,pos,filter)
 	})
 	
 	return tr.Hit and tr.Entity
+end
+
+function ENT:CheckMovePathBlocked(start,pos,filter)
+	local tr = util.TraceLine({
+		start = start,
+		endpos = pos,
+		filter = filter,
+		mask = self:GetSolidMask(),
+	})
+	
+	return tr.Hit and tr.Entity!=self:GetEnemy() and tr.Entity
 end
 
 function ENT:GetRandomWalkPosition()
@@ -705,7 +727,8 @@ function ENT:OnMeleeAttack()
 	if (self.MeleeAttack and self.MeleeAttack < CurTime()) then
 		self.MeleeAttack = CurTime() + 5
 
-		self:DoGesture(ACT_HL2MP_GESTURE_RANGE_ATTACK_MELEE)
+		self:DoGesture(ACT_HL2MP_GESTURE_RANGE_ATTACK_FIST)
+		-- ACT_HL2MP_GESTURE_RANGE_ATTACK_MELEE
 
 		self:Attack({
 			damage = math.random(5, self.MeleeAttackDamage or 10),
