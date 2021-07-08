@@ -108,9 +108,9 @@ if (SERVER) then
 else
 	language.Add('tool.'..ClassName..'.name','NPC Spawner')
 	language.Add('tool.'..ClassName..'.desc','NPC Spawner Tool')
-	language.Add('tool.'..ClassName..'.left','Создать/Перезаписать точку возрождения')
-	language.Add('tool.'..ClassName..'.right','Удалить точку возрождения')
-	language.Add('tool.'..ClassName..'.reload','Копировать настройки')
+	language.Add('tool.'..ClassName..'.left','Create/Update spawner')
+	language.Add('tool.'..ClassName..'.right','Delete spawner')
+	language.Add('tool.'..ClassName..'.reload','Copy info from spawner')
 	language.Add('tool.'..ClassName..'.panel_npc','NPC Selection')
 	language.Add('tool.'..ClassName..'.npc','NPC')
 	language.Add('tool.'..ClassName..'.all_npcs','All NPCs')
@@ -118,9 +118,9 @@ else
 	language.Add('tool.'..ClassName..'.skill','Weapon Skill')
 	language.Add('tool.'..ClassName..'.panel_spawning','Spawning Rates')
 	language.Add('tool.'..ClassName..'.delay','Spawning Delay (minutes)')
-	language.Add('tool.'..ClassName..'.maximum','Max Alive')
+	language.Add('tool.'..ClassName..'.maximum','Max count')
 	language.Add('tool.'..ClassName..'.decrease','Wave Delay Decrease')
-	language.Add('tool.'..ClassName..'.decrease.help','Every time you kill (Max Alive) NPCs, the spawning delay will be decreased by this amount')
+	language.Add('tool.'..ClassName..'.decrease.help','Every time you kill (Max count) NPCs, the spawning delay will be decreased by this amount')
 	language.Add('tool.'..ClassName..'.panel_positioning','Positioning')
 	language.Add('tool.'..ClassName..'.positioning.help',"Because spawning is random, NPCs can get stuck.\nYou can either make them not collide with each other or space out where they spawn.")
 	language.Add('tool.'..ClassName..'.nocollide','Disable NPC Collisions')
@@ -152,8 +152,8 @@ function TOOL:AreaInRect(v, location)
 	local radius = 16
 
 	return (v.position.x >= location.x - radius and v.position.x <= (location.x + radius) and
-				v.position.y >= location.y - radius and v.position.y <= (location.y + radius) and
-				v.position.z >= location.z - radius and v.position.z <= (location.z + radius))
+		v.position.y >= location.y - radius and v.position.y <= (location.y + radius) and
+		v.position.z >= location.z - radius and v.position.z <= (location.z + radius))
 end
 
 if (SERVER) then

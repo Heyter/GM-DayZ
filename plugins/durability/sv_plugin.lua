@@ -70,6 +70,7 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 
 				function WEAPON:Hook_PostReload()
 					local item = self.ixItem
+					local owner = self:GetOwner()
 
 					if (item and item.useDurability) then
 						local durability = item:GetData("durability", 100)
@@ -78,7 +79,7 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 							durability = math.max(0, math.Round(durability - (item.DegradeRate * self.ShotsFired), 1))
 
 							item:SetData("durability", durability)
-							self:GetOwner():SetLocalVar("WeaponDurability", durability)
+							owner:SetLocalVar("WeaponDurability", durability)
 						end
 
 						self.MalfunctionMeanCopy = self.MalfunctionMeanCopy or self:MalfunctionMeanCalculate()
@@ -87,7 +88,7 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 
 					self.ShotsFired = 0
 
-					self:GetOwner():TakeInventoryAmmo(self.Primary.Ammo, self.LastLoadClip1)
+					owner:TakeInventoryAmmo(self.Primary.Ammo, self.LastLoadClip1)
 				end
 
 				function WEAPON:Hook_PostFireBullets()

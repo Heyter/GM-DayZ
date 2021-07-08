@@ -3,16 +3,16 @@ ix.allowedHoldableClasses["gmodz_npc_loot"] = true
 local v2 = Vector(0, 0, 32)
 
 function PLUGIN:OnNPCKilled(npc, attacker, weapon)
-	if (!attacker:IsPlayer()) then return end
+	if (attacker:IsPlayer()) then
+		local config_rep = ix.config.Get("reputationSavior", 10)
 
-	local config_rep = ix.config.Get("reputationSavior", 10)
+		net.Start("ixUpdateRep")
+			net.WriteBool(false) -- положительная репутация
+			net.WriteUInt(config_rep, 16)
+		net.Send(attacker)
 
-	net.Start("ixUpdateRep")
-		net.WriteBool(false) -- положительная репутация
-		net.WriteUInt(config_rep, 16)
-	net.Send(attacker)
-
-	attacker:AddReputation(config_rep)
+		attacker:AddReputation(config_rep)
+	end
 
 	-- generate loot
 	local replication

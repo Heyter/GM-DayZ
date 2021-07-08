@@ -58,10 +58,6 @@ else
 			if (IsValid(entity) and Schema.outlineItems[entity:GetClass()]) then
 				color = ix.option.Get("colorOutlineItems", color_white)
 
-				if (color.a != 255) then
-					color.a = 255
-				end
-
 				outline.Add(entity, color, OUTLINE_MODE_VISIBLE)
 			end
 		end

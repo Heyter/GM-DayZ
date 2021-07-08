@@ -49,26 +49,13 @@ end
 
 if (CLIENT) then
 	do
-		local ents = ents
-		local badEnts = {
-			[1] = 'class C_PhysPropClientside',
-			[2] = 'class C_ClientRagdoll',
-		}
-
-		hook.Add('OnEntityCreated', 'hlib.cleanup', function(entity)
-			if (entity:GetClass() == badEnts[1] or entity:GetClass() == badEnts[2]) then
-				timer.Simple(10, function()
-					for i = 1, ents.GetCount() do
-						local ent = ents.GetAll()[i]
-
-						if (ent:GetClass() == badEnts[1] or ent:GetClass() == badEnts[2]) then
-							ent:Remove()
-							ent = nil
-						end
-					end
-
+		local bad_ents = {['class C_PhysPropClientside'] = true, ['class C_ClientRagdoll'] = true}
+		timer.Create("CleanupGarbage", 60, 0, function()
+			for _, v in ipairs(ents.GetAll()) do
+				if (bad_ents[v:GetClass()]) then
+					SafeRemoveEntity(v)
 					RunConsoleCommand('r_cleardecals')
-				end)
+				end
 			end
 		end)
 	end

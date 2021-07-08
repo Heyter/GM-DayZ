@@ -39,7 +39,7 @@ local function InternalSpawnNPC(
 	local Offset = NPCData.Offset or spawner.spawnheight or 32
 	Position = Position + Vector(0, 0, Offset)
 
-	--if (!spawner.nocollide) then
+	if (!spawner.nocollide) then
 		local data = {}
 		data.start = Position
 		data.endpos = data.start + vector_up
@@ -54,7 +54,11 @@ local function InternalSpawnNPC(
 		end
 
 		Position = data.endpos + Vector(0, 0, 25)
-	--end
+	end
+
+	if (!util.IsInWorld(Position)) then
+		return
+	end
 
 	-- Create NPC
 	local NPC = ents.Create(NPCData.Class)
@@ -136,6 +140,7 @@ local function InternalSpawnNPC(
 			break
 		end
 	end
+
 	for _, v in pairs(NPCData.Weapons or {}) do
 		if v == Equipment then
 			valid = true
@@ -147,13 +152,6 @@ local function InternalSpawnNPC(
 		NPC:SetKeyValue("additionalequipment", Equipment)
 		NPC.Equipment = Equipment
 	end
-
-	--for _, ent in pairs(ents.GetAll()) do
-	-- if ent:IsPlayer() and ... then
-		--NPC:AddEntityRelationship(ent, D_LI, 99) -- Отношение дружелюбное
-		--NPC:AddEntityRelationship(ent, D_HT, 99) -- Отношение враг
-		-- NPC:AddEntityRelationship(ent, D_NU, 99) -- Отношение нейтральное
-	--end
 
 	NPC:Spawn()
 	NPC:Activate()
@@ -194,18 +192,6 @@ function ENT:GetSpawnLocation(position, radius)
 	return (position + Vector(radius * rand(), radius * rand(), 0))
 end
 
-function ENT:ConfigureNPCHealth(npc, healthmul)
-	local hp = npc:GetMaxHealth()
-	local chp = npc:Health()
-	-- Bug with nextbots
-	if (chp > hp) then
-		hp = chp
-	end
-	hp = hp * healthmul
-	npc:SetMaxHealth(hp)
-	npc:SetHealth(hp)
-end
-
 function ENT:GetSpawnWeapon(weapon, class)
 	local npcdata = list.Get("NPC")[class]
 
@@ -234,7 +220,7 @@ timer.Create("ixNPCSpawner", 5, 0, function()
 			local nearPlayer
 
 			for _, v2 in ipairs(player.GetHumans()) do
-				if (IsValid(v2) and v2:GetMoveType() != MOVETYPE_NOCLIP and v2:Alive() and v2:GetPos():DistToSqr(v2.position) < nearDist) then
+				if (IsValid(v2) and v2:GetMoveType() != MOVETYPE_NOCLIP and v2:Alive() and v2:GetPos():DistToSqr(v.position) < nearDist) then
 					nearPlayer = true
 					break
 				end
@@ -265,7 +251,17 @@ timer.Create("ixNPCSpawner", 5, 0, function()
 			v.spawnedNPCs[npc] = true
 			v.totalSpawnedNPCs = (v.totalSpawnedNPCs or 0) + 1
 
-			ENT:ConfigureNPCHealth(npc, v.healthmul)
+			local hp = npc:GetMaxHealth()
+			local chp = npc:Health()
+
+			-- Bug with nextbots
+			if (chp > hp) then
+				hp = chp
+			end
+
+			hp = hp * v.healthmul
+			npc:SetMaxHealth(hp)
+			npc:SetHealth(hp)
 
 			if (npc.SetCurrentWeaponProficiency) then
 				npc:SetCurrentWeaponProficiency(v.skill)
@@ -275,7 +271,7 @@ timer.Create("ixNPCSpawner", 5, 0, function()
 				npc:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE_DEBRIS)
 			end
 
-			NPC:SetSpawnEffect(true)
+			npc:SetSpawnEffect(true)
 			npc:DrawShadow(false)
 
 			npc.KillReward = v.killreward
@@ -309,15 +305,4 @@ end
 
 function PLUGIN:SaveData()
 	self:SetData(PLUGIN.spawners)
-end
-
--- TODO: PlayerSpawn и там изменять по всем бандитам Relationshit
-function PLUGIN:PlayerDeath(victim, _, attacker)
-	-- TODO: attacker.IsBandit определять по GetClass
-
-	if (attacker:IsNPC() and victim:IsPlayer()) then
-		if (attacker.IsBandit and victim:GetReputationLevel() < 0) then
-			attacker:AddEntityRelationship(victim, D_NU, 99)
-		end
-	end
 end

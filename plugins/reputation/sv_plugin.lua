@@ -123,4 +123,12 @@ function PLUGIN:PostPlayerLoadout(client)
 
 		client.ResetPlayerModel = nil
 	end
+
+	local repPerc = client:GetReputation() / ix.config.Get("maxReputation", 1500)
+
+	if (repPerc <= -0.5) then
+		client.IsBandit = true
+	else
+		client.IsBandit = nil
+	end
 end

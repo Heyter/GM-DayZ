@@ -46,7 +46,7 @@ function playerMeta:ActivateNoCollision(time, collision_group)
 				local tooNearPlayer
 
 				for _, v in ipairs(player.GetAll()) do
-					if (self:GetPos():DistToSqr(v:GetPos()) <= dist) then
+					if (v != self and self:GetPos():DistToSqr(v:GetPos()) <= dist) then
 						tooNearPlayer = true
 						break
 					end

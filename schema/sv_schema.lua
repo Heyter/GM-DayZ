@@ -102,11 +102,12 @@ function ixItemENT:Use(activator, caller)
 			caller:PerformInteraction(ix.config.Get("itemPickupTime", 0.5), self, function(client)
 				if (!ix.item.PerformInventoryAction(client, "take", self)) then
 					return false -- do not mark dirty if interaction fails
-				else
-					client:ForceSequence("pickup", function()
-						client:EmitSound("items/itempickup.wav")
-					end, 1)
 				end
+				-- else
+					-- client:ForceSequence("pickup", function()
+						-- client:EmitSound("items/itempickup.wav")
+					-- end, 1)
+				-- end
 			end)
 		end
 

@@ -39,6 +39,7 @@ function PLUGIN:PlayerEnterSafeZone(client)
 end
 
 function PLUGIN:PlayerSpawn(client)
+	client:SetCollisionGroup(COLLISION_GROUP_PLAYER)
 	client:SetAvoidPlayers(true)
 end
 

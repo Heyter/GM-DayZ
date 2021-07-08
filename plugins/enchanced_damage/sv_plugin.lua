@@ -176,7 +176,7 @@ function ix.bleeding.Timer(client, level, isRise)
 end
 
 function playerMeta:SetBleeding(damage, bNotShouldTakeDamage, inflictor)
-	if (!damage or damage <= 0) then return end
+	if (damage or 0) <= 0 then return end
 	if (!bNotShouldTakeDamage and hook.Run("PlayerShouldTakeDamage", self, self) == false) then return end
 	if (damage >= self:GetMaxHealth() or self:GetHealth() - damage <= 0) then return end
 

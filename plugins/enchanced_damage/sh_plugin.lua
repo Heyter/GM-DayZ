@@ -45,7 +45,7 @@ end
 
 function PLUGIN:ScaleNPCDamage(entity, hit_group, dmg_info)
 	if (hit_group == HITGROUP_HEAD) then
-		dmg_info:ScaleDamage(entity:Health())
+		dmg_info:ScaleDamage(3)
 	elseif (hit_group == HITGROUP_CHEST) then
 		dmg_info:ScaleDamage(1)
 	elseif (hit_group == HITGROUP_STOMACH) then

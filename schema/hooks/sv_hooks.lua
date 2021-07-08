@@ -31,7 +31,7 @@ function Schema:PlayerShouldTakeDamage(client, attacker)
 		end
 	end
 
-	if (client:GetLocalVar("protection") or (client.protection_time or 0) > CurTime()) then
+	if (client:HasGodMode() or client:GetLocalVar("protection") or (client.protection_time or 0) > CurTime()) then
 		return false
 	end
 end
