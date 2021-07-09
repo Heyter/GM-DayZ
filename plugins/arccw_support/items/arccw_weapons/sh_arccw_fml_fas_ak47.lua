@@ -9,6 +9,6 @@ ITEM.JamCapacity = 200
 ITEM.DegradeRate = 0.02
 
 if (SERVER) then
-	ITEM.rarity = { rare = true }
+	ITEM.rarity = { rare = true, weight = 1 }
 	ITEM.rate = 1
 end

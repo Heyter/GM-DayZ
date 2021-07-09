@@ -100,9 +100,9 @@ function PLUGIN:OnCharacterDisconnect(client, character)
 end
 
 function PLUGIN:PostPlayerLoadout(client)
-	if (client.ResetPlayerModel) then
-		local rep = client:GetReputation()
+	local rep = client:GetReputation()
 
+	if (client.ResetPlayerModel) then
 		if (rep < 0) then
 			client:SetModel(Schema.BanditModels[ math.random( #Schema.BanditModels ) ])
 		elseif (rep > 0) then
@@ -124,9 +124,7 @@ function PLUGIN:PostPlayerLoadout(client)
 		client.ResetPlayerModel = nil
 	end
 
-	local repPerc = client:GetReputation() / ix.config.Get("maxReputation", 1500)
-
-	if (repPerc <= -0.5) then
+	if (rep / ix.config.Get("maxReputation", 1500) <= -0.5) then
 		client.IsBandit = true
 	else
 		client.IsBandit = nil

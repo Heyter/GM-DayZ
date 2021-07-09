@@ -5,7 +5,7 @@ ITEM.description = "A high end set of advanced tools for working on firearms. Un
 ITEM.raiseDurability = 30
 
 if (SERVER) then
-	ITEM.rarity = { rare = true }
+	ITEM.rarity = { rare = true, weight = 10 }
 	ITEM.rate = 2
 end
 

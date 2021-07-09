@@ -6,6 +6,7 @@ PLUGIN.items = PLUGIN.items or {}
 PLUGIN.spawner.positions = PLUGIN.spawner.positions or {}
 
 Schema.dropItems = Schema.dropItems or {rare = {}, common = {}}
+Schema.weightedItems = Schema.weightedItems or {}
 
 function Schema.GetRandomItem(chance)
 	local itemID = math.random()
@@ -21,6 +22,23 @@ function Schema.GetRandomItem(chance)
 	return itemID, isRare
 end
 
+function Schema.GetRandomWeightedItem(scale, shuffle)
+	if (shuffle) then
+		table.shuffle(Schema.weightedItems)
+	end
+
+	local random = math.random() * (scale or 1)
+	local sum = 0
+
+	for _, v in ipairs(Schema.weightedItems) do
+		sum = sum + v.weight
+
+		if random <= sum then
+			return v.id
+		end
+	end
+end
+
 util.AddNetworkString("ixItemSpawnerManager")
 util.AddNetworkString("ixItemSpawnerDelete")
 util.AddNetworkString("ixItemSpawnerEdit")
@@ -31,6 +49,9 @@ util.AddNetworkString("ixItemSpawnerChanges")
 function PLUGIN:InitializedPlugins()
 	Schema.dropItems = {rare = {}, common = {}}
 
+	local total_weight = 0
+	Schema.weightedItems = {}
+
 	for itemID, v in pairs(ix.item.list) do
 		if (v.rarity and istable(v.rarity)) then
 			if (v.rarity.rare) then
@@ -40,8 +61,25 @@ function PLUGIN:InitializedPlugins()
 			if (v.rarity.common) then
 				Schema.dropItems.common[#Schema.dropItems.common + 1] = itemID
 			end
+
+			if (v.rarity.weight) then
+				Schema.weightedItems[#Schema.weightedItems + 1] = {id = itemID, weight = v.rarity.weight}
+				total_weight = total_weight + v.rarity.weight
+			end
 		end
 	end
+
+	Schema.weightedItems[#Schema.weightedItems + 1] = {id = "money", weight = 90}
+
+	if (#Schema.weightedItems > 0) then
+		for _, v in ipairs(Schema.weightedItems) do
+			v.weight = v.weight / total_weight
+		end
+
+		table.shuffle(Schema.weightedItems)
+	end
+
+	total_weight = nil
 end
 
 function PLUGIN:LoadData()
@@ -124,7 +162,7 @@ function PLUGIN:ForceSpawn(client, spawner)
 		return
 	end
 
-	local itemID = Schema.GetRandomItem(spawner.rarity)
+	local itemID = Schema.GetRandomWeightedItem(3, true)
 
 	if (itemID) then
 		ix.item.Spawn(itemID, spawner.position, function(_, entity)
@@ -137,8 +175,6 @@ function PLUGIN:ForceSpawn(client, spawner)
 				physObj:Sleep()
 			end
 		end)
-	else
-		spawner.lastSpawned = os.time() + 60
 	end
 end
 
@@ -170,7 +206,7 @@ timer.Create("ixItemSpawner", 5, 0, function()
 				continue
 			end
 
-			local itemID = Schema.GetRandomItem(v.rarity)
+			local itemID = Schema.GetRandomWeightedItem(3, true)
 
 			if (itemID) then
 				ix.item.Spawn(itemID, v.position, function(_, entity)
@@ -183,8 +219,6 @@ timer.Create("ixItemSpawner", 5, 0, function()
 						physObj:Sleep()
 					end
 				end)
-			else
-				v.lastSpawned = os.time() + 60
 			end
 		end
 	end

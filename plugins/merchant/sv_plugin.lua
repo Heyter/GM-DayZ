@@ -120,6 +120,68 @@ net.Receive("ixMerchantTrade", function(len, client)
 	end
 end)
 
+--- Установить рандомный массив предметов
+function PLUGIN:SetRandomItems(maxItems, scale)
+	local items = {}
+
+	if (maxItems > 0) then
+		for i = 1, maxItems do
+			local itemID = Schema.GetRandomWeightedItem(scale)
+
+			if (itemID and itemID != "money") then
+				local item = ix.item.list[itemID]
+				if (!item) then continue end
+
+				local itemData = {}
+
+				if (item.isStackable) then
+					itemData.quantity = 1
+				end
+
+				if (item.useDurability) then
+					itemData.durability = (item.defDurability or 100) * math.Rand(0.01, 0.5)
+				end
+
+				table.insert(items, {
+					uniqueID = itemID,
+					price = math.max(0, PLUGIN:CalculatePrice(item, true) / ix.config.Get("merchantSellPerc", 0.7)),
+					data = itemData
+				})
+
+				itemData = nil
+			end
+		end
+	end
+
+	return items
+end
+
+--- Таймер, который обновляет торговца каждые X минут
+function PLUGIN.MerchantInterval()
+	for _, entity in ipairs(ents.FindByClass("gmodz_merchant")) do
+		local count = table.Count(entity.items)
+
+		if (!count or count <= 0) then
+			entity.items = PLUGIN:SetRandomItems(math.random(3, 15))
+
+			for k, v in ipairs(entity.receivers) do
+				if (IsValid(v) and v:Alive() and v:GetPos():DistToSqr(entity:GetPos()) <= 36864) then
+					net.Start("ixMerchantOpen")
+						net.WriteEntity(entity)
+						net.WriteTable(entity.items)
+					net.Send(v)
+				else
+					table.remove(entity.receivers, k)
+				end
+			end
+		end
+
+		count = nil
+	end
+
+	PLUGIN:SaveData()
+end
+
 -- HOOKS
 
 function PLUGIN:SaveData()
@@ -170,4 +232,6 @@ function PLUGIN:LoadData()
 
 		entity.items = v.items
 	end
+
+	timer.Create("ixMerchantInterval", ix.config.Get("merchantInterval", 60) * 60, 0, PLUGIN.MerchantInterval)
 end

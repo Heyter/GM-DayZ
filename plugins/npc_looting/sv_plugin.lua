@@ -3,9 +3,9 @@ ix.allowedHoldableClasses["gmodz_npc_loot"] = true
 local v2 = Vector(0, 0, 32)
 
 function PLUGIN:OnNPCKilled(npc, attacker, weapon)
-	if (attacker:IsPlayer()) then
-		local config_rep = ix.config.Get("reputationSavior", 10)
+	local config_rep = ix.config.Get("reputationSavior", 10)
 
+	if (attacker:IsPlayer()) then
 		net.Start("ixUpdateRep")
 			net.WriteBool(false) -- положительная репутация
 			net.WriteUInt(config_rep, 16)
@@ -20,17 +20,14 @@ function PLUGIN:OnNPCKilled(npc, attacker, weapon)
 	inventory.noSave = true
 	inventory.isLoot = true
 
-	local maxItems = 0
-	if (math.random() < 0.17) then -- 17% шанс дропа вещей
-		maxItems = math.random(0, 3)
-	end
-
-	local money = math.random(100)
+	local maxItems = math.random(0, 3)
+	local has_item = nil
+	local money = math.random(2, config_rep)
 
 	if ((npc.KillReward or 0) > 0) then
 		replication = true
 		money = npc.KillReward * math.max(1, maxItems)
-	elseif (money <= math.random(100) * math.max(1, maxItems)) then
+	elseif (money <= math.random(config_rep) * math.max(1, maxItems)) then
 		replication = true
 	else
 		money = 0
@@ -38,14 +35,15 @@ function PLUGIN:OnNPCKilled(npc, attacker, weapon)
 
 	if (maxItems > 0) then
 		for i = 1, maxItems do
-			local itemID, isRare = Schema.GetRandomItem(0.05)
+			local itemID = Schema.GetRandomWeightedItem(3)
 			if (!itemID) then continue end
 
-			if (isRare) then
+			if (itemID == "money") then
 				money = money * 2
+			else
+				inventory:Add(itemID, 1, nil, nil, nil, true)
+				has_item = true
 			end
-
-			inventory:Add(itemID, 1, nil, nil, nil, true)
 		end
 
 		replication = true
@@ -59,7 +57,7 @@ function PLUGIN:OnNPCKilled(npc, attacker, weapon)
 
 	local pos = npc:GetPos() + v2
 
-	if (maxItems == 0 and money > 0) then
+	if (!has_item and money > 0) then
 		ix.item.inventories[inventory:GetID()] = nil
 		inventory = nil
 

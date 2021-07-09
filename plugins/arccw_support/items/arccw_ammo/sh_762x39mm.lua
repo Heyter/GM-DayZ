@@ -5,6 +5,5 @@ ITEM.ammoAmount = 30 -- amount of the ammo
 ITEM.description =  "Коробка с патронами %s калибра 5,45x39"
 
 if (SERVER) then
-	ITEM.rarity = { common = true }
-	ITEM.rate = 6
+	ITEM.rarity = { common = true, weight = 50 }
 end

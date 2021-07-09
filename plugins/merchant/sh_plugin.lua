@@ -11,6 +11,20 @@ ix.config.Add("merchantSellPerc", 0.7, "Множитель процента пр
 	category = PLUGIN.name
 })
 
+ix.config.Add("merchantInterval", 120, "Интервал обновлений ассортимента торговца (в минутах)", 
+	function(_, newValue)
+		if (SERVER) then
+			if (timer.Exists("ixMerchantInterval")) then
+				timer.Adjust("ixMerchantInterval", newValue * 60, 0, PLUGIN.MerchantInterval)
+			else
+				timer.Create("ixMerchantInterval", newValue * 60, 0, PLUGIN.MerchantInterval)
+			end
+		end
+	end, {
+	data = {min = 1, max = 1440},
+	category = PLUGIN.name
+})
+
 function PLUGIN:CalculatePrice(item, isSellingToVendor, client)
 	local price = ix.item.list[item.uniqueID].price or 0
 	local scale = ix.config.Get("merchantSellPerc", 0.7)
@@ -25,7 +39,9 @@ function PLUGIN:CalculatePrice(item, isSellingToVendor, client)
 		price = (item.price or price) / scale / scale
 	end
 
-	price = hook.Run("MerchantCalculatePrice", client, price, scale, isSellingToVendor) or price
+	if (client) then
+		price = hook.Run("MerchantCalculatePrice", client, price, scale, isSellingToVendor) or price
+	end
 
 	return math.max(0, math.floor(price))
 end

@@ -7,7 +7,7 @@ ITEM.isClothesKit = true
 ITEM.isWeaponKit = nil
 
 if (SERVER) then
-	ITEM.rarity = { rare = true }
+	ITEM.rarity = { rare = true, weight = 10 }
 	ITEM.rate = 2
 end
 

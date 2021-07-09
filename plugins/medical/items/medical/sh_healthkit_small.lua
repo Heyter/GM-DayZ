@@ -11,6 +11,6 @@ function ITEM:OnCanUse()
 end
 
 if (SERVER) then
-	ITEM.rarity = { common = true }
+	ITEM.rarity = { common = true, weight = 15 }
 	ITEM.rate = 4
 end

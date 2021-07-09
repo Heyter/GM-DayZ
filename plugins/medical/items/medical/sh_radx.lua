@@ -16,6 +16,6 @@ else
 end
 
 if (SERVER) then
-	ITEM.rarity = { rare = true }
+	ITEM.rarity = { rare = true, weight = 40 }
 	ITEM.rate = 5
 end

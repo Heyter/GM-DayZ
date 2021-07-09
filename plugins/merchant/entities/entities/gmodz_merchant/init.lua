@@ -41,6 +41,7 @@ function ENT:SpawnFunction(client, trace)
 	entity:SetAngles(angles)
 	entity:Spawn()
 
+	entity.items = PLUGIN:SetRandomItems(math.random(0, 10))
 	PLUGIN:SaveData()
 
 	return entity

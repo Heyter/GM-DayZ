@@ -6,6 +6,6 @@ ITEM.hungerAmount = 0.2 -- процент
 ITEM.thirstAmount = 0.6 -- процент
 
 if (SERVER) then
-	ITEM.rarity = { common = true }
+	ITEM.rarity = { common = true, weight = 100 }
 	ITEM.rate = 12
 end

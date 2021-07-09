@@ -4,11 +4,11 @@ ITEM.model = "models/props/cs_militia/footlocker01_closed.mdl"
 
 ITEM.defDurability = 5000
 ITEM.damageReduction = 0.05 -- резист всего тела на 5%
-ITEM.replacements = "models/gmodz/characters/ghillie.mdl"
+ITEM.replacement = "models/gmodz/characters/ghillie.mdl"
 ITEM.noCollisionGroup = true
 
 if (SERVER) then
-	ITEM.rarity = { rare = true }
+	ITEM.rarity = { rare = true, weight = 3 }
 	ITEM.rate = 2
 
 	function ITEM:OnInstanced(index)
@@ -18,4 +18,4 @@ if (SERVER) then
 	end
 end
 
-ix.anim.SetModelClass(ITEM.replacements, "player")
+ix.anim.SetModelClass(ITEM.replacement, "player")
