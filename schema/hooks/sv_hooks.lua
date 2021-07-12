@@ -83,6 +83,53 @@ function Schema:PlayerSpawnVehicle(client)
 	return client:IsSuperAdmin()
 end
 
+--[[ GAMEMODE ]]
+
+function GM:PlayerDeath(client, inflictor, attacker)
+	local character = client:GetCharacter()
+
+	if (character) then
+		if (IsValid(client.ixRagdoll)) then
+			client.ixRagdoll.ixIgnoreDelete = true
+			client:SetLocalVar("blur", nil)
+
+			if (hook.Run("ShouldRemoveRagdollOnDeath", client) != false) then
+				client.ixRagdoll:Remove()
+			end
+		end
+
+		client.deathTime = CurTime() + ix.config.Get("spawnTime", 5)
+		character:SetData("health", nil, true)
+
+		local deathSound = hook.Run("GetPlayerDeathSound", client)
+
+		if (deathSound != false) then
+			deathSound = deathSound or deathSounds[math.random(1, #deathSounds)]
+
+			if (client:IsFemale() and !deathSound:find("female")) then
+				deathSound = deathSound:gsub("male", "female")
+			end
+
+			client:EmitSound(deathSound)
+		end
+
+		local weapon = attacker:IsPlayer() and attacker:GetActiveWeapon()
+
+		ix.log.Add(client, "playerDeath",
+			attacker:GetName() ~= "" and attacker:GetName() or attacker:GetClass(), IsValid(weapon) and weapon:GetClass())
+	end
+end
+
+function GM:PlayerDeathThink(client)
+	if (client:GetCharacter()) then
+		if (client.deathTime and client.deathTime <= CurTime() and hook.Run("CanPlayerDeathThink", client) == true) then
+			client:Spawn()
+		end
+	end
+
+	return false
+end
+
 function GM:PlayerHurt(client, attacker, health, damage)
 	if ((client.ixNextPain or 0) < CurTime() and health > 0) then
 		local painSound = hook.Run("GetPlayerPainSound", client) or false --Schema:GetPainSound(client:IsFemale() and "female" or "male", client:LastHitGroup())
@@ -123,6 +170,8 @@ function GM:PlayerSay(client, text)
 	hook.Run("PostPlayerSay", client, chatType, message, anonymous)
 	return ""
 end
+
+--[[ GAMEMODE END ]]
 
 function Schema:InitPostEntity()
     local physData = physenv.GetPerformanceSettings()

@@ -19,7 +19,7 @@ function PLUGIN:DoPlayerDeath(victim, attacker, dmg_info)
 		attacker:AddFrags(1)
 	end
 
-	net.Start("ixDeathNotice")
+	net.Start("ixDeathNotice", true)
 		net.WriteEntity(victim)
 		net.WriteEntity(attacker)
 		net.WriteString(inflictor:GetClass())

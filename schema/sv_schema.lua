@@ -123,6 +123,6 @@ function GM:DoPlayerDeath(client, attacker, damageinfo)
 		client:CreateRagdoll()
 	end
 
-	client:SetAction("@respawning", ix.config.Get("spawnTime", 5))
+	//client:SetAction("@respawning", ix.config.Get("spawnTime", 5))
 	client:SetDSP(31)
 end

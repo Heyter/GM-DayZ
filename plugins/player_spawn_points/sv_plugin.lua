@@ -1,5 +1,6 @@
 local PLUGIN = PLUGIN
-PLUGIN.spawners = PLUGIN.spawners or {}
+util.AddNetworkString("ixPlayerDeathMenu")
+util.AddNetworkString("ixPlayerSpawnerSync")
 
 local spawnPointVariations = {Vector(0, 0, 0)}
 
@@ -103,25 +104,33 @@ local function GetSpawnPointsAroundSpawn(ply, pos, radiusMultiplier)
 end
 
 -- https://github.com/TTT-2/TTT2/blob/master/lua/ttt2/libraries/spawn.lua#L234
+local angle_180 = Angle(0, 180, 0)
 function PLUGIN:PlayerLoadout(client)
-	if (#PLUGIN.spawners > 0) then
-		table.shuffle(PLUGIN.spawners)
+	if (client:GetCharacter() and !client:GetCharacter():GetData("pos") and #PLUGIN.spawners > 0) then
+		if (!client.spawnInSafezone) then table.shuffle(PLUGIN.spawners) end
 
 		local position
 
 		for i = 1, #PLUGIN.spawners do
 			local v = PLUGIN.spawners[i]
-			-- if (v.safezone) then // не делать проверку IsSpawnPointSafe т.к там нет коллизии у игроков
-			-- если игрок мертв предложить меню спавна, переписав Spawn мету, дабы не восскреснуть или найти как не воскрешать
 
-			if (IsSpawnPointSafe(client, v.position, false)) then
+			if (client.spawnInSafezone) then
+				if (!v.safezone) then continue end
+
 				position = v.position
 				break
+			else
+				if (!v.safezone and IsSpawnPointSafe(client, v.position, false)) then
+					position = v.position
+					break
+				end
 			end
 		end
 
 		if (position) then
+			self:ResetPlayer(client)
 			client:SetPos(position)
+			client:SetEyeAngles(angle_180)
 			return
 		end
 
@@ -134,7 +143,9 @@ function PLUGIN:PlayerLoadout(client)
 		end
 
 		if (position) then
+			self:ResetPlayer(client)
 			client:SetPos(position)
+			client:SetEyeAngles(angle_180)
 			return
 		end
 	end
@@ -146,4 +157,90 @@ end
 
 function PLUGIN:SaveData()
 	self:SetData(PLUGIN.spawners)
+end
+
+--[[ RE-SPAWN MENU ]]
+function PLUGIN:DoPlayerDeath(client)
+	client.deathSpawn = nil
+
+	if (client:GetCharacter()) then
+		client:GetCharacter():SetData("pos", nil, true)
+	end
+end
+
+function PLUGIN:CanPlayerDeathThink(client)
+	return client.deathSpawn
+end
+
+function PLUGIN:ResetPlayer(client)
+	client.spawnInSafezone = nil
+	client.deathSpawn = nil
+	client.deathTime = nil
+end
+
+net.Receive("ixPlayerDeathMenu", function(_, client)
+	if ((client.ixPlayerDeathMenu or 0) < CurTime()) then
+		client.ixPlayerDeathMenu = CurTime() + 1
+	else
+		return
+	end
+
+	if (client:GetCharacter() and !client:Alive() and !client.deathSpawn and client.deathTime and client.deathTime <= CurTime()) then
+		if (net.ReadBool()) then
+			client.spawnInSafezone = true
+		else
+			client.spawnInSafezone = nil
+		end
+
+		client.deathSpawn = true
+	end
+end)
+--[[ RE-SPAWN MENU END ]]
+
+--[[ Spawn Saver by Chessnut ( Saves the position of a character. ) ]]
+-- Called right before the character has its information save.
+function PLUGIN:CharacterPreSave(character)
+	-- Get the player from the character.
+	local client = character:GetPlayer()
+
+	-- Check to see if we can get the player's position.
+	if (IsValid(client)) then
+		if (client.bNotSavePosition or !client:Alive()) then
+			character:SetData("pos", nil, true)
+			client.bNotSavePosition = nil
+			return
+		end
+
+		local position, eyeAngles = client:GetPos(), client:EyeAngles()
+		-- Use pre-observer position to prevent spawning in the air.
+		if (client.ixObsData) then
+			position, eyeAngles = client.ixObsData[1], client.ixObsData[2]
+		end
+		-- Store the position in the character's data.
+		character:SetData("pos", {position, eyeAngles, game.GetMap()}, true)
+	end
+end
+
+-- Called after the player's loadout has been set.
+function PLUGIN:PlayerLoadedCharacter(client, character, lastChar)
+	timer.Simple(0, function()
+		if (IsValid(client)) then
+			self:ResetPlayer(client)
+
+			-- Get the saved position from the character data.
+			local position = character:GetData("pos")
+
+			-- Check if the position was set.
+			if (position) then
+				if (position[3] and position[3]:lower() == game.GetMap():lower()) then
+					-- Restore the player to that position.
+					client:SetPos(position[1].x and position[1] or client:GetPos())
+					client:SetEyeAngles(position[2].p and position[2] or angle_zero)
+				end
+
+				-- Remove the position data since it is no longer needed.
+				character:SetData("pos", nil, true)
+			end
+		end
+	end)
 end

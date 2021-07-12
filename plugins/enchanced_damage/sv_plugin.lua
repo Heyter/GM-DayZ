@@ -56,7 +56,7 @@ function PLUGIN:PostPlayerTakeDamage(client, damageInfo)
 			end
 
 			if ((client.ixNextHurt or 0) < CurTime()) then
-				net.Start("ixHitmarker")
+				net.Start("ixHitmarker", true)
 					net.WriteBool(hit_group == HITGROUP_HEAD)
 				net.Send(client)
 

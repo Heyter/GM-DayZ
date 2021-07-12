@@ -471,6 +471,8 @@ if (CLIENT) then
 	end
 
 	local nearDist = math.pow(3000, 2)
+	local PLUGIN
+
 	function TOOL:DrawHUD()
 		PLUGIN = PLUGIN or ix.plugin.Get("npc_spawner")
 
@@ -491,7 +493,7 @@ if (CLIENT) then
 			surface.SetDrawColor(0, 0, 0, 150)
 			surface.DrawRect(a.x - tW * 0.5 - 5, a.y - 50, tW + 10, tH * 5)
 
-			for _, v2 in ipairs(ents.FindInSphere(v.position, v.spawnradius)) do
+			for _, v2 in ipairs(ents.FindInSphere(v.position, v.spawnradius or cvars.spawnradius)) do
 				if (IsValid(v2) and (v2:IsPlayer() and v2:GetMoveType() != MOVETYPE_NOCLIP or v2:IsNPC())) then
 					col = Color(255, 0, 0)
 					break

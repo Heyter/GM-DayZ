@@ -32,4 +32,9 @@ function PLUGIN:SpawnMenuOpen()
 			break
 		end
 	end
+
+	if (notification.AddProgress or notification.AddLegacy) then
+		function notification.AddProgress() end
+		function notification.AddLegacy() end
+	end
 end

@@ -162,7 +162,7 @@ function ITEM:PlayerDropItem(client)
 	client = client or self.player
 	if (!IsValid(client)) then return end
 
-	net.Start("ixPlayerDropItem")
+	net.Start("ixPlayerDropItem", true)
 		net.WriteString(self:GetModel() or "models/props_junk/watermelon01.mdl")
 	net.Send(client)
 
