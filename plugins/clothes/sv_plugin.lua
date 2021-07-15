@@ -124,7 +124,7 @@ FindMetaTable("Player").GetClothesItem = function(self)
 	return (self.ixClothes or {})
 end
 
-concommand.Add("bot_ads", function()
+--[[ concommand.Add("bot_ads", function()
 	if (!IsValid(Entity(2))) then return end
 
 	local inventory = Entity(2):GetCharacter():GetInventory()
@@ -139,4 +139,4 @@ concommand.Add("bot_ads", function()
 			end
 		end
 	end)
-end)
+end) ]]

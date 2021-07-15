@@ -12,7 +12,6 @@ local vector_max = Vector( 16, 16, 64 )
 	Desc: Find out if the spawnpoint is suitable or not
 -----------------------------------------------------------]]
 function GM:IsSpawnpointSuitable( pl, spawnpointent, bMakeSuitable )
-
 	local Pos = spawnpointent:GetPos()
 
 	-- Note that we're searching the default hull size here for a player in the way of our spawning.
@@ -22,22 +21,15 @@ function GM:IsSpawnpointSuitable( pl, spawnpointent, bMakeSuitable )
 
 	if ( pl:Team() == TEAM_SPECTATOR ) then return true end
 
-	local Blockers = 0
-
-	for k, v in pairs( Ents ) do
-		if ( IsValid( v ) && v != pl && v:GetClass() == "player" && v:Alive() ) then
-
-			Blockers = Blockers + 1
-
+	for _, v in ipairs( Ents ) do
+		if ( IsValid( v ) and v != pl and v:IsPlayer() and v:Alive() ) then
 			if ( bMakeSuitable ) then
 				v:Kill()
+			else
+				return false
 			end
-
 		end
 	end
 
-	if ( bMakeSuitable ) then return true end
-	if ( Blockers > 0 ) then return false end
 	return true
-
 end

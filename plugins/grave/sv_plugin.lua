@@ -23,6 +23,8 @@ function PLUGIN:DoPlayerDeath(client)
 			end
 
 			item.invID = inventory:GetID()
+--[[ 			item.characterID = ...
+			item.playerID = ... ]]
 		end
 	end
 
