@@ -11,7 +11,7 @@ net.Receive("ixStashWithdrawMoney", function(_, client)
 		return
 	end
 
-	if (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.PROTECTED) then
+	if (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) == SH_SZ.OUTSIDE) then
 		client:NotifyLocalized("stash_far")
 		return
 	end
@@ -40,7 +40,7 @@ net.Receive("ixStashDepositMoney", function(_, client)
 		return
 	end
 
-	if (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.PROTECTED) then
+	if (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) == SH_SZ.OUTSIDE) then
 		client:NotifyLocalized("stash_far")
 		return
 	end
@@ -69,7 +69,7 @@ net.Receive("ixStashWithdrawItem", function(len, client)
 		return
 	end
 
-	if (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.PROTECTED) then
+	if (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) == SH_SZ.OUTSIDE) then
 		client:NotifyLocalized("stash_far")
 		return
 	end
@@ -90,6 +90,7 @@ net.Receive("ixStashWithdrawItem", function(len, client)
 
 	stash[id] = nil
 
+	-- calculate stash filled slots
 	local i = 0
 	for k, v in pairs(stash) do
 		if (k == 0 or v.data.noWeight) then continue end
@@ -109,7 +110,7 @@ net.Receive("ixStashDepositItem", function(len, client)
 		return
 	end
 
-	if (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.PROTECTED) then
+	if (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) == SH_SZ.OUTSIDE) then
 		client:NotifyLocalized("stash_far")
 		return
 	end
@@ -170,6 +171,7 @@ net.Receive("ixStashDepositItem", function(len, client)
 		}
 	end
 
+	-- calculate stash filled slots
 	local i = 0
 	for k, v in pairs(stash) do
 		if (k == 0 or v.data.noWeight) then continue end
@@ -202,4 +204,50 @@ function PLUGIN:SaveData()
 	end
 
 	self:SetData(data)
+end
+
+function PLUGIN:InitPostEntity()
+	local query = mysql:Delete("ix_items")
+		query:Where("inventory_id", 0)
+	query:Execute()
+end
+
+PLUGIN.CheckedCharacter = PLUGIN.CheckedCharacter or {}
+
+function PLUGIN:PlayerLoadedCharacter(_, character)
+	if (self.CheckedCharacter[character:GetID()]) then return end
+
+	timer.Simple(0.25, function()
+		local r = nil
+		local stash = character:GetStash()
+
+		for k, v in pairs(stash) do
+			if (k != 0 and v.uniqueID and !ix.item.list[v.uniqueID]) then
+				table.remove(stash, k)
+				r = true
+			end
+		end
+
+		if (r) then
+			-- calculate stash filled slots
+			local i = 0
+			for k, v in pairs(stash) do
+				if (k == 0 or v.data.noWeight) then continue end
+				i = i + 1
+			end
+
+			if (i == 0) then
+				character:SetStash({})
+			else
+				stash[0] = stash[0] or {}
+				stash[0].max = i
+
+				character:SetStash(stash)
+			end
+
+			r, i = nil, nil
+		end
+
+		self.CheckedCharacter[character:GetID()] = true
+	end)
 end

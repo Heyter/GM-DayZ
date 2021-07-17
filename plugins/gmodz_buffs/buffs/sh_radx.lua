@@ -1,5 +1,5 @@
-BUFF.time = 180
-BUFF.time_max = 300
+BUFF.time = 30
+BUFF.time_max = 120
 
 if (CLIENT) then
 	function BUFF:HUDExtraPaint(client, perc, hud, margin)

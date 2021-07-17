@@ -1,16 +1,18 @@
-ITEM.name = "RadAway"
-ITEM.model = Model("models/healthvial.mdl")
-ITEM.description = "RadAway is an intravenous chemical solution that bonds with radioactive particles and removes them from the user's system. While Rad-X is designed to increase the body's natural resistance to radiation, RadAway is designed to be used after exposure."
+ITEM.name = "Anti-rad"
+ITEM.model = "models/gmodz/medical/antirad.mdl"
+ITEM.description = "Antirad is a packet of anti-radiation drugs that neutralize radiation accumulated in the body."
 
-ITEM.radiationAmount = -200
+ITEM.radiationAmount = -300
+ITEM.price = 200
+
+ITEM.useSound = "gmodz/items/antirad/use.wav"
 
 function ITEM:OnCanUse()
-	if (self.player:GetRadiationTotal() < 1) then
+	if (self.player:GetRadiationTotal() <= 0) then
 		return false
 	end
 end
 
 if (SERVER) then
-	ITEM.rarity = { common = true, weight = 50 }
-	ITEM.rate = 7
+	ITEM.rarity = { rare = true, weight = 70 }
 end

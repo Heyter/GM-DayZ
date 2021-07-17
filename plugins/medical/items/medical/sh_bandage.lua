@@ -1,8 +1,11 @@
 ITEM.name = "Bandage"
-ITEM.model = Model("models/props_wasteland/prison_toiletchunk01l.mdl")
+ITEM.model = "models/gmodz/medical/bandage.mdl"
 ITEM.description = "Small roll of gauze cloth."
 
 ITEM.healthAmount = 5
+
+-- TODO sound
+ITEM.useSound = nil
 
 if (SERVER) then
 	function ITEM:OnUse()
@@ -16,6 +19,5 @@ else
 end
 
 if (SERVER) then
-	ITEM.rarity = { common = true, weight = 80 }
-	ITEM.rate = 7
+	ITEM.rarity = { common = true, weight = 100 }
 end

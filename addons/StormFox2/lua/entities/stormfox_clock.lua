@@ -67,6 +67,8 @@ else
 	local mat4 = Material("stormfox2/entities/clock_material")
 	local sf = Material("stormfox/SF.png")
 	function ENT:Draw()
+		if EyePos():DistToSqr(self:GetPos()) > 500000 then return end
+
 		render.MaterialOverrideByIndex( 0, mat3 )
 		render.MaterialOverrideByIndex( 1, mat4 )
 		self:DrawModel()

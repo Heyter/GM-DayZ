@@ -9,7 +9,6 @@ ITEM.noCollisionGroup = true
 
 if (SERVER) then
 	ITEM.rarity = { rare = true, weight = 3 }
-	ITEM.rate = 2
 
 	function ITEM:OnInstanced(index)
 		if (index == 0) then

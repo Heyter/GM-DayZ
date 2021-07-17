@@ -1,18 +1,11 @@
-ITEM.name = "Respirator"
-ITEM.model = "models/barneyhelmet_faceplate.mdl"
+ITEM.name = "Gasmask"
+ITEM.model = "models/gmodz/equipments/gasmask.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.isGasMask = true
 ITEM.price = 250
-ITEM.category = "Outfit"
-ITEM.iconCam = {
-	pos = Vector(133.12742614746, 109.28756713867, 78.981819152832),
-	ang = Angle(25, 220, 0),
-	fov = 4.5012266396634,
-	outline = true,
-	outlineColor = color_white
-}
-ITEM.exRender = true
+ITEM.category = "Clothes"
+
 ITEM.pacData = {
 	[1] = {
 		["children"] = {
@@ -20,29 +13,26 @@ ITEM.pacData = {
 				["children"] = {
 				},
 				["self"] = {
-					["Angles"] = Angle(8.4950472228229e-005, -66.922698974609, -89.999969482422),
-					["UniqueID"] = "3085914138",
-					["ClassName"] = "model",
-					["Size"] = 0.95,
+					["Bone"] = "eyes",
+					["UniqueID"] = "9f02ff856fca52c11d7309db5109fbe8504d3c023c461b29ec950c0c3a108b2b",
+					["ClassName"] = "model2",
 					["EditorExpand"] = true,
-					["Model"] = "models/barneyhelmet_faceplate.mdl",
-					["Position"] = Vector(3.3733520507813, -1.6019897460938, -0.10595703125),
+					["Model"] = "models/gmodz/equipments/gasmask.mdl",
+					["Position"] = Vector(-3.870000, 0.040000, -0.120000),
+					["Scale"] = Vector(1.170000, 1.000000, 1.000000),
+					["Name"] = "gasmask_hat",
+					["ModelModifiers"] = "filter=1;",
 				},
 			},
 		},
 		["self"] = {
 			["EditorExpand"] = true,
-			["UniqueID"] = "GASMASK_MODEL",
+			["UniqueID"] = "980e481055c78348af5aaaadefb99ada2f85af1498f8f8156c2c237cb10621db",
 			["ClassName"] = "group",
-			["Name"] = "my outfit",
-			["Description"] = "add parts to me!",
+			["Name"] = "gasmask"
 		},
 	},
 }
-
-function ITEM:OnGetDropModel(entity)
-	return "models/props_junk/cardboard_box004a.mdl"
-end
 
 function ITEM:GetDescription()
 	if (self.entity) then
@@ -140,7 +130,10 @@ ITEM.functions.EquipUn = { -- sorry, for name order.
 		return false
 	end,
 	OnCanRun = function(item)
-		return (!IsValid(item.entity) and item:GetData("equip"))
+		local client = item.player
+
+		return !IsValid(item.entity) and IsValid(client) and item:GetData("equip") == true and
+			hook.Run("CanPlayerUnequipItem", client, item) != false
 	end
 }
 
@@ -161,7 +154,9 @@ ITEM.functions.Equip = {
 		return false
 	end,
 	OnCanRun = function(item)
-		return (!IsValid(item.entity) and !item:GetData("equip"))
+		local client = item.player
+
+		return !IsValid(item.entity) and IsValid(client) and item:GetData("equip") != true and hook.Run("CanPlayerEquipItem", client, item) != false
 	end
 }
 
@@ -169,7 +164,7 @@ local function ChangeFilter(client, item, targetItem)
 	if (item and targetItem and targetItem.isFilter) then
 		local filter = targetItem:GetFilterHealth()
 		item:SetData("filter", filter)
-		
+
         client:NotifyLocalized("filterChanged")
 		return true
 	end
@@ -183,7 +178,7 @@ function ITEM:ChangeFilter(client, item, targetItem)
 		return ChangeFilter(client, item, targetItem)
 	else
 		client:NotifyLocalized("maskFull")
-		
+
 		return false
 	end
 end
@@ -222,7 +217,7 @@ ITEM.functions.Filter = {
 
 			if (istable(data) and data[1]) then
 				target = ix.item.instances[data[1]]
-				
+
 				if (!items[target.id]) then
 					return false -- stop hacking you dumb fuck
 				end
@@ -230,7 +225,6 @@ ITEM.functions.Filter = {
 				for k, invItem in pairs(items) do
 					if (invItem.isFilter) then
 						target = invItem
-						
 						break
 					end
 				end

@@ -37,3 +37,21 @@ function PLUGIN:CanPlayerRegenHealth(client)
 		return false
 	end
 end
+
+function PLUGIN:AdjustStaminaOffset(client, offset)
+	if (client:GetLocalVar("energyStamina", 0) > CurTime()) then
+		return offset * 1.65
+	end
+end
+
+if (CLIENT) then
+	function PLUGIN:HUDExtraPaint(client, perc, hud, margin)
+		if (client:GetLocalVar("energyStamina", 0) > CurTime()) then
+			local time = math.max(0, client:GetLocalVar("energyStamina", 0) - CurTime())
+
+			perc.textColor = color_white
+			perc.y = perc.y - perc.h - margin
+			hud:drawText(perc, L"Endurance":utf8upper() .. " " .. string.ToMinutesSeconds(time))
+		end
+	end
+end

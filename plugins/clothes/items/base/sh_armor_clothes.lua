@@ -147,6 +147,7 @@ function ITEM:AddOutfit(client)
 		end
 	end
 
+	-- arg client
 	self:OnEquipped(client)
 end
 

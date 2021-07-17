@@ -55,6 +55,8 @@ else
 	local matBase = Material("effects/splashwake1")
 	local matBeam = Material( "effects/lamp_beam" )
 	function ENT:Draw()
+		if EyePos():DistToSqr(self:GetPos()) > 500000 then return end
+
 		-- Render glasscube
 			render.SetBlend(0.5)
 			render.MaterialOverride(mat)

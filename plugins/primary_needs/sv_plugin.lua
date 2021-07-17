@@ -50,6 +50,8 @@ function PLUGIN:PlayerSpawn(client)
 
 		client.refillNeeds = nil
 	end
+
+	client:SetLocalVar("energyStamina", nil)
 end
 
 function PLUGIN:PlayerPostThink(client)
@@ -106,5 +108,12 @@ do
 		self:SetLocalVar("thirst", 
 			CurTime() - math.Clamp(math.min(curNeed, maxSeconds) - amount, 0, maxSeconds)
 		)
+	end
+
+	function playerMeta:AddStaminaRegenTime(duration)
+		local time = math.min(90, math.max(0, self:GetLocalVar("energyStamina", 0) - CurTime()) + duration)
+		self:SetLocalVar("energyStamina", CurTime() + time)
+
+		time = nil
 	end
 end

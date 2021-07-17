@@ -230,6 +230,13 @@ function PLUGIN:LoadData()
 			entity:SetBodygroup(id, bodygroup)
 		end
 
+		for k2, v2 in pairs(v.items) do
+			if (!ix.item.list[v2.uniqueID]) then
+				table.remove(v2.items, k2)
+				-- todo проверить
+			end
+		end
+
 		entity.items = v.items
 	end
 

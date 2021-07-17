@@ -299,7 +299,6 @@ hook.Add("CreateMenuButtons", "ixInventory", function(tabs)
 
 			local money = panel2:Add("ixStashMoney")
 			money:Dock(FILL)
-			money:DockMargin(0, 0, 5, 0)
 			money:SetMoney(LocalPlayer():GetCharacter():GetMoney())
 			money.Think = function(t)
 				if (t.money != LocalPlayer():GetCharacter():GetMoney()) then

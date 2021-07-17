@@ -22,12 +22,16 @@ end
 function ENT:Use(activator)
 	local inventory = self:GetInventory()
 
-	if (inventory and !ix.storage.InUse(inventory)) then
+	if (inventory /*and !ix.storage.InUse(inventory)*/) then
 		ix.storage.Open(activator, inventory, {
 			entity = self,
 			name = "Loot",
 			searchTime = 0.5,
-			data = {money = self:GetMoney()}
+			data = {money = self:GetMoney()},
+			bMultipleUsers = true,
+			OnPlayerOpen = function()
+				self:SetLifetime(CurTime() + 120)
+			end
 		})
 	end
 end
@@ -53,7 +57,7 @@ function ENT:Think()
 		local bMoney = self:GetMoney() < 1
 
 		if (!bItems or !bMoney) then
-			self.DoNextThink = CurTime() + 1
+			self.DoNextThink = CurTime() + 0.5
 			return
 		end
 

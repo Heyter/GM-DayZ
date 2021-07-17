@@ -332,7 +332,7 @@ else
 			sound.PlayFile( snd, "3dnoplay", function( station, errCode, errStr )
 				if ( IsValid( station ) ) then
 					station:Set3DFadeDistance( 0, 10 )
-					station:SetVolume( 1)
+					station:SetVolume( 0.7 )
 					station:SetPos(vPos)
 					station:Play()
 				end
@@ -389,7 +389,7 @@ else
 		_Light = n_Light
 		_Length = n_Length
 		_Stop = math.max(c + n_Length, _Stop)
-		sound.Play("ambient/atmosphere/thunder" .. math.random(3,4) .. ".wav", StormFox2.util.ViewEntity():GetPos(), 150)
+		sound.Play("ambient/atmosphere/thunder" .. math.random(3,4) .. ".wav", StormFox2.util.ViewEntity():GetPos(), 120)
 
 	end
 	local Sway = 120

@@ -12,6 +12,7 @@ end
 function Schema:PostPlayerLoadout(client)
 	client:AllowFlashlight(true)
 	client:SetJumpPower(ix.config.Get("jumpPower", 200))
+	client:SetExtraHealth(nil)
 end
 
 function Schema:CanPlayerJoinClass(client, class, classData)
@@ -169,6 +170,17 @@ function GM:PlayerSay(client, text)
 
 	hook.Run("PostPlayerSay", client, chatType, message, anonymous)
 	return ""
+end
+
+function GM:DoPlayerDeath(client, attacker, damageinfo)
+	client:AddDeaths(1)
+
+	if (hook.Run("ShouldSpawnClientRagdoll", client) != false) then
+		client:CreateRagdoll()
+	end
+
+	//client:SetAction("@respawning", ix.config.Get("spawnTime", 5))
+	client:SetDSP(31)
 end
 
 --[[ GAMEMODE END ]]

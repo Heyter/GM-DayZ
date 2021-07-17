@@ -8,8 +8,7 @@ ITEM.damageReduction = { [HITGROUP_HEAD] = 0.45 }
 ITEM.dropHat = true
 
 if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 5 }
-	ITEM.rate = 2
+	ITEM.rarity = { rare = true, weight = 2 }
 
 	function ITEM:OnInstanced(index)
 		if (index == 0) then

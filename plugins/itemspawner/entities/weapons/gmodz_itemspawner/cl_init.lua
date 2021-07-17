@@ -54,7 +54,8 @@ function SWEP:DrawHUD()
 		surface.SetDrawColor(Color("sky_blue"))
 		surface.DrawRect(a.x, a.y, 8, 8)
 		draw.SimpleText(v.title, "ixSmallFont", a.x, a.y - 10, col, 1, 1)
-		draw.SimpleText(Format("Rarity: %d%%", (v.rarity * 100)), "ixSmallFont", a.x, a.y - 10 - ty*0.6, color_white, 1, 1)
-		draw.SimpleText(Format("Delay: %d min", v.delay), "ixSmallFont", a.x, a.y - 10 - ty - 5, color_white, 1, 1)
+		draw.SimpleText(Format("Delay: %d min", v.delay), "ixSmallFont", a.x, a.y - 10 - ty*0.6, color_white, 1, 1)
+		--draw.SimpleText(Format("Rarity: %d%%", (v.rarity * 100)), "ixSmallFont", a.x, a.y - 10 - ty*0.6, color_white, 1, 1)
+		--draw.SimpleText(Format("Delay: %d min", v.delay), "ixSmallFont", a.x, a.y - 10 - ty - 5, color_white, 1, 1)
 	end
 end

@@ -8,12 +8,12 @@ ix.config.Add("staminaDrain", 1, "How much stamina to drain per tick (every quar
 	category = "characters"
 })
 
-ix.config.Add("staminaRegeneration", 1.75, "How much stamina to regain per tick (every quarter second).", nil, {
+ix.config.Add("staminaRegeneration", 0.5, "How much stamina to regain per tick (every quarter second).", nil, {
 	data = {min = 0, max = 10, decimals = 2},
 	category = "characters"
 })
 
-ix.config.Add("staminaCrouchRegeneration", 2, "How much stamina to regain per tick (every quarter second) while crouching.", nil, {
+ix.config.Add("staminaCrouchRegeneration", 0.75, "How much stamina to regain per tick (every quarter second) while crouching.", nil, {
 	data = {min = 0, max = 10, decimals = 2},
 	category = "characters"
 })

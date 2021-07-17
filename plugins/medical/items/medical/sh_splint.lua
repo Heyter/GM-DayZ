@@ -1,8 +1,13 @@
 ITEM.name = "Splint"
-ITEM.model = Model("models/props_c17/furnituredrawer001a_shard01.mdl")
+ITEM.model = "models/carlsmei/escapefromtarkov/medical/alusplint.mdl"
 ITEM.description = "A splint is a rigid or flexible device that maintains in position a displaced or movable part, also used to keep in place and protect an injured part to support healing and to prevent further damage."
 
-ITEM.healthAmount = 5
+-- TODO sound
+ITEM.useSound = nil
+
+function ITEM:OnCanUse()
+	return self.player:IsBrokenLeg()
+end
 
 if (SERVER) then
 	function ITEM:OnUse()
@@ -16,6 +21,5 @@ else
 end
 
 if (SERVER) then
-	ITEM.rarity = { common = true, weight = 80 }
-	ITEM.rate = 7
+	ITEM.rarity = { common = true, weight = 100 }
 end

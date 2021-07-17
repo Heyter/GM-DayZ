@@ -1,8 +1,11 @@
-ITEM.name = "Rad-X"
-ITEM.model = Model("models/healthvial.mdl")
-ITEM.description = "It is an anti-radiation chem to be taken before exposure (unlike RadAway, which removes the effects of radiation after a person gets irradiated)."
+ITEM.name = "RAD-X"
+ITEM.model = "models/gmodz/medical/radioprotector.mdl"
+ITEM.description = "Protects against radiation exposure."
 
 ITEM.radiationAmount = -75
+ITEM.price = 350
+
+ITEM.useSound = "gmodz/items/syringe/use.wav"
 
 if (SERVER) then
 	function ITEM:OnUse()
@@ -10,12 +13,12 @@ if (SERVER) then
 	end
 else
 	function ITEM:ExtendDesc(text)
-		text[#text+1] = Format("Radiation Resistance (%d's)", ix.buff.list["radx"].time)
+		text[#text+1] = Format("Radiation Protection: 40%% (%d's)", ix.buff.list["radx"].time)
+
 		return text
 	end
 end
 
 if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 40 }
-	ITEM.rate = 5
+	ITEM.rarity = { rare = true, weight = 70 }
 end

@@ -33,6 +33,8 @@ if (SERVER) then
 				client:EmitSound(useSound, 60)
 			elseif (istable(useSound)) then
 				client:EmitSound(unpack(useSound))
+			elseif (self.useSound and isfunction(self.useSound)) then
+				self:useSound(combineItem, client)
 			end
 		end
 

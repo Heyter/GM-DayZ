@@ -31,3 +31,9 @@ function ix.util.SpawnProp(model, position, force, lifetime, angles, collision)
 
 	return entity
 end
+
+-- Применимо для отладки кода и ловли эксплоитеров
+--- Сохраняется в console.log
+function ix.util.DebugLog(str)
+	MsgC(Color("sky_blue"), os.date("(%d/%m/%Y - %H:%M:%S)", os.time()), Color("yellow"), " [LOG] ", color_white, str, "\n")
+end

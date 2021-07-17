@@ -12,11 +12,13 @@ end
 function PLUGIN:PlayerLoadedCharacter(client, character)
 	timer.Simple(0.25, function()
 		ix.squad.Restore(character:GetSquadID(), client:SteamID64(), function(squad)
-			if (squad) then
-				squad:Sync(client)
-			else
-				character:SetSquadID("NULL")
-				character:SetSquadOfficer(0)
+			if (IsValid(client) and character) then
+				if (squad) then
+					squad:Sync(client)
+				else
+					character:SetSquadID("NULL")
+					character:SetSquadOfficer(0)
+				end
 			end
 		end)
 	end)

@@ -104,6 +104,8 @@ else
 	end
 	local r_update = false
 	function ENT:Draw()
+		if EyePos():DistToSqr(self:GetPos()) > 500000 then return end
+
 		render.MaterialOverrideByIndex(1, sc_mat)
 		self:DrawModel()
 		render.MaterialOverrideByIndex()

@@ -1,3 +1,5 @@
+local GM = GM or GAMEMODE
+
 -- Disable entity driving.
 function Schema:CanDrive(client, entity)
 	return false
@@ -44,4 +46,34 @@ function Schema:PrePACEditorOpen(client)
 	if (!client:IsSuperAdmin()) then
 		return false
 	end
+end
+
+-- disable ix.menu
+do
+	ix.menu = {}
+	local ixItemENT = scripted_ents.GetStored("ix_item").t
+
+	if (CLIENT) then
+		function ix.menu.Open() return false end
+		function ix.menu.IsOpen() return true end
+		function ix.menu.NetworkChoice() end
+
+		function GM:KeyRelease(client, key)
+			if (!IsFirstTimePredicted()) then
+				return
+			end
+
+			if (key == IN_USE) then
+				timer.Remove("ixItemUse")
+
+				client.ixInteractionTarget = nil
+				client.ixInteractionStartTime = nil
+			end
+		end
+	else
+		net.Receive("ixEntityMenuSelect", function() end)
+		net.Receive("ixItemEntityAction", function() end)
+	end
+
+	function ixItemENT:GetEntityMenu() return nil end
 end

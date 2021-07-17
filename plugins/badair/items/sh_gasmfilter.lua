@@ -1,23 +1,14 @@
 ITEM.name = "Filter"
 ITEM.description = "A Gas Mask filter"
-ITEM.model = "models/props_lab/rotato.mdl"
+ITEM.model = "models/gmodz/equipments/gasmask_filter.mdl"
 ITEM.price = 80
 ITEM.isFilter = true
 ITEM.filterHealth = ix.config.Get("gasmask_filter", 600)
-ITEM.iconCam = {
-	pos = Vector(57.318908691406, 48.096267700195, 34.891246795654),
-	ang = Angle(25, 220, 0),
-	fov = 6.508287169279,
-}
 
 if (CLIENT) then
 	function ITEM:CanStack(combineItem)
 		return combineItem:GetFilterHealth() == self:GetFilterHealth()
 	end
-end
-
-function ITEM:OnGetDropModel(entity)
-	return "models/props_lab/box01a.mdl"
 end
 
 function ITEM:GetFilterHealth()

@@ -49,6 +49,7 @@ timer.Create("ixRadiation", 1, 0, function()
 
 					radiationResistance = 1 - radiationResistance
 
+					-- TODO: сделать hook через который считать резисты в бафах
 					if ((client:HasBuff("radx") or 0) > CurTime()) then
 						-- 0.6 = 1 - Rad-X Radiation Protection (40% resistance)
 						radiationResistance = radiationResistance * 0.6

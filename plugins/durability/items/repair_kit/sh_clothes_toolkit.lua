@@ -1,19 +1,19 @@
-ITEM.name = "Clothes set of tools"
-ITEM.model = "models/props_lab/partsbin01.mdl"
-ITEM.description = "Clothes set of tools."
+ITEM.name = "Sewing kit"
+ITEM.model = "models/lostsignalproject/items/repair/toolkit_s.mdl"
+ITEM.description = ""
 
 ITEM.raiseDurability = 75
 ITEM.isClothesKit = true
 ITEM.isWeaponKit = nil
+ITEM.price = 500
 
 if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 10 }
-	ITEM.rate = 2
+	ITEM.rarity = { rare = true, weight = 7 }
 end
 
 if (CLIENT) then
 	function ITEM:ExtendDesc(text)
-		text[1] = Format("This repairs %d%% of a clothes.", self.raiseDurability)
+		text[1] = Format("Restores %d%% of the durability.", self.raiseDurability)
 		return text
 	end
 end

@@ -26,7 +26,7 @@ if (CLIENT) then
 		end
 
 		if (self.staminaAmount != 0) then
-			text[#text + 1] = Format("%s: %s%d", L"Endurance", self.staminaAmount < 0 and "-" or "+", math.abs(self.staminaAmount))
+			text[#text + 1] = Format("%s: %s%d%%", L"Endurance", self.staminaAmount < 0 and "-" or "+", math.abs(self.staminaAmount))
 		end
 
 		if (self.radiationAmount != 0) then

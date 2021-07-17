@@ -1,12 +1,16 @@
+local gray = Color(51,51,51,250)
 local function paint_button(t, w, h)
-	local clr = ColorAlpha(color_black, 200)
+	local clr = gray
 
 	if (t:IsHovered()) then
-		clr = ColorAlpha(color_black, 150)
+		clr = gray:Lighten(15)
 	end
 
 	surface.SetDrawColor(clr)
 	surface.DrawRect(0, 0, w, h)
+
+	surface.SetDrawColor(Color("orange"))
+	surface.DrawRect(0, 0, w, 2)
 end
 
 surface.CreateFont("DeathMenuBtn", {
@@ -17,7 +21,7 @@ surface.CreateFont("DeathMenuBtn", {
 
 local PANEL = {}
 PANEL.ButtonFont = "DeathMenuBtn"
-PANEL.BackgroundColor = Color(25, 25, 25, 150)
+PANEL.BackgroundColor = Color(34, 34, 34, 250)
 
 function PANEL:Init()
 	self:SetSize(ScrW(), 64)
@@ -147,12 +151,12 @@ function PANEL:Think()
 	self:SetAlpha(255 * fraction)
 end
 
-vgui.Register("ixDeathMenu", PANEL, "DPanel")
+vgui.Register("ixDeathScreenMenu", PANEL, "DPanel")
 
 concommand.Add("gmodz_reload_death_menu", function()
 	if (IsValid(ix.gui.death_menu)) then
 		ix.gui.death_menu:Remove()
 	end
 
-	ix.gui.death_menu = vgui.Create("ixDeathMenu") 
+	ix.gui.death_menu = vgui.Create("ixDeathScreenMenu") 
 end)

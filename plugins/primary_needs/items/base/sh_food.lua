@@ -8,10 +8,11 @@ ITEM.description = "This is base a food."
 ITEM.category = "Consumables"
 
 // -0.3; 0.3
-ITEM.hungerAmount = 0.3 -- процент
-ITEM.thirstAmount = 0.3 -- процент
+ITEM.hungerAmount = 0 -- процент
+ITEM.thirstAmount = 0 -- процент
 ITEM.healthAmount = 0
-ITEM.staminaAmount = 0
+ITEM.staminaAmount = 0 -- процент (сколько добавить стамины при применение)
+ITEM.staminaRegenTime = 0 -- регенерация стамины в секундах
 ITEM.radiationAmount = 0
 
 --ITEM.drinkSound = "gmodz/primary_needs/drinking.wav"
@@ -22,6 +23,10 @@ ITEM.useSound = "gmodz/primary_needs/eating.wav"
 ITEM.price = 0
 ITEM.maxQuantity = 16
 
+if (SERVER) then
+	ITEM.dropUsedItem = true
+end
+
 if (CLIENT) then
 	function ITEM:PopulateTooltip(tooltip)
 		local text = {}
@@ -31,7 +36,11 @@ if (CLIENT) then
 		end
 
 		if (self.staminaAmount != 0) then
-			text[#text + 1] = Format("%s: %s%d", L"Endurance", self.staminaAmount < 0 and "-" or "+", math.abs(self.staminaAmount))
+			if (self.staminaRegenTime > 0 and self.staminaAmount > 0) then
+				text[#text + 1] = Format("%s: %s%d%% (%d's)", L"Endurance", self.staminaAmount < 0 and "-" or "+", math.abs(self.staminaAmount * 100), self.staminaRegenTime)
+			else
+				text[#text + 1] = Format("%s: %s%d%%", L"Endurance", self.staminaAmount < 0 and "-" or "+", math.abs(self.staminaAmount * 100))
+			end
 		end
 
 		if (self.radiationAmount != 0) then
@@ -83,7 +92,11 @@ ITEM.functions.use = {
 		end
 
 		if (item.staminaAmount != 0) then
-			client:RestoreStamina(item.staminaAmount)
+			client:RestoreStamina(item.staminaAmount * 100)
+
+			if (item.staminaRegenTime > 0 and item.staminaAmount > 0) then
+				client:AddStaminaRegenTime(item.staminaRegenTime)
+			end
 		end
 
 		if (item.hungerAmount != 0) then
@@ -104,7 +117,11 @@ ITEM.functions.use = {
 			end
 		end
 
-		item:PlayerDropItem(client)
+		-- Использованный предмет будет выкинут на пол, типа поел.
+
+		if (item.dropUsedItem) then
+			item:PlayerDropItem(client)
+		end
 
 		return item:UseStackItem()
 	end,

@@ -193,9 +193,9 @@ net.Receive("ixTradeSendItem", function(len, client)
 
 	if (!isnumber(id) or !client.isTrading) then
 		if (!client.isTrading) then
-			print(Format("[ixTradeSendItem] Exploit isTrading: %s (%s)", client:Name(), client:SteamID()))
+			ix.util.DebugLog(Format("Exploit isTrading: %s (%s)", client:Name(), client:SteamID()))
 		elseif (!isnumber(id)) then
-			print(Format("[ixTradeSendItem] Exploit !isnumber(id): %s (%s)", client:Name(), client:SteamID()))
+			ix.util.DebugLog(Format("Exploit isnumber: %s (%s)", client:Name(), client:SteamID()))
 		end
 
 		return
@@ -232,9 +232,9 @@ net.Receive("ixTradeTakeItem", function(len, client)
 
 	if (!isnumber(id) or !client.isTrading) then
 		if (!client.isTrading) then
-			print(Format("[ixTradeTakeItem] Exploit isTrading: %s (%s)", client:Name(), client:SteamID()))
+			ix.util.DebugLog(Format("Exploit isTrading: %s (%s)", client:Name(), client:SteamID()))
 		elseif (!isnumber(id)) then
-			print(Format("[ixTradeTakeItem] Exploit !isnumber(id): %s (%s)", client:Name(), client:SteamID()))
+			ix.util.DebugLog(Format("Exploit isnumber: %s (%s)", client:Name(), client:SteamID()))
 		end
 
 		return

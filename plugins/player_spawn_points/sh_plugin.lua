@@ -42,12 +42,12 @@ if (CLIENT) then
 	end)
 
 	function PLUGIN:InitPostEntity()
-		ix.gui.death_menu = vgui.Create("ixDeathMenu")
+		ix.gui.death_menu = vgui.Create("ixDeathScreenMenu")
 	end
 
 	if (IsValid(ix.gui.death_menu)) then
 		ix.gui.death_menu:Remove()
-		ix.gui.death_menu = vgui.Create("ixDeathMenu")
+		ix.gui.death_menu = vgui.Create("ixDeathScreenMenu")
 	end
 
 	local owner, w, h, ft, clmp
@@ -84,7 +84,7 @@ if (CLIENT) then
 				return
 			end
 
-			surface.SetDrawColor(0, 0, 0, math.ceil((aprg^.5) * 75))
+			surface.SetDrawColor(0, 0, 0, math.ceil((aprg^.5) * 200))
 			surface.DrawRect(-1, -1, w+2, h+2)
 
 			ix.util.DrawText(
