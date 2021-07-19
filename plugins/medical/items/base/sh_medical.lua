@@ -11,7 +11,8 @@ ITEM.useSound = "items/medshot4.wav"
 -- ITEM.useSound = {"items/medshot4.wav", 60, 100} // soundName, soundLevel, pitchPercent
 
 ITEM.healthAmount = 0
-ITEM.staminaAmount = 0
+ITEM.staminaAmount = 0 -- процент (сколько добавить стамины при применение)
+ITEM.staminaRegenTime = 0 -- длительность регенерации стамины в секундах
 ITEM.radiationAmount = 0
 
 ITEM.price = 0
@@ -26,7 +27,11 @@ if (CLIENT) then
 		end
 
 		if (self.staminaAmount != 0) then
-			text[#text + 1] = Format("%s: %s%d%%", L"Endurance", self.staminaAmount < 0 and "-" or "+", math.abs(self.staminaAmount))
+			if (self.staminaRegenTime > 0 and self.staminaAmount > 0) then
+				text[#text + 1] = Format("%s: %s%d%% (%d's)", L"Endurance", self.staminaAmount < 0 and "-" or "+", math.abs(self.staminaAmount * 100), self.staminaRegenTime)
+			else
+				text[#text + 1] = Format("%s: %s%d%%", L"Endurance", self.staminaAmount < 0 and "-" or "+", math.abs(self.staminaAmount * 100))
+			end
 		end
 
 		if (self.radiationAmount != 0) then
@@ -68,7 +73,11 @@ ITEM.functions.use = {
 		end
 
 		if (item.staminaAmount != 0) then
-			client:RestoreStamina(item.staminaAmount)
+			client:RestoreStamina(item.staminaAmount * 100)
+
+			if (item.staminaRegenTime > 0 and item.staminaAmount > 0) then
+				client:AddStaminaRegenTime(item.staminaRegenTime)
+			end
 		end
 
 		if (item.radiationAmount != 0) then

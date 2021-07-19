@@ -5,7 +5,7 @@ ITEM.description = "Protects against radiation exposure."
 ITEM.radiationAmount = -75
 ITEM.price = 350
 
-ITEM.useSound = "gmodz/items/syringe/use.wav"
+ITEM.useSound = "gmodz/items/syringe/use.mp3"
 
 if (SERVER) then
 	function ITEM:OnUse()

@@ -12,7 +12,7 @@ ITEM.hungerAmount = 0 -- процент
 ITEM.thirstAmount = 0 -- процент
 ITEM.healthAmount = 0
 ITEM.staminaAmount = 0 -- процент (сколько добавить стамины при применение)
-ITEM.staminaRegenTime = 0 -- регенерация стамины в секундах
+ITEM.staminaRegenTime = 0 -- длительность регенерации стамины в секундах
 ITEM.radiationAmount = 0
 
 --ITEM.drinkSound = "gmodz/primary_needs/drinking.wav"

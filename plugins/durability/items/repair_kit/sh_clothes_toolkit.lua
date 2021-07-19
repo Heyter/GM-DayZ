@@ -2,7 +2,7 @@ ITEM.name = "Sewing kit"
 ITEM.model = "models/lostsignalproject/items/repair/toolkit_s.mdl"
 ITEM.description = ""
 
-ITEM.raiseDurability = 75
+ITEM.raiseDurability = 0.75
 ITEM.isClothesKit = true
 ITEM.isWeaponKit = nil
 ITEM.price = 500

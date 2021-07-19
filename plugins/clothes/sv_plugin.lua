@@ -40,9 +40,8 @@ end
 function PLUGIN:PlayerTakeDamage(client, damageInfo)
 	local attacker = damageInfo:GetAttacker()
 
-	if (IsValid(attacker) and (attacker:IsPlayer() or attacker:IsNPC())) then
+	if (IsValid(attacker) and (attacker:IsPlayer() or attacker:IsNPC() or attacker:IsNextBot())) then
 		local hit_group = client:LastHitGroup()
-		local damage = damageInfo:GetDamage()
 		local item = client:GetClothesItem()
 		local isHead = hit_group == HITGROUP_HEAD
 
@@ -52,6 +51,11 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 			item = item["suit"]
 			isHead = nil
 		end
+
+		print("pre", damageInfo:GetDamage())
+		hook.Run("PlayerTakeDamageClothes", client, damageInfo, attacker)
+		print("post", damageInfo:GetDamage())
+		local damage = damageInfo:GetDamage()
 
 		if (item) then
 			if (istable(item.damageReduction)) then
@@ -107,6 +111,8 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 					item:SetData("durability", durability)
 				end
 			end
+		else
+			damageInfo:SetDamage(damage)
 		end
 	end
 end

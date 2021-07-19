@@ -3,7 +3,7 @@ ITEM.model = "models/lostsignalproject/items/repair/armor_repair_pro.mdl"
 ITEM.description = "Includes tools to repair weapons and clothing."
 
 ITEM.maxQuantity = 3
-ITEM.raiseDurability = 100
+ITEM.raiseDurability = 1
 ITEM.price = 1000
 
 ITEM.isWeaponKit = true

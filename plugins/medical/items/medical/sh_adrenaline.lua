@@ -10,7 +10,13 @@ if (SERVER) then
 	end
 else
 	function ITEM:ExtendDesc(text)
-		text[#text+1] = Format("Increases movement speed (%d's)", ix.buff.list["adrenaline"].time)
+		local buff = ix.buff.list["adrenaline"]
+
+		if (buff) then
+			text[#text+1] = Format("Increases movement speed (%d's)", buff.time)
+			text[#text+1] = Format("Increases stamina regeneration %.1f", buff.stamina_offset)
+		end
+
 		return text
 	end
 end

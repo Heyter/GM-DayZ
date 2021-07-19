@@ -1,17 +1,13 @@
 local PLUGIN = PLUGIN
 
-function PLUGIN:EntityTakeDamage(_, dmgInfo)
-	local attacker = dmgInfo:GetAttacker()
+function PLUGIN:PlayerTakeDamageClothes(client, info, attacker)
+	local weapon = attacker:GetActiveWeapon()
 
-	if (IsValid(attacker) and attacker:IsPlayer()) then
-		local weapon = attacker:GetActiveWeapon()
+	if (IsValid(weapon) and weapon.ixItem) then
+		local durability = (weapon.ixItem:GetData("durability", 100) / 100)
+		durability = 0.5 + math.min((0.5 * durability / 0.50), 0.5)
 
-		if (IsValid(weapon) and weapon.ixItem) then
-			local durability = (weapon.ixItem:GetData("durability", 100) / 100)
-			durability = 0.5 + math.min((0.5 * durability / 0.50), 0.5)
-
-			dmgInfo:SetDamage(math.Round(dmgInfo:GetDamage() * durability, 1))
-		end
+		info:SetDamage(math.Round(info:GetDamage() * durability, 1))
 	end
 end
 
@@ -69,22 +65,25 @@ hook.Add("InitializedPlugins", "durability_weapons.InitializedPlugins", function
 				end
 
 				function WEAPON:Hook_PostReload()
-					local item = self.ixItem
 					local owner = self:GetOwner()
 
-					if (item and item.useDurability) then
-						local durability = item:GetData("durability", 100)
+					ProtectedCall(function()
+						local item = self.ixItem
 
-						if ((self.ShotsFired or 0) > 0 and durability > 0) then
-							durability = math.max(0, math.Round(durability - (item.DegradeRate * self.ShotsFired), 1))
+						if (item and item.useDurability) then
+							local durability = item:GetData("durability", 100)
 
-							item:SetData("durability", durability)
-							owner:SetLocalVar("WeaponDurability", durability)
+							if ((self.ShotsFired or 0) > 0 and durability > 0) then
+								durability = math.max(0, math.Round(durability - (item.DegradeRate * self.ShotsFired), 1))
+
+								item:SetData("durability", durability)
+								owner:SetLocalVar("WeaponDurability", durability)
+							end
+
+							self.MalfunctionMeanCopy = self.MalfunctionMeanCopy or self:MalfunctionMeanCalculate()
+							self.MalfunctionMean = math.max(0, self.MalfunctionMeanCopy * (durability / 100))
 						end
-
-						self.MalfunctionMeanCopy = self.MalfunctionMeanCopy or self:MalfunctionMeanCalculate()
-						self.MalfunctionMean = math.max(0, self.MalfunctionMeanCopy * (durability / 100))
-					end
+					end)
 
 					self.ShotsFired = 0
 

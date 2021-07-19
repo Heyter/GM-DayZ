@@ -15,7 +15,7 @@ if (SERVER) then
 	end
 else
 	function ITEM:ExtendDesc(text)
-		text[#text+1] = "Heals fracture"
+		text[#text+1] = "Treats a fracture"
 		return text
 	end
 end

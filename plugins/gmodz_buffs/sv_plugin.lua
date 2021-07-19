@@ -7,12 +7,15 @@ function PLUGIN:OnCharacterDisconnect(client)
 end
 
 function PLUGIN:PlayerSpawn(client)
-	if (client.clearBuffs) then
-		client:ClearBuffs()
-		client.clearBuffs = nil
-	end
+	client:ClearBuffs()
 end
 
 function PLUGIN:PlayerDeath(client)
-	client.clearBuffs = true
+	client:ClearBuffs(true)
+end
+
+function PLUGIN:PlayerTakeDamageClothes(client, info)
+	if ((client:HasBuff("epinephrine") or 0) > CurTime() and ix.buff.list["epinephrine"]) then
+		info:SetDamage(info:GetDamage() * (1 - ix.buff.list["epinephrine"].damageReduction))
+	end
 end

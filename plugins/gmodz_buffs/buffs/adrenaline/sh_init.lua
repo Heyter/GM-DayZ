@@ -12,6 +12,7 @@
 
 BUFF.time = 60
 BUFF.time_max = 360
+BUFF.stamina_offset = 1.8
 
 ix.util.Include("sv_init.lua", "server")
 
@@ -34,5 +35,11 @@ if (CLIENT) then
 			perc.y = perc.y - perc.h - margin
 			hud:drawText(perc, "ADRENALINE: " .. string.ToMinutesSeconds(time))
 		end
+	end
+end
+
+function BUFF:AdjustStaminaOffset(client, offset)
+	if (client:HasBuff(self.uniqueID)) then
+		return offset * self.stamina_offset
 	end
 end

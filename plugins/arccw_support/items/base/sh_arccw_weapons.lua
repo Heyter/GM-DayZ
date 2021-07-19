@@ -95,6 +95,12 @@ if (CLIENT) then
 
 		return false
 	end
+else
+	function ITEM:OnInstanced(index)
+		if (index == 0) then
+			self:SetData("durability", 100 * math.Rand(0.1, 0.9), false)
+		end
+	end
 end
 
 ITEM.functions.Detach = {

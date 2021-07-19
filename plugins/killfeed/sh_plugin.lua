@@ -65,7 +65,7 @@ if (CLIENT) then
 			end
 		end
 
-		if (attacker:IsNPC() or attacker.SBAdvancedNextBot) then
+		if (attacker:IsNPC() or attacker:IsNextBot()) then
 			local copy_attacker = attacker:GetClass()
 			attacker = scripted_ents.Get(copy_attacker) and attacker.PrintName or nil
 
@@ -117,7 +117,7 @@ if (CLIENT) then
 		elseif (attacker:IsWorld()) then
 			pnl:AddText(victim:GetName(), clrVic)
 			pnl:AddText("[crashed]", gray) -- разбился кароче
-		elseif (attacker:IsNPC() or attacker.SBAdvancedNextBot) then -- NPC убил игрока.
+		elseif (attacker:IsNPC() or attacker:IsNextBot()) then -- NPC убил игрока.
 			KilledByWeapon(death_msg, ent_class, attacker, victim, clrAtt, clrVic, pnl)
 		end
 

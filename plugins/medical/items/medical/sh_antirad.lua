@@ -1,4 +1,4 @@
-ITEM.name = "Anti-rad"
+ITEM.name = "Antirad"
 ITEM.model = "models/gmodz/medical/antirad.mdl"
 ITEM.description = "Antirad is a packet of anti-radiation drugs that neutralize radiation accumulated in the body."
 

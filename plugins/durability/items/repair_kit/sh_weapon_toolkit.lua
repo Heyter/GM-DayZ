@@ -2,7 +2,7 @@ ITEM.name = "Weapon repair kit"
 ITEM.model = "models/lostsignalproject/items/repair/toolkit_wp.mdl"
 ITEM.description = ""
 
-ITEM.raiseDurability = 75
+ITEM.raiseDurability = 0.75
 ITEM.isClothesKit = nil
 ITEM.isWeaponKit = true
 ITEM.price = 500

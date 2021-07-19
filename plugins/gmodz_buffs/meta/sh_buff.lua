@@ -33,6 +33,10 @@ function BUFF:TimerRemove(client)
 	client.timer_buffs[id] = nil
 end
 
+function BUFF:TimerAdjust(client, delay, reps, func)
+	timer.Adjust("ixBuffTimer_" .. tostring(self) .. client:EntIndex(), delay, reps, func)
+end
+
 function BUFF:TimerExists(client)
 	return timer.Exists("ixBuffTimer_" .. tostring(self) .. client:EntIndex())
 end
