@@ -18,7 +18,9 @@ ArcCW.ConVar_BuffMults = {
     ["Mult_MeleeTime"] = "arccw_mult_meleetime",
 }
 
-ArcCW.ConVar_BuffAdds = {}
+ArcCW.ConVar_BuffAdds = {
+    ["Add_Sway"] = "arccw_add_sway",
+}
 
 ArcCW.ConVar_BuffOverrides = {
     ["Override_ShootWhileSprint"] = "arccw_mult_shootwhilesprinting"
@@ -872,12 +874,12 @@ function SWEP:RefreshBGs()
 
         if self.WMModel and self.WMModel:IsValid() then
             if self.MirrorVMWM and ele.VMSkin then
-                self.WMModel:SetColor(ele.VMColor)
-                self:SetColor(ele.VMColor)
+                self.WMModel:SetColor(ele.VMColor or color_white)
+                self:SetColor(ele.VMColor or color_white)
             end
             if ele.WMSkin then
-                self.WMModel:SetColor(ele.WMColor)
-                self:SetColor(ele.WMColor)
+                self.WMModel:SetColor(ele.WMColor or color_white)
+                self:SetColor(ele.WMColor or color_white)
             end
         end
 
@@ -1081,6 +1083,12 @@ function SWEP:Attach(slot, attname, silent, noadjust)
         end
     end
 
+--[[ 	if (attslot.Installed) then
+		hook.Run("ArcCW_PlayerAttached", self:GetOwner(), self, attslot.Installed, slot, attname)
+	else
+		hook.Run("ArcCW_PlayerAttached", self:GetOwner(), self, attname, slot, false)
+	end ]]
+
     attslot.Installed = attname
 
     if atttbl.Health then
@@ -1170,6 +1178,8 @@ function SWEP:Detach(slot, silent, noadjust, nocheck)
     if self.Attachments[slot].Installed == self.Attachments[slot].EmptyFallback then
         return
     end
+
+--[[ 	hook.Run("ArcCW_PlayerAttached", self:GetOwner(), self, self.Attachments[slot].Installed, slot, true) ]]
 
     local previnstall = self.Attachments[slot].Installed
 
@@ -1557,7 +1567,7 @@ function SWEP:AddSubSlot(i, attname)
             self.Attachments[index] = slot
             self.Attachments[index].Bone = og_slot.Bone
             self.Attachments[index].WMBone = og_slot.WMBone
-            self.Attachments[index].ExtraSightDist = self.Attachments[index].ExtraSightDist or og_slot.ExtraSightDist
+            self.Attachments[index].ExtraSightDist = 0--self.Attachments[index].ExtraSightDist or og_slot.ExtraSightDist
             self.Attachments[index].CorrectivePos = og_slot.CorrectivePos
             self.Attachments[index].CorrectiveAng = og_slot.CorrectiveAng
             og_slot.SubAtts[ind] = index

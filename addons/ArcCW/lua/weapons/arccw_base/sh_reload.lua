@@ -49,7 +49,10 @@ function SWEP:Reload()
     if true then self:SetNextPrimaryFire(CurTime() + 2) return end
     ]]
 
-    if self.Throwing or self.PrimaryBash or self:HasBottomlessClip() then return end
+    if self.Throwing then return end
+    if self.PrimaryBash then return end
+
+    if self:HasBottomlessClip() then return end
 
     -- with the lite 3D HUD, you may want to check your ammo without reloading
     local Lite3DHUD = self:GetOwner():GetInfo("arccw_hud_3dfun") == "1"
@@ -71,7 +74,9 @@ function SWEP:Reload()
 
     self.LastClip1 = self:Clip1()
 
-    local reserve = self:Ammo1() + self:Clip1()
+    local reserve = self:Ammo1()
+
+    reserve = reserve + self:Clip1()
     if self:HasInfiniteAmmo() then reserve = self:GetCapacity() + self:Clip1() end
 
     local clip = self:GetCapacity()

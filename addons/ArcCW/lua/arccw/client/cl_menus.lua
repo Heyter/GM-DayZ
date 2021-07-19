@@ -165,7 +165,6 @@ local CrosshairPanel = {
     { type = "b", text = "#arccw.cvar.crosshair_clump", var = "arccw_crosshair_clump" },
     { type = "b", text = "#arccw.cvar.crosshair_clump_outline", var = "arccw_crosshair_clump_outline" },
     { type = "b", text = "#arccw.cvar.crosshair_clump_always", var = "arccw_crosshair_clump_always" },
-    { type = "b", text = "#arccw.cvar.crosshair_aa", var = "arccw_crosshair_aa" },
     { type = "m", text = "#arccw.cvar.crosshair_clr", r = "arccw_crosshair_clr_r", g = "arccw_crosshair_clr_g", b = "arccw_crosshair_clr_b", a = "arccw_crosshair_clr_a" },
     { type = "f", text = "#arccw.cvar.crosshair_outline", var = "arccw_crosshair_outline", min = 0, max = 4 },
     { type = "m", text = "#arccw.cvar.crosshair_outline_clr", r = "arccw_crosshair_outline_r", g = "arccw_crosshair_outline_g", b = "arccw_crosshair_outline_b", a = "arccw_crosshair_outline_a" },
@@ -212,7 +211,7 @@ local ServerPanel = {
     { type = "b", text = "#arccw.cvar.override_barrellength", var = "arccw_override_nearwall", sv = true },
     { type = "b", text = "#arccw.cvar.doorbust", var = "arccw_doorbust", sv = true },
     { type = "f", text = "#arccw.cvar.weakensounds", var = "arccw_weakensounds", min = -20, max = 30, sv = true},
-    { type = "c", text = "#arccw.cvar.weakensounds.desc" }
+    { type = "c", text = "#arccw.cvar.weakensounds.desc" },
 }
 
 local AmmoPanel = {
@@ -286,9 +285,9 @@ local MultsPanel = {
     { type = "f", text = "#arccw.cvar.mult_heat",            var = "arccw_mult_heat", min = 0, max = 3, sv = true },
     { type = "f", text = "#arccw.cvar.mult_crouchdisp",      var = "arccw_mult_crouchdisp", min = 0, max = 1, sv = true },
     { type = "f", text = "#arccw.cvar.mult_crouchrecoil",    var = "arccw_mult_crouchrecoil", min = 0, max = 1, sv = true },
-    { type = "f", text = "#arccw.cvar.mult_sway",            var = "arccw_mult_sway", min = 0, max = 10, sv = true },
+
     { type = "f", text = "#arccw.cvar.mult_meleedamage",     var = "arccw_mult_meleedamage", min = 0, max = 4, sv = true },
-    { type = "f", text = "#arccw.cvar.mult_meleetime",     var = "arccw_mult_meleetime", min = 0, max = 3, sv = true },
+    { type = "f", text = "#arccw.cvar.mult_meleetime",       var = "arccw_mult_meleetime", min = 0, max = 3, sv = true },
     { type = "f", text = "#arccw.cvar.mult_malfunction",     var = "arccw_mult_malfunction", min = 0, max = 10, sv = true },
 
     { type = "b", text = "#arccw.cvar.mult_startunloaded",   var = "arccw_mult_startunloaded", sv = true },
@@ -296,9 +295,14 @@ local MultsPanel = {
     { type = "o", text = "#arccw.cvar.malfunction", var = "arccw_malfunction", sv = true,
             choices = {[0] = "#arccw.cvar.malfunction.0", [1] = "#arccw.cvar.malfunction.1", [2] = "#arccw.cvar.malfunction.2"}},
 
-    { type = "b", text = "#arccw.cvar.mult_bottomlessclip",   var = "arccw_mult_bottomlessclip", sv = true },
+    { type = "b", text = "#arccw.cvar.mult_bottomlessclip",  var = "arccw_mult_bottomlessclip", sv = true },
     { type = "c", text = "Bottomless Clip is currently unfinished and will just give you a bunch of ammo if you change attachments with it on." },
-    { type = "b", text = "#arccw.cvar.mult_infiniteammo",   var = "arccw_mult_infiniteammo", sv = true },
+    { type = "b", text = "#arccw.cvar.mult_infiniteammo",    var = "arccw_mult_infiniteammo", sv = true },
+
+    { type = "b", text = "#arccw.cvar.enable_sway",          var = "arccw_enable_sway", sv = true },
+    { type = "c", text = "#arccw.cvar.enable_sway.desc" },
+    { type = "f", text = "#arccw.cvar.add_sway",             var  = "arccw_add_sway", min = 0, max = 5, sv = true },
+    { type = "f", text = "#arccw.cvar.mult_sway",            var = "arccw_mult_sway", min = 0, max = 10, sv = true },
 }
 
 local MultPresets = {

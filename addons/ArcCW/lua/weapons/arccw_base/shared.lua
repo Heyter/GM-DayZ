@@ -1,5 +1,8 @@
 AddCSLuaFile()
 
+-- For those who may find it useful...
+-- use WEAPONENTITY:SetNWBool("ArcCW_DisableAutosave", true) to tell the client to not load their autosaves.
+
 SWEP.Spawnable = false -- this obviously has to be set to true
 SWEP.AutoSpawnable = nil -- TTT weapon autospawn. ArcCW weapons automatically spawn in TTT as long as SWEP.Spawnable is set to true
 SWEP.Category = "ArcCW - Firearms" -- edit this if you like
@@ -138,6 +141,7 @@ SWEP.VisualRecoilMult = 1.25
 SWEP.RecoilPunch = 1.5
 SWEP.RecoilPunchBackMax = 1
 SWEP.RecoilPunchBackMaxSights = nil -- may clip with scopes
+SWEP.RecoilVMShake = 1 -- random viewmodel offset when shooty
 
 SWEP.Sway = 0
 
@@ -192,10 +196,9 @@ SWEP.MoveDispersion = 150 -- inaccuracy added by moving. Applies in sights as we
 SWEP.SightsDispersion = 0 -- dispersion that remains even in sights
 SWEP.JumpDispersion = 300 -- dispersion penalty when in the air
 
--- Based off of CS+'s bipod
 SWEP.Bipod_Integral = false -- Integral bipod (ie, weapon model has one)
-SWEP.BipodDispersion = .1 -- Bipod dispersion for Integral bipods
-SWEP.BipodRecoil = 0.25 -- Bipod recoil for Integral bipods
+SWEP.BipodDispersion = 1 -- Bipod dispersion for Integral bipods
+SWEP.BipodRecoil = 1 -- Bipod recoil for Integral bipods
 
 SWEP.ShootWhileSprint = false
 
@@ -683,77 +686,36 @@ end
 SWEP.Bodygroups = {} -- [0] = 1, [1] = 0...
 -- SWEP.RegularClipSize = 0
 
-if SERVER then
+local searchdir = "weapons/arccw_base"
 
-include("sv_npc.lua")
-include("sv_shield.lua")
+local function autoinclude(dir)
+    local files, dirs = file.Find(searchdir .. "/*.lua", "LUA")
 
+    for _, filename in pairs(files) do
+        if filename == "shared.lua" then continue end
+        local luatype = string.sub(filename, 1, 2)
+
+        if luatype == "sv" then
+            if SERVER then
+                include(dir .. "/" .. filename)
+            end
+        elseif luatype == "cl" then
+            AddCSLuaFile(dir .. "/" .. filename)
+            if CLIENT then
+                include(dir .. "/" .. filename)
+            end
+        else
+            AddCSLuaFile(dir .. "/" .. filename)
+            include(dir .. "/" .. filename)
+        end
+    end
+
+    for _, path in pairs(dirs) do
+        autoinclude(dir .. "/" .. path)
+    end
 end
 
-include("sh_model.lua")
-include("sh_timers.lua")
-include("sh_think.lua")
-include("sh_deploy.lua")
-include("sh_anim.lua")
-include("sh_firing.lua")
-include("sh_reload.lua")
-include("sh_attach.lua")
-include("sh_sights.lua")
-include("sh_firemodes.lua")
-include("sh_customize.lua")
-include("sh_ubgl.lua")
-include("sh_rocket.lua")
-include("sh_heat.lua")
-include("sh_bash.lua")
-include("sh_bipod.lua")
-include("sh_grenade.lua")
-include("sh_ttt.lua")
-include("sh_util.lua")
-AddCSLuaFile("sh_model.lua")
-AddCSLuaFile("sh_timers.lua")
-AddCSLuaFile("sh_think.lua")
-AddCSLuaFile("sh_deploy.lua")
-AddCSLuaFile("sh_anim.lua")
-AddCSLuaFile("sh_firing.lua")
-AddCSLuaFile("sh_reload.lua")
-AddCSLuaFile("sh_attach.lua")
-AddCSLuaFile("sh_sights.lua")
-AddCSLuaFile("sh_firemodes.lua")
-AddCSLuaFile("sh_customize.lua")
-AddCSLuaFile("sh_ubgl.lua")
-AddCSLuaFile("sh_rocket.lua")
-AddCSLuaFile("sh_heat.lua")
-AddCSLuaFile("sh_bash.lua")
-AddCSLuaFile("sh_bipod.lua")
-AddCSLuaFile("sh_grenade.lua")
-AddCSLuaFile("sh_ttt.lua")
-AddCSLuaFile("sh_util.lua")
-
-AddCSLuaFile("cl_customize2.lua")
-AddCSLuaFile("cl_viewmodel.lua")
-AddCSLuaFile("cl_scope.lua")
-AddCSLuaFile("cl_crosshair.lua")
-AddCSLuaFile("cl_hud.lua")
-AddCSLuaFile("cl_holosight.lua")
-AddCSLuaFile("cl_lhik.lua")
-AddCSLuaFile("cl_laser.lua")
-AddCSLuaFile("cl_blur.lua")
-AddCSLuaFile("cl_presets.lua")
-AddCSLuaFile("cl_light.lua")
-
-if CLIENT then
-    include("cl_customize2.lua")
-    include("cl_viewmodel.lua")
-    include("cl_scope.lua")
-    include("cl_crosshair.lua")
-    include("cl_hud.lua")
-    include("cl_holosight.lua")
-    include("cl_lhik.lua")
-    include("cl_laser.lua")
-    include("cl_blur.lua")
-    include("cl_presets.lua")
-    include("cl_light.lua")
-end
+autoinclude(searchdir)
 
 function SWEP:SetupDataTables()
     self:NetworkVar("Int", 0, "NWState")
@@ -785,6 +747,8 @@ function SWEP:SetupDataTables()
     self:NetworkVar("Float", 4, "NextPrimaryFireSlowdown")
     self:NetworkVar("Float", 5, "NextIdle")
     self:NetworkVar("Float", 6, "Holster_Time")
+    self:NetworkVar("Float", 7, "SightDelta")
+    self:NetworkVar("Float", 8, "SprintDelta")
 
     self:NetworkVar("Vector", 0, "BipodPos")
 

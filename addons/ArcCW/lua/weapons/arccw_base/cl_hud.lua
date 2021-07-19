@@ -233,7 +233,7 @@ function SWEP:DrawHUD()
 
         -- welcome to the bar
         surface.DrawOutlinedRect(ecksy, 26 * s*7.7, s*128, s*8, s)
-        surface.DrawRect(ecksy, 26 * s*7.7+s*2, s*128*proggers, s*8-s*4, s)
+        surface.DrawRect(ecksy, 26 * s*7.7+s*2, s*128*math.Clamp(proggers, 0, 1), s*8-s*4, s)
 
         surface.SetFont("ArcCW_20")
         surface.SetTextPos(ecksy, 26 * s*8.5)
@@ -244,6 +244,9 @@ function SWEP:DrawHUD()
 
         surface.DrawOutlinedRect(ecksy, 26 * s*10, s*64, s*4, s/2)
         surface.DrawRect(ecksy, 26 * s*10+s*1, s*64*self:GetSightDelta(), s*4-s*2)
+
+        surface.DrawOutlinedRect(ecksy, 26 * s*10.25, s*64, s*4, s/2)
+        surface.DrawRect(ecksy, 26 * s*10.25+s*1, s*64*self:GetSprintDelta(), s*4-s*2)
 
         
         surface.SetTextPos(ecksy, 26 * s*11)
@@ -288,18 +291,41 @@ function SWEP:DrawHUD()
         surface.SetTextPos(ecksy, 26 * s*9.25)
         surface.DrawText("SIGHT DELTA")
 
-        surface.SetTextPos(ecksy, 26 * s*10.25)
-        if thestate == ArcCW.STATE_IDLE then
-            surface.DrawText("LAST CHANGE: " .. math.Round(CurTime() - self.LastExitSightTime, 2))
-        elseif  thestate == ArcCW.STATE_SIGHTS then
-            surface.DrawText("LAST CHANGE: " .. math.Round(CurTime() - self.LastEnterSightTime, 2))
-        end
-
         surface.SetTextPos(ecksy, 26 * s*11)
         surface.DrawText("HOLSTER TIME")
 
         surface.SetTextPos(ecksy, 26 * s*12)
         surface.DrawText("HOLSTER ENT")
+
+        -- lhik timeline
+        surface.SetTextColor(255, 255, 255, 255)
+        surface.SetFont("ArcCW_8")
+        surface.SetDrawColor(255, 255, 255, 11)
+        surface.DrawRect(s*8, s*8, ScrW() - (s*16), s*2)
+
+        local texy = math.Round(CurTime(),1)
+        local a, b = surface.GetTextSize(texy)
+        surface.SetTextPos((ScrW()/2) - (a/2), (s*16) - (b/2))
+        surface.DrawText(texy)
+
+        surface.SetDrawColor(255, 255, 255, 127)
+        if self.LHIKTimeline then for i, v in pairs(self.LHIKTimeline) do
+
+            local pox = ScrW()/2
+            local poy = (s*7)
+
+            local zo = s*0.01
+
+            local dist = self.LHIKStartTime + v.t
+
+            surface.DrawRect(pox + (dist*zo), poy, s*8, s*4)
+
+            texy = math.Round(dist,1)
+            a, b = surface.GetTextSize(texy)
+            surface.SetTextPos(pox + (dist*zo) - (a/2), (s*16) - (b/2) )
+            surface.DrawText(texy)
+        end end
+
     end
 
     if !GetConVar("cl_drawhud"):GetBool() then return false end
@@ -437,6 +463,10 @@ function SWEP:DrawHUD()
                 MyDrawText(wammotype)
             end
 
+            if !fmbars then
+                apan_bg.y = apan_bg.y + ScreenScaleMulti(6)
+            end
+
             local wammo = {
                 x = apan_bg.x + apan_bg.w - airgap,
                 y = apan_bg.y - ScreenScaleMulti(4),
@@ -505,7 +535,7 @@ function SWEP:DrawHUD()
 
             local wmode = {
                 x = apan_bg.x + apan_bg.w - airgap,
-                y = wammo.y + wammo.h,
+                y = wammo.y + wammo.h + ScreenScaleMulti(6),
                 font = "ArcCW_12",
                 text = data.mode,
                 col = col2,
@@ -513,8 +543,8 @@ function SWEP:DrawHUD()
                 shadow = true,
                 alpha = alpha,
             }
-            if fmbars then
-                wmode.y = wammo.y + wammo.h + ScreenScaleMulti(6)
+            if !fmbars then
+                wmode.y = wmode.y - ScreenScaleMulti(6)
             end
             MyDrawText(wmode)
 
@@ -906,11 +936,15 @@ function SWEP:CustomAmmoDisplay()
 
     self.AmmoDisplay.Draw = true -- draw the display?
 
-    if self.Primary.ClipSize > 0 then
-        local plus = data.plus or 0
-        self.AmmoDisplay.PrimaryClip = data.clip + plus -- amount in clip
+    if self.Primary.ClipSize > 0 and tonumber(data.clip) then
+        local plus = tonumber(data.plus) or 0
+        self.AmmoDisplay.PrimaryClip = tonumber(data.clip) + plus -- amount in clip
+    end
+
+    if self.Primary.ClipSize > 0 and tonumber(data.ammo) then
         self.AmmoDisplay.PrimaryAmmo = tonumber(data.ammo) -- amount in reserve
     end
+
     if true then
         local ubglammo = self:GetBuff_Override("UBGL_Ammo")
         if !ubglammo then return end

@@ -465,41 +465,40 @@ if CLIENT then
 		StormFox2.Environment.DrawWaterOverlay( b )
 	end
 
-	-- Render screen effects
---[[ 	HUDRainDrops = {}
-	HUDRainMatID = surface.GetTextureID( "simpleweather/warp_ripple3" )
+	-- rain drops effect on players hud
+	rain.HUDRainDropTextureID = surface.GetTextureID("atmos/warp_ripple3")
+	rain.HUDRainDropsNext = 0
+	rain.HUDRainDrops = {}
+
+	local client
 	rain.HUDPaint = function()
-		if( StormFox2.DownFall.FindSky(LocalPlayer():GetPos(), vector_origin, 1) and StormFox2.util.GetCalcView().ang.p < 15 and LocalPlayer():WaterLevel() < 3 ) then
-				
-			if( CurTime() > (NextHUDRain or 0) ) then
-				
-				NextHUDRain = CurTime() + math.Rand( 0.1, 0.4 )
-				
-				local t = { }
-				t.x = math.random( 0, ScrW() )
-				t.y = math.random( 0, ScrH() )
-				t.r = math.random( 20, 40 )
-				t.c = CurTime()
-				
-				table.insert( HUDRainDrops, t )
-				
+		client = LocalPlayer()
+
+		if (client:Alive() and !client:InVehicle() and client:WaterLevel() < 3 and client:EyeAngles().p < 15 and StormFox2.Wind.IsEntityInWind(client)) then
+			if (CurTime() > rain.HUDRainDropsNext) then
+				rain.HUDRainDropsNext = CurTime() + math.Rand(0.1, 0.4)
+
+				local rainDrop = {}
+				rainDrop.x = math.random(0, ScrW())
+				rainDrop.y = math.random(0, ScrH())
+				rainDrop.r = math.random(20, 40)
+				rainDrop.creationTime = CurTime()
+
+				table.insert(rain.HUDRainDrops, rainDrop)
 			end
-			
 		end
 
-		for k, v in pairs( HUDRainDrops ) do
-			
-			if( CurTime() - v.c > 1 ) then
-				table.remove( HUDRainDrops, k )
+		for k, v in ipairs(rain.HUDRainDrops) do
+			if (CurTime() - v.creationTime > 1) then
+				table.remove(rain.HUDRainDrops, k)
 				continue
 			end
-			
-			surface.SetDrawColor( 255, 255, 255, 255 * ( 1 - ( CurTime() - v.c ) ) )
-			surface.SetTexture( HUDRainMatID )
-			surface.DrawTexturedRect( v.x, v.y, v.r, v.r )
-			
+
+			surface.SetDrawColor(255, 255, 255, (255 * (1 - (CurTime() - v.creationTime))))
+			surface.SetTexture(rain.HUDRainDropTextureID)
+			surface.DrawTexturedRect(v.x, v.y, v.r, v.r)
 		end
-	end ]]
+	end
 end
 
 -- 2D skyboxes

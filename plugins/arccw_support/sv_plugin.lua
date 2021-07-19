@@ -13,7 +13,7 @@ function ix.arccw_support.Attach(itemWeapon, attID)
 
 	local client = itemWeapon.player or itemWeapon:GetOwner()
 
-	if (IsValid(client) and client:GetCharacter()) then
+	if (IsValid(client) and client:GetCharacter() and (client.StopArcAttach or 0) < CurTime()) then
 		local slot = itemWeapon.attachments[attID]
 		if (!slot) then return false end
 
@@ -66,7 +66,7 @@ function ix.arccw_support.Detach(itemWeapon, attID)
 
 	local client = itemWeapon.player or itemWeapon:GetOwner()
 
-	if (IsValid(client) and client:GetCharacter()) then
+	if (IsValid(client) and client:GetCharacter() and (client.StopArcAttach or 0) < CurTime()) then
 		local slot = itemWeapon.attachments[attID]
 		local mods = itemWeapon:GetData("mods", {})
 
@@ -98,6 +98,13 @@ function ix.arccw_support.Detach(itemWeapon, attID)
 		end
 
 		if (IsValid(weapon) and weapon.ixItem and weapon.ixItem == itemWeapon) then
+			local attItem = ix.item.list[attID]
+
+			if (!attItem or !client:GetCharacter():GetInventory():FindEmptySlot(attItem.width, attItem.height, true)) then
+				client:NotifyLocalized("noFit")
+				return false
+			end
+
 			weapon:Detach(slot)
 			client:EmitSound("weapons/crossbow/reload1.wav")
 
@@ -265,13 +272,7 @@ end)
 
 -- HOOKS --
 function PLUGIN:ArcCW_PlayerCanAttach(client, weapon, attID, slot, detach)
-	if (ix.arccw_support.free_atts[attID]) then
-		return
-	end
-
-	if ((client.StopArcAttach or 0) < CurTime()) then
-		client.StopArcAttach = nil
-	else
+	if (ix.arccw_support.free_atts[attID] or (client.StopArcAttach or 0) > CurTime()) then
 		return
 	end
 
@@ -297,7 +298,16 @@ function PLUGIN:ArcCW_PlayerCanAttach(client, weapon, attID, slot, detach)
 		else
 			local mods = weaponItem:GetData("mods", {})
 
-			if (mods[slot] and client:GetCharacter():GetInventory():Add(attID)) then
+			if (table.IsEmpty(mods)) then
+				return false
+			end
+
+			if (mods[slot]) then
+				if (!client:GetCharacter():GetInventory():Add(attID)) then
+					client:NotifyLocalized("noFit")
+					return false
+				end
+
 				mods[slot] = nil
 
 				if (table.IsEmpty(mods)) then
@@ -317,6 +327,8 @@ function PLUGIN:PlayerCanPickupWeapon(client, weapon)
 		-- if (!ArcCW.EnableCustomization or GetConVar("arccw_enable_customization"):GetInt() < 0 or GetConVar("arccw_attinv_free"):GetBool()) then
 			-- return
 		-- end
+
+		weapon:SetNWBool("ArcCW_DisableAutosave", true)
 
 		timer.Simple(.2, function()
 			ix.arccw_support.InitWeapon(client, weapon)

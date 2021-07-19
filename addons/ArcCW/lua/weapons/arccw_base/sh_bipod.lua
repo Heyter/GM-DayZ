@@ -20,27 +20,21 @@ function SWEP:CanBipod()
 
     if self.CachedCanBipodTime >= CurTime() then return self.CachedCanBipod end
 
-    -- local bip = self:GetInBipod()
-
-    local maxs = Vector(2, 2, 2)
-    local mins = Vector(-2, -2, -2)
-
     local pos = self:GetOwner():EyePos()
     local angle = self:GetOwner():EyeAngles()
-
     if self:GetOwner():GetVelocity():Length() > 0 then
         return false
     end
 
     local rangemult = 2
-
     if self:IsProne() then
-        rangemult = 2.5
+        rangemult = rangemult * 1.25
     end
+    rangemult = rangemult * self:GetBuff_Mult("Mult_BipodRange")
 
     local tr = util.TraceLine({
         start = pos,
-        endpos = pos + (angle:Forward() * 48 * rangemult),
+        endpos = pos + (angle:Forward() * 24 * rangemult),
         filter = self:GetOwner(),
         mask = MASK_PLAYERSOLID
     })
@@ -49,10 +43,10 @@ function SWEP:CanBipod()
         return false
     end
 
-    maxs = Vector(8, 8, 0)
-    mins = Vector(-8, -8, -16)
+    local maxs = Vector(8, 8, 0)
+    local mins = Vector(-8, -8, -16)
 
-    angle.p = angle.p + 15
+    angle.p = angle.p + 20
 
     tr = util.TraceHull({
         start = pos,
@@ -77,7 +71,6 @@ end
 function SWEP:EnterBipod()
     if self:GetInBipod() then return end
     if !self:CanBipod() then return end
-    --if CurTime() < self:GetNextSecondaryFire() then return end
 
     if self.Animations.enter_bipod then
         self:PlayAnimation("enter_bipod")
@@ -90,8 +83,6 @@ function SWEP:EnterBipod()
     self:SetBipodPos(self:GetOwner():EyePos())
     self:SetBipodAngle(self:GetOwner():EyeAngles())
 
-    self:SetNextSecondaryFire(CurTime() + 0.075)
-
     if game.SinglePlayer() and CLIENT then return end
 
     self:MyEmitSound(self.EnterBipodSound)
@@ -100,7 +91,6 @@ end
 
 function SWEP:ExitBipod()
     if !self:GetInBipod() then return end
-    if CurTime() < self:GetNextSecondaryFire() then return end
 
     if self.Animations.exit_bipod then
         self:PlayAnimation("exit_bipod")
@@ -109,11 +99,6 @@ function SWEP:ExitBipod()
     if CLIENT and self:GetBuff_Override("LHIK") then
         self:DoLHIKAnimation("exit", 0.5)
     end
-
-    self:SetNextSecondaryFire(CurTime() + 0.075)
-
-    self:SetBipodPos(Vector(0, 0, 0))
-    self:SetBipodAngle(Angle(0, 0, 0))
 
     if game.SinglePlayer() and CLIENT then return end
 

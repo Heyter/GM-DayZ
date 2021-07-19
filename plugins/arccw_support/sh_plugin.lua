@@ -227,8 +227,8 @@ function PLUGIN:InitPostEntity()
 		local item, class, oldItem
 		local attachments = {}
 
-		for _, v in ipairs(weapons.GetList()) do
-			class = v.ClassName
+		for _, SWEP in ipairs(weapons.GetList()) do
+			class = SWEP.ClassName
 
 			if (weapons.IsBasedOn(class, "arccw_base") and !class:find("base")) then
 				item = ix.item.list[class]
@@ -237,15 +237,15 @@ function PLUGIN:InitPostEntity()
 					item.class = class
 
 					if (#item.description == 0) then
-						item.description = v.Trivia_Desc or ""
+						item.description = SWEP.Trivia_Desc or ""
 					end
 
 					if (#item.model == 0) then
-						item.model = v.WorldModel or "models/weapons/w_pistol.mdl"
+						item.model = SWEP.WorldModel or "models/weapons/w_pistol.mdl"
 					end
 
 					if (#item.name == 0) then
-						item.name = v.PrintName or v.TrueName
+						item.name = SWEP.PrintName or SWEP.TrueName
 					end
 
 					ix.arccw_support.atts_slots[item.uniqueID] = ix.arccw_support.atts_slots[item.uniqueID] or {}
@@ -253,17 +253,17 @@ function PLUGIN:InitPostEntity()
 					item.attachments = {}
 
 					-- pretty heavy.
-					if (v.Attachments) then
+					if (SWEP.Attachments) then
 						local slots = {}
 
-						for i, k in ipairs(v.Attachments) do
+						for i, k in ipairs(SWEP.Attachments) do
 							if (!k.PrintName or k.Hidden or k.Blacklisted or k.Integral) then goto SKIP end
 
 							slots = {i}
 							table.Add(slots, k.MergeSlots or {})
 
 							for _, slot in ipairs(slots) do
-								for _, attID in ipairs(ArcCW:GetAttsForSlot((v.Attachments[slot] or {}).Slot, v)) do
+								for _, attID in ipairs(ArcCW:GetAttsForSlot((SWEP.Attachments[slot] or {}).Slot, SWEP)) do
 									if (!item.attachments[attID]) then
 										item.attachments[attID] = slot
 									else
@@ -279,50 +279,59 @@ function PLUGIN:InitPostEntity()
 						end
 					end
 
-					if (v.Primary.Ammo and #v.Primary.Ammo > 0) then
+					if (SWEP.Primary.Ammo and #SWEP.Primary.Ammo > 0) then
 						for _, itemAmmo in pairs(ix.item.list) do
-							if ((itemAmmo.base == "base_ammo" or itemAmmo.base == "base_arccw_ammo") and itemAmmo.ammo == v.Primary.Ammo) then
+							if ((itemAmmo.base == "base_ammo" or itemAmmo.base == "base_arccw_ammo") and itemAmmo.ammo == SWEP.Primary.Ammo) then
 								item.ammo = itemAmmo.uniqueID
-								-- ix.item.list[item.ammo].maxRounds = v.Primary.ForceDefaultClip or v.Primary.ClipSize
+								-- ix.item.list[item.ammo].maxRounds = SWEP.Primary.ForceDefaultClip or SWEP.Primary.ClipSize
 								break
 							end
 						end
 					end
 
-					v.Primary.DefaultClip = 0
-					v.InitialDefaultClip = nil
+					SWEP.Primary.DefaultClip = 0
+					SWEP.InitialDefaultClip = nil
+
+					if (CLIENT) then
+						function SWEP:GetPresets() return {} end
+						function SWEP:LoadPreset() end
+						function SWEP:SavePreset() end
+						function SWEP:CreatePresetSave() end
+						function SWEP:CreatePresetMenu() end
+						function SWEP:ClosePresetMenu() end
+					end
 				end
 			end
 		end
 
 		for attID, v in pairs(ArcCW.AttachmentTable) do
-			oldItem = ix.item.list[attID]
-
-			item = oldItem or ix.item.Register(attID, "base_arccw_attachments", nil, nil, true)
-			item.name = oldItem and item.name or v.PrintName or v.ShortName
-
-			if (oldItem) then
-				if (#item.description == 0) then
-					item.description = v.Description
-				end
-
-				if (#item.model == 0) then
-					item.model = v.Model or "models/Items/BoxMRounds.mdl"
-				end
-			else
-				item.description = v.Description
-				item.model = v.Model or "models/Items/BoxMRounds.mdl"
-			end
-
-			-- item.slot = oldItem and item.slot or v.Slot
-
 			if (v.Free) then
 				ix.arccw_support.free_atts[attID] = 1
-			end
+			else
+				oldItem = ix.item.list[attID]
 
-			if (v.DroppedModel and v.DroppedModel != item.model) then
-				function item:OnGetDropModel(entity)
-					return v.DroppedModel
+				item = oldItem or ix.item.Register(attID, "base_arccw_attachments", nil, nil, true)
+				item.name = oldItem and item.name or v.PrintName or v.ShortName
+
+				if (oldItem) then
+					if (#item.description == 0) then
+						item.description = v.Description
+					end
+
+					if (#item.model == 0) then
+						item.model = v.Model or "models/Items/BoxMRounds.mdl"
+					end
+				else
+					item.description = v.Description
+					item.model = v.Model or "models/Items/BoxMRounds.mdl"
+				end
+
+				-- item.slot = oldItem and item.slot or v.Slot
+
+				if (v.DroppedModel and v.DroppedModel != item.model) then
+					function item:OnGetDropModel(entity)
+						return v.DroppedModel
+					end
 				end
 			end
 		end
@@ -350,11 +359,9 @@ if (CLIENT) then
 	local oldWeapon
 	function PLUGIN:PlayerWeaponChanged(client, weapon)
 		if (!IsValid(weapon) or oldWeapon == weapon) then return end
-
 		oldWeapon = weapon
 
 		local weaponItem
-
 		local items = client:GetItems()
 
 		if (items) then
@@ -369,6 +376,7 @@ if (CLIENT) then
 
 		if (weaponItem) then
 			ix.arccw_support.cache_weapons[weapon] = weaponItem
+			client.StopArcAttach = CurTime() + 1
 		end
 	end
 
@@ -377,8 +385,18 @@ if (CLIENT) then
 			return
 		end
 
+		if (client.StopArcAttach or 0) > CurTime() then
+			return false
+		end
+
+		local inventory = client:GetCharacter():GetInventory()
+
+		if (!inventory) then
+			return false
+		end
+
 		if (!detach) then
-			if (!client:GetCharacter():GetInventory():HasItem(attID)) then
+			if (!inventory:HasItem(attID)) then
 				return false
 			end
 		else
@@ -387,7 +405,7 @@ if (CLIENT) then
 			if (weaponItem) then
 				local mods = weaponItem:GetData("mods", {})
 
-				if (table.IsEmpty(mods) or !mods[slot]) then
+				if (table.IsEmpty(mods) or !mods[slot] or !inventory:FindEmptySlot(weaponItem.width, weaponItem.height, true)) then
 					return false
 				end
 			end
