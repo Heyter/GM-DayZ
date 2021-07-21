@@ -3,13 +3,11 @@ ITEM.model = "models/gmodz/medical/health_reg.mdl"
 ITEM.description = ""
 
 ITEM.price = 450
+ITEM.useSound = "gmodz/items/medical/pills_use.wav"
 
--- TODO sound
-ITEM.useSound = nil
+ITEM.rarity = { weight = 15 }
 
 if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 15 }
-
 	function ITEM:OnUse()
 		self.player:AddBuff("health_reg")
 	end

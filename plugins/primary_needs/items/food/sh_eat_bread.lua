@@ -6,9 +6,10 @@ ITEM.hungerAmount = 0.15
 ITEM.thirstAmount = -0.03
 ITEM.healthAmount = 1
 ITEM.price = 50
-ITEM.useSound = "gmodz/primary_needs/eating.wav"
+ITEM.useSound = "gmodz/items/food/eating.wav"
+
+ITEM.rarity = { weight = 100 }
 
 if (SERVER) then
-	ITEM.rarity = { common = true, weight = 100 }
 	ITEM.dropUsedItem = nil
 end

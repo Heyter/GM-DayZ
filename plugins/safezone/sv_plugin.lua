@@ -27,34 +27,51 @@ end
 
 function PLUGIN:PlayerExitSafeZone(client)
 	client.protection_time = CurTime() + 10
-	client:ActivateNoCollision(1, COLLISION_GROUP_PLAYER)
+	client:SetNoCollideWithTeammates(false)
 	client:SetAvoidPlayers(true)
+	-- client:SetCollisionGroup(COLLISION_GROUP_PLAYER)
 end
 
 function PLUGIN:PlayerEnterSafeZone(client)
-	client:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
+	-- client:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
+	client:SetNoCollideWithTeammates(true)
 	client:SetAvoidPlayers(false)
 
-	timer.Remove(client:EntIndex() .. "_checkBounds_cycle")
+	if (self.collides[client]) then
+		self.collides[client] = nil
+	end
 end
 
 function PLUGIN:PlayerSpawn(client)
-	client:SetCollisionGroup(COLLISION_GROUP_PLAYER)
+	client:SetNoCollideWithTeammates(false)
 	client:SetAvoidPlayers(true)
+
+	if (self.collides[client]) then
+		self.collides[client] = nil
+	end
 end
 
---function PLUGIN:PlayerInitialSpawn(client)
-	-- client:SetCustomCollisionCheck(true) -- ShouldCollide
-	-- client:SetAvoidPlayers(true)
-	-- client:CollisionRulesChanged() -- ShouldCollide
---end
-
--- ShouldCollide ломает физику при опр. условиях.
---[[ function PLUGIN:ShouldCollide(ent1, ent2)
-	if (ent1:IsPlayer() and ent2:IsPlayer()) then
-		if (ent1:IsStuck() and ent2:IsStuck()) then return false end
-		if (ent1:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.OUTSIDE or ent2:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.OUTSIDE) then
-			return false
+-- идиотский ShouldCollide крашит физику, пришлось костыль сделать.
+PLUGIN.collides = PLUGIN.collides or {}
+timer.Create("StuckPlayers", 0.5, 0, function()
+	for _, v in ipairs(player.GetAll()) do
+		if (IsValid(v) and !PLUGIN.collides[v] and v:Alive() and v:GetMoveType() == MOVETYPE_WALK and v:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) == SH_SZ.OUTSIDE and v:IsStuck()) then
+			v:SetNoCollideWithTeammates(true)
+			v:SetAvoidPlayers(true)
+			PLUGIN.collides[v] = true
 		end
 	end
-end ]]
+
+	if (table.IsEmpty(PLUGIN.collides)) then return end
+
+	for k in pairs(PLUGIN.collides) do
+		if (IsValid(k) and k:Alive() and k:GetMoveType() == MOVETYPE_WALK and k:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) == SH_SZ.OUTSIDE) then
+			if (!k:IsStuck()) then
+				k:SetNoCollideWithTeammates(false)
+				PLUGIN.collides[k] = nil
+			end
+		else
+			PLUGIN.collides[k] = nil
+		end
+	end
+end)

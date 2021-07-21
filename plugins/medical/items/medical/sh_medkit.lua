@@ -5,9 +5,9 @@ ITEM.description = "All-purpose single-use medkit. Allows to handle injuries of 
 ITEM.healthAmount = 20
 ITEM.radiationAmount = -250
 ITEM.price = 300
+ITEM.useSound = "gmodz/items/medical/medkit_use.wav"
 
--- TODO sound
-ITEM.useSound = nil
+ITEM.rarity = { weight = 25 }
 
 function ITEM:OnCanUse()
 	if (self.player:Health() >= self.player:GetMaxHealth()) then
@@ -16,8 +16,6 @@ function ITEM:OnCanUse()
 end
 
 if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 25 }
-
 	function ITEM:OnUse()
 		self.player:HealBleeding()
 	end

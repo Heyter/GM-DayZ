@@ -25,7 +25,7 @@ function PANEL:Populate(items)
 		self.index = self.container:Add("DPanel")
 		self.index:Dock(TOP)
 		self.index:SetHeight(64)
-		self.index:DockMargin(20, 20, 20, 0)
+		self.index:DockMargin(5, 5, 5, 0)
 
 		self.index.leftPanel = self.index:Add("DPanel")
 		self.index.leftPanel:Dock(LEFT)
@@ -34,21 +34,29 @@ function PANEL:Populate(items)
 		self.index.title = self.index.leftPanel:Add("DLabel")
 		self.index.title:SetText(item.title)
 		self.index.title:Dock(TOP)
-		self.index.title:DockMargin(10, 10, 0, 0)
+		self.index.title:DockMargin(10, 5, 0, 0)
 		self.index.title:SetFont("ixMediumFont")
-		self.index.title:SetColor(ix.config.Get("color", Color(255,255,255)))
+		self.index.title:SetColor(ix.config.Get("color", color_white))
 
 		self.index.update = self.index.leftPanel:Add("DLabel")
-		self.index.update:SetText("Delay: " .. item.delay .. " min")
+		self.index.update:SetText("Задержка: " .. item.delay .. " мин.")
 		self.index.update:Dock(TOP)
-		self.index.update:SetFont("ixGenericFont")
-		self.index.update:DockMargin(10, 10, 0, 0)
+		self.index.update:SetFont("ixToolTipText")
+		self.index.update:DockMargin(10, 5, 0, 0)
 
-		self.index.rarity = self.index.leftPanel:Add("DLabel")
-		self.index.rarity:SetText((item.rarity * 100) .. "%")
-		self.index.rarity:Dock(RIGHT)
-		self.index.rarity:SetFont("ixMediumFont")
-		self.index.rarity:DockMargin(0, -60, 0, 0)
+		local chance = "Обычный"
+
+		if (item.chance_type == 1) then
+			chance = "Вещественный"
+		elseif (item.chance_type == 2) then
+			chance = "Линейный"
+		end
+
+		self.index.type = self.index.leftPanel:Add("DLabel")
+		self.index.type:SetText("Рандом: " .. chance .. " (" .. (item.scale or 1) .. ")")
+		self.index.type:Dock(BOTTOM)
+		self.index.type:SetFont("ixToolTipText")
+		self.index.type:DockMargin(10, 5, 0, 0)
 
 		self.index.avatar = vgui.Create("AvatarImage", self.index)
 		self.index.avatar:SetSize(64, 64)
@@ -57,9 +65,9 @@ function PANEL:Populate(items)
 
 		self.index.delete = vgui.Create("DButton", self.index)
 		self.index.delete:Dock(RIGHT)
-		self.index.delete:SetText("Delete")
+		self.index.delete:SetText("Удалить")
 		self.index.delete.DoClick = function()
-			net.Start("ixItemSpawnerDelete")
+			net.Start("ixItemSpawnerSync")
 				net.WriteUInt(index, 12)
 			net.SendToServer()
 		end
@@ -67,7 +75,7 @@ function PANEL:Populate(items)
 
 		self.index.edit = vgui.Create("DButton", self.index)
 		self.index.edit:Dock(RIGHT)
-		self.index.edit:SetText("Edit")
+		self.index.edit:SetText("Изменить")
 		self.index.edit.DoClick = function()
 			self.editor = vgui.Create("ixItemSpawnerEditor")
 			self.editor:Setup(item, index)
@@ -76,7 +84,7 @@ function PANEL:Populate(items)
 
 		self.index.teleport = vgui.Create("DButton", self.index)
 		self.index.teleport:Dock(RIGHT)
-		self.index.teleport:SetText("Goto")
+		self.index.teleport:SetText("Телепорт")
 		self.index.teleport.DoClick = function()
 			net.Start("ixItemSpawnerGoto")
 				net.WriteVector(item.position)
@@ -86,7 +94,7 @@ function PANEL:Populate(items)
 
 		self.index.spawn = vgui.Create("DButton", self.index)
 		self.index.spawn:Dock(RIGHT)
-		self.index.spawn:SetText("Spawn")
+		self.index.spawn:SetText("Создать")
 		self.index.spawn.DoClick = function()
 			net.Start("ixItemSpawnerSpawn")
 				net.WriteTable(item)

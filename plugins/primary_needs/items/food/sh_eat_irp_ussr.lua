@@ -8,8 +8,6 @@ ITEM.healthAmount = 15
 ITEM.staminaAmount = 1
 ITEM.staminaRegenTime = 50
 ITEM.price = 1000
-ITEM.useSound = "gmodz/primary_needs/irp_eat.wav"
+ITEM.useSound = "gmodz/items/food/irp_eat.wav"
 
-if (SERVER) then
-	ITEM.rarity = { common = true, weight = 8 }
-end
+ITEM.rarity = { weight = 8 }

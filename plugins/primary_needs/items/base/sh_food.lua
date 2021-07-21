@@ -15,9 +15,9 @@ ITEM.staminaAmount = 0 -- процент (сколько добавить ста
 ITEM.staminaRegenTime = 0 -- длительность регенерации стамины в секундах
 ITEM.radiationAmount = 0
 
---ITEM.drinkSound = "gmodz/primary_needs/drinking.wav"
+--ITEM.drinkSound = "gmodz/items/food/drinking.wav"
 
-ITEM.useSound = "gmodz/primary_needs/eating.wav"
+ITEM.useSound = "gmodz/items/food/eating.wav"
 -- ITEM.useSound = {"items/medshot4.wav", 60, 100} // soundName, soundLevel, pitchPercent
 
 ITEM.price = 0

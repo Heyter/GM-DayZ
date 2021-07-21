@@ -21,7 +21,7 @@ if (CLIENT) then
 		category = "performance"
 	})
 
-	ix.option.Add("colorSafezones", ix.type.color, Color("lime"), {
+	ix.option.Add("colorSafezones", ix.type.color, Color("green"), {
 		category = "colors"
 	})
 
@@ -31,7 +31,7 @@ if (CLIENT) then
 
 	do
 		local sizeRing, center, min, max, alpha, dist
-		local safezoneColor = Color("lime")
+		local safezoneColor = Color("green")
 
 		hook.Add("PostDrawTranslucentRenderables", "PostDrawTranslucentRenderables.drawSafezones", function(bDepth, bSkybox)
 			if (ix.option.Get("drawSafezones", false)) then return end
@@ -92,17 +92,4 @@ if (CLIENT) then
 			end
 		end
 	end
-
---[[ 	function PLUGIN:ShouldCollide(ent1, ent2)
-		if (ent1:IsPlayer() and ent2:IsPlayer()) then
-			if (ent1:IsStuck() and ent2:IsStuck()) then return false end
-
-			local pos1 = select(1, ent1:GetBonePosition(ent1:LookupBone("ValveBiped.Bip01_Spine") or -1)) or ent1:LocalToWorld(ent1:OBBCenter())
-			local pos2 = select(1, ent2:GetBonePosition(ent2:LookupBone("ValveBiped.Bip01_Spine") or -1)) or ent2:LocalToWorld(ent2:OBBCenter())
-
-			if (SH_SZ:IsWithinSafeZone(pos1) or SH_SZ:IsWithinSafeZone(pos2)) then
-				return false
-			end
-		end
-	end ]]
 end

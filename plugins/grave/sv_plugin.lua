@@ -16,6 +16,10 @@ function PLUGIN:DoPlayerDeath(client)
 		for _, item in pairs(slot) do
 			if (item:GetData("equip")) then
 				client:RemoveEquippableItem(item)
+
+				if (item:GetData("equip")) then
+					item:SetData("equip", nil, true)
+				end
 			end
 
 			if (item.OnTransferred and item.isBag) then

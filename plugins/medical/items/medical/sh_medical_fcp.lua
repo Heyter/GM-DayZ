@@ -1,9 +1,7 @@
 ITEM.name = "FCP"
 ITEM.model = "models/gmodz/medical/fcp.mdl"
 ITEM.description = ""
-
--- TODO sound
-ITEM.useSound = nil
+ITEM.useSound = "gmodz/items/medical/pills_use.wav"
 
 function ITEM:OnCanUse()
 	return self.player:IsBrokenLeg() or self.player:GetNetVar("bleeding", false)
@@ -22,6 +20,4 @@ else
 	end
 end
 
-if (SERVER) then
-	ITEM.rarity = { common = true, weight = 80 }
-end
+ITEM.rarity = { weight = 80 }

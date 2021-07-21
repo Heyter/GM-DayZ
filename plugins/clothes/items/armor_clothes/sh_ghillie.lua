@@ -7,9 +7,9 @@ ITEM.damageReduction = 0.05 -- резист всего тела на 5%
 ITEM.replacement = "models/gmodz/characters/ghillie.mdl"
 ITEM.noCollisionGroup = true
 
-if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 3 }
+ITEM.rarity = { weight = 3 }
 
+if (SERVER) then
 	function ITEM:OnInstanced(index)
 		if (index == 0) then
 			self:SetData("durability", self.defDurability * math.Rand(0.5, 0.75), false)

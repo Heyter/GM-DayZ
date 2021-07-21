@@ -5,13 +5,11 @@ ITEM.description = ""
 ITEM.healthAmount = 30
 ITEM.radiationAmount = -200
 ITEM.price = 500
+ITEM.useSound = "gmodz/items/medical/medkit_use.wav"
 
--- TODO sound
-ITEM.useSound = nil
+ITEM.rarity = { weight = 10 }
 
 if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 10 }
-
 	function ITEM:OnUse()
 		self.player:HealLeg()
 		self.player:HealBleeding()

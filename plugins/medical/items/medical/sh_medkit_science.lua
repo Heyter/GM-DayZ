@@ -5,9 +5,9 @@ ITEM.description = "They heal significantly more health than other medkits, and 
 ITEM.healthAmount = 75
 ITEM.radiationAmount = -400
 ITEM.price = 800
+ITEM.useSound = "gmodz/items/medical/medkit_use.wav"
 
--- TODO sound
-ITEM.useSound = nil
+ITEM.rarity = { weight = 10 }
 
 function ITEM:OnCanUse()
 	if (self.player:Health() >= self.player:GetMaxHealth()) then
@@ -16,8 +16,6 @@ function ITEM:OnCanUse()
 end
 
 if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 10 }
-
 	function ITEM:OnUse()
 		self.player:HealBleeding()
 		self.player:HealLeg()

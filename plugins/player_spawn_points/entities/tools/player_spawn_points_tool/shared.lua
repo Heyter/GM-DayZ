@@ -1,17 +1,9 @@
-TOOL.Category = 'Gmodz'
+TOOL.Category = 'GmodZ'
 TOOL.Name = 'Player Spawn Points'
 TOOL.Command = nil
 TOOL.ConfigName = ''
 
-local ClassName = "player_spawn_points"
-
-local function lang(id)
-	return "#tool." .. ClassName .. "." .. id
-end
-
-local function cvar(id)
-	return ClassName .. "_" .. id
-end
+local ClassName = "player_spawn_points_tool"
 
 TOOL.ClientConVar['safezone'] = 0
 
@@ -37,119 +29,15 @@ function TOOL:AreaInRect(v, location)
 		v.position.z >= location.z - radius and v.position.z <= (location.z + radius))
 end
 
-if (SERVER) then
-	function TOOL:LeftClick(trace)
-		local owner = self:GetOwner()
-
-		if (!owner:IsSuperAdmin()) then
-			return false
-		end
-
-		local PLUGIN = ix.plugin.Get(ClassName)
-		if (!PLUGIN) then return false end
-
-		local stop = nil
-		local location = trace.HitPos + trace.HitNormal * 2
-
-		for k, v in ipairs(PLUGIN.spawners) do
-			if (self:AreaInRect(v, location)) then
-				if (!v.static) then
-					v.safezone = tobool(self:GetClientNumber("safezone", 0))
-				end
-
-				stop = true
-				break
-			end
-		end
-
-		if (stop) then
-			net.Start("ixPlayerSpawnerSync")
-				net.WriteTable(PLUGIN.spawners)
-			net.Send(owner)
-
-			PLUGIN:SaveData()
-
-			return true
-		end
-
-		local angles = (trace.HitPos - owner:GetPos()):Angle()
-		angles.r = 0
-		angles.p = 0
-		angles.y = angles.y + 180
-
-		local data = {
-			position = location,
-			angles = angles,
-			title = "Player Spawn Point #" .. #PLUGIN.spawners + 1,
-			safezone = tobool(self:GetClientNumber("safezone", 0))
-		}
-
-		table.insert(PLUGIN.spawners, data)
-		data = nil
-
-		net.Start("ixPlayerSpawnerSync")
-			net.WriteTable(PLUGIN.spawners)
-		net.Send(owner)
-
-		PLUGIN:SaveData()
-
-		return true
-	end
-
-	function TOOL:RightClick(trace)
-		local owner = self:GetOwner()
-
-		if (!owner:IsSuperAdmin()) then
-			return false
-		end
-
-		local PLUGIN = ix.plugin.Get(ClassName)
-		if (!PLUGIN) then return false end
-
-		local location = trace.HitPos + trace.HitNormal * 0.04
-		local index
-
-		for k, v in ipairs(PLUGIN.spawners) do
-			if (!v.static and self:AreaInRect(v, location)) then
-				index = k
-				break
-			end
-		end
-
-		if (index) then
-			table.remove(PLUGIN.spawners, index)
-
-			net.Start("ixPlayerSpawnerSync")
-				net.WriteTable(PLUGIN.spawners)
-			net.Send(owner)
-
-			PLUGIN:SaveData()
-		else
-			return false
-		end
-
-		return true
-	end
-
-	function TOOL:Deploy()
-		local owner = self:GetOwner()
-
-		if (!owner:IsSuperAdmin()) then
-			return false
-		end
-
-		local PLUGIN = ix.plugin.Get(ClassName)
-		if (!PLUGIN) then return false end
-
-		net.Start("ixPlayerSpawnerSync")
-			net.WriteTable(PLUGIN.spawners)
-		net.Send(owner)
-
-		return true
-	end
-end
-
 if (CLIENT) then
+	local function lang(id)
+		return "#tool." .. ClassName .. "." .. id
+	end
+
+	local function cvar(id)
+		return ClassName .. "_" .. id
+	end
+
 	function TOOL:LeftClick(trace)
 		return self:GetOwner():IsSuperAdmin()
 	end
@@ -165,9 +53,7 @@ if (CLIENT) then
 	function TOOL:Deploy()
 		return self:GetOwner():IsSuperAdmin()
 	end
-end
 
-if (CLIENT) then
 	local function AddControl(CPanel, control, name, data)
 		data = data or {}
 		data.Label = lang(name)
@@ -193,17 +79,17 @@ if (CLIENT) then
 
 	local PLUGIN
 	function TOOL:DrawHUD()
-		PLUGIN = PLUGIN or ix.plugin.Get(ClassName)
+		PLUGIN = PLUGIN or ix.plugin.Get("player_spawn_points")
 
-		if (!PLUGIN.spawners) then return false end
+		if (!PLUGIN or !PLUGIN.spawners) then return false end
 		local spawners = PLUGIN.spawners or {}
 		if (table.IsEmpty(spawners)) then return false end
 
 		local trace = self:GetOwner():GetEyeTraceNoCursor()
 		local location = trace.HitPos + trace.HitNormal * 0.04
 
-		for _, v in ipairs(PLUGIN.spawners or {}) do
-			local col = !v.static and color_white or Color(167, 167, 167)
+		for _, v in ipairs(spawners) do
+			local col = !v.static and color_white or Color("gray")
 			local a = v.position:ToScreen()
 
 			surface.SetFont("DermaDefaultBold")
@@ -217,7 +103,7 @@ if (CLIENT) then
 
 			local space = 10
 
-			surface.SetDrawColor(Color(0, 255, 255))
+			surface.SetDrawColor(Color("sky_blue"))
 			surface.DrawRect(a.x, a.y, 8, 8)
 
 			draw.SimpleTextOutlined(v.title, "DermaDefaultBold", a.x, a.y - space, col, 1, 1, 1, color_black)

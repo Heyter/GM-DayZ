@@ -7,8 +7,6 @@ ITEM.staminaAmount = 0.5
 ITEM.staminaRegenTime = 60
 
 -- TODO sound
-ITEM.useSound = "gmodz/primary_needs/drinking.wav"
+ITEM.useSound = "gmodz/items/food/drinking.wav"
 
-if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 45 }
-end
+ITEM.rarity = { weight = 45 }

@@ -1,26 +1,12 @@
-
 local PLUGIN = PLUGIN
+PLUGIN.spawners = PLUGIN.spawners or {}
+PLUGIN.chance_type = {
+	["weighted"] = 1,
+	["linear"] = 2,
+	["default"] = 3,
+}
 
-PLUGIN.spawner = PLUGIN.spawner or {}
-PLUGIN.items = PLUGIN.items or {}
-PLUGIN.spawner.positions = PLUGIN.spawner.positions or {}
-
-Schema.dropItems = Schema.dropItems or {rare = {}, common = {}}
 Schema.weightedItems = Schema.weightedItems or {}
-
-function Schema.GetRandomItem(chance)
-	local itemID = math.random()
-	local isRare = false
-
-	if (itemID > (chance or 0.05)) then
-		itemID = Schema.dropItems.common[ math.random( #Schema.dropItems.common ) ]
-	else
-		itemID = Schema.dropItems.rare[ math.random( #Schema.dropItems.rare ) ]
-		isRare = true
-	end
-
-	return itemID, isRare
-end
 
 function Schema.GetRandomWeightedItem(scale, shuffle)
 	if (shuffle) then
@@ -40,28 +26,18 @@ function Schema.GetRandomWeightedItem(scale, shuffle)
 end
 
 util.AddNetworkString("ixItemSpawnerManager")
-util.AddNetworkString("ixItemSpawnerDelete")
+util.AddNetworkString("ixItemSpawnerSync")
 util.AddNetworkString("ixItemSpawnerEdit")
 util.AddNetworkString("ixItemSpawnerGoto")
 util.AddNetworkString("ixItemSpawnerSpawn")
 util.AddNetworkString("ixItemSpawnerChanges")
 
 function PLUGIN:InitializedPlugins()
-	Schema.dropItems = {rare = {}, common = {}}
-
 	local total_weight = 0
 	Schema.weightedItems = {}
 
 	for itemID, v in pairs(ix.item.list) do
 		if (v.rarity and istable(v.rarity)) then
-			if (v.rarity.rare) then
-				Schema.dropItems.rare[#Schema.dropItems.rare + 1] = itemID
-			end
-
-			if (v.rarity.common) then
-				Schema.dropItems.common[#Schema.dropItems.common + 1] = itemID
-			end
-
 			if (v.rarity.weight) then
 				Schema.weightedItems[#Schema.weightedItems + 1] = {id = itemID, weight = v.rarity.weight}
 				total_weight = total_weight + v.rarity.weight
@@ -83,15 +59,61 @@ function PLUGIN:InitializedPlugins()
 end
 
 function PLUGIN:LoadData()
-	PLUGIN.spawner.positions = self:GetData() or {}
+	local data = self:GetData() or {}
+
+	if (!table.IsEmpty(data)) then
+		for _, v in pairs(data) do
+			for k, v2 in ipairs(v.items) do
+				if (istable(v2) and !ix.item.list[v2.id]) then
+					table.remove(v.items, k)
+				else
+					if (!ix.item.list[v2]) then
+						table.remove(v.items, k)
+					end
+				end
+			end
+
+			if (table.IsEmpty(v.items)) then
+				v.chance_type = 3
+				v.items = nil
+			end
+		end
+	end
+
+	PLUGIN.spawners = table.Copy(data)
+	data = nil
 end
 
 function PLUGIN:SaveData()
-	self:SetData(PLUGIN.spawner.positions)
+	self:SetData(PLUGIN.spawners)
+end
+
+function PLUGIN:GetRandomItem(type, items, scale, shuffle)
+	if (type == 1) then -- weighted
+		local random = math.random() * (scale or 1)
+		local sum = 0
+
+		if (shuffle) then
+			table.shuffle(items)
+		end
+
+		for _, v in ipairs(items) do
+			sum = sum + v.weight
+
+			if random <= sum then
+				return v.id
+			end
+		end
+	elseif (type == 2) then -- linear
+		return items[ math.random(#items) ]
+	end
 end
 
 function PLUGIN:AddSpawner(client, position)
-	if !(CAMI.PlayerHasAccess(client, "Helix - Item Spawner", nil)) then return end
+	if (!client:IsSuperAdmin()) then
+		ix.util.DebugLog(Format("Exploit PLUGIN.AddSpawner: %s (%s)", client:Name(), client:SteamID()))
+		return
+	end
 
 	local respawnTime = ix.config.Get("spawnerRespawnTime", 600)
 	local offsetTime  = ix.config.Get("spawnerOffsetTime", 100)
@@ -100,32 +122,34 @@ function PLUGIN:AddSpawner(client, position)
 	end
 
 	local data = {
-		["ID"] = os.time(),
-		["title"] = "Item Spawner #" .. #PLUGIN.spawner.positions + 1,
+		["title"] = "Item Spawner #" .. #PLUGIN.spawners + 1,
 		["delay"] = math.random(respawnTime - offsetTime, respawnTime + offsetTime),
 		["author"] = client:SteamID64(),
 		["position"] = position,
-		["rarity"] = ix.config.Get("spawnerRareItemChance", 0) / 100
+		["chance_type"] = 3
 	}
 
 	data["lastSpawned"] = os.time() + (data["delay"] * 60)
 
-	table.insert(PLUGIN.spawner.positions, data)
+	table.insert(PLUGIN.spawners, data)
 	data = nil
 
-	net.Start("ixItemSpawnerDelete")
-		net.WriteTable(PLUGIN.spawner.positions)
+	net.Start("ixItemSpawnerSync")
+		net.WriteTable(PLUGIN.spawners)
 	net.Send(client)
 
 	PLUGIN:SaveData()
 end
 
 function PLUGIN:RemoveSpawner(client, index)
-	if !(CAMI.PlayerHasAccess(client, "Helix - Item Spawner", nil)) then return end
+	if (!client:IsSuperAdmin()) then
+		ix.util.DebugLog(Format("Exploit PLUGIN.RemoveSpawner: %s (%s)", client:Name(), client:SteamID()))
+		return
+	end
 
-	for k, v in ipairs(PLUGIN.spawner.positions) do
+	for k, v in ipairs(PLUGIN.spawners) do
 		if (k == index) then
-			table.remove(PLUGIN.spawner.positions, k)
+			table.remove(PLUGIN.spawners, k)
 			PLUGIN:SaveData()
 			return true
 		end
@@ -136,7 +160,10 @@ end
 
 local nearDist = math.pow(256, 2)
 function PLUGIN:ForceSpawn(client, spawner)
-	if !(CAMI.PlayerHasAccess(client, "Helix - Item Spawner", nil)) then return end
+	if (!client:IsSuperAdmin()) then
+		ix.util.DebugLog(Format("Exploit PLUGIN.ForceSpawn: %s (%s)", client:Name(), client:SteamID()))
+		return
+	end
 	if !(ix.config.Get("itemSpawnerActive")) then return end
 
 	spawner.lastSpawned = os.time() + (spawner.delay * 60)
@@ -162,7 +189,13 @@ function PLUGIN:ForceSpawn(client, spawner)
 		return
 	end
 
-	local itemID = Schema.GetRandomWeightedItem(3, true)
+	local itemID
+
+	if (spawner.items and spawner.chance_type != 3) then
+		itemID = self:GetRandomItem(spawner.chance_type, spawner.items, spawner.scale, true)
+	else
+		itemID = Schema.GetRandomWeightedItem(spawner.scale, true)
+	end
 
 	if (itemID) then
 		ix.item.Spawn(itemID, spawner.position, function(_, entity)
@@ -179,9 +212,9 @@ function PLUGIN:ForceSpawn(client, spawner)
 end
 
 timer.Create("ixItemSpawner", 5, 0, function()
-	if (table.IsEmpty(PLUGIN.spawner.positions) or !(ix.config.Get("itemSpawnerActive", false))) then return end
+	if (table.IsEmpty(PLUGIN.spawners) or !(ix.config.Get("itemSpawnerActive", false))) then return end
 
-	for _, v in ipairs(PLUGIN.spawner.positions) do
+	for _, v in ipairs(PLUGIN.spawners) do
 		if (v.lastSpawned < os.time()) then
 			v.lastSpawned = os.time() + (v.delay * 60)
 
@@ -206,7 +239,13 @@ timer.Create("ixItemSpawner", 5, 0, function()
 				continue
 			end
 
-			local itemID = Schema.GetRandomWeightedItem(3, true)
+			local itemID
+
+			if (v.items and v.chance_type != 3) then
+				itemID = PLUGIN:GetRandomItem(v.chance_type, v.items, v.scale, true)
+			else
+				itemID = Schema.GetRandomWeightedItem(v.scale, true)
+			end
 
 			if (itemID) then
 				ix.item.Spawn(itemID, v.position, function(_, entity)
@@ -224,44 +263,70 @@ timer.Create("ixItemSpawner", 5, 0, function()
 	end
 end)
 
-net.Receive("ixItemSpawnerDelete", function(length, client)
-	if !(CAMI.PlayerHasAccess(client, "Helix - Item Spawner", nil)) then return end
+net.Receive("ixItemSpawnerSync", function(_, client)
+	if (!client:IsSuperAdmin()) then
+		ix.util.DebugLog(Format("Exploit ixItemSpawnerSync: %s (%s)", client:Name(), client:SteamID()))
+		return
+	end
 
 	if (PLUGIN:RemoveSpawner(client, net.ReadUInt(12))) then
 		net.Start("ixItemSpawnerManager")
-			net.WriteTable(PLUGIN.spawner.positions)
+			net.WriteTable(PLUGIN.spawners)
 		net.Send(client)
 	end
 end)
 
-net.Receive("ixItemSpawnerGoto", function(length, client)
-	if !(CAMI.PlayerHasAccess(client, "Helix - Item Spawner", nil)) then return end
+net.Receive("ixItemSpawnerGoto", function(_, client)
+	if (!client:IsSuperAdmin()) then
+		ix.util.DebugLog(Format("Exploit ixItemSpawnerGoto: %s (%s)", client:Name(), client:SteamID()))
+		return
+	end
 
 	client:SetPos(net.ReadVector())
 end)
 
-net.Receive("ixItemSpawnerSpawn", function(length, client)
-	if !(CAMI.PlayerHasAccess(client, "Helix - Item Spawner", nil)) then return end
+net.Receive("ixItemSpawnerSpawn", function(_, client)
+	if (!client:IsSuperAdmin()) then
+		ix.util.DebugLog(Format("Exploit ixItemSpawnerSpawn: %s (%s)", client:Name(), client:SteamID()))
+		return
+	end
 
 	PLUGIN:ForceSpawn(client, net.ReadTable())
 end)
 
-net.Receive("ixItemSpawnerChanges", function(length, client)
-	if !(CAMI.PlayerHasAccess(client, "Helix - Item Spawner", nil)) then return end
+net.Receive("ixItemSpawnerChanges", function(_, client)
+	if (!client:IsSuperAdmin()) then
+		ix.util.DebugLog(Format("Exploit ixItemSpawnerChanges: %s (%s)", client:Name(), client:SteamID()))
+		return
+	end
 
 	local changes = net.ReadTable()
 
-	for k, v in ipairs(PLUGIN.spawner.positions) do
+	for k, v in ipairs(PLUGIN.spawners) do
 		if (k == changes[1]) then
 			v.title = changes[2]
 			v.delay = math.Clamp(changes[3], 1, 10000)
-			v.rarity = math.Clamp(changes[4], 0, 100) / 100
+
+			if (!table.IsEmpty(changes[5])) then
+				v.chance_type = PLUGIN.chance_type[changes[4]]
+				v.items = changes[5]
+			else
+				v.chance_type = 3
+			end
+
+			if (v.items and table.IsEmpty(v.items)) then
+				v.items = nil
+			end
+
+			v.scale = math.Clamp(changes[6], 1, 100)
 
 			break
 		end
 	end
 
+	changes = nil
+
 	net.Start("ixItemSpawnerManager")
-		net.WriteTable(PLUGIN.spawner.positions)
+		net.WriteTable(PLUGIN.spawners)
 	net.Send(client)
 end)

@@ -47,13 +47,13 @@ do
 		sky_blue = Color(0, 255, 255),
 		red = Color(255, 0, 0),
 		orange = Color(252, 177, 3),
-		lime = Color(0, 255, 0),
 		dark_lime = Color(50, 255, 50),
 		light_lime = Color(50, 200, 50),
 		yellow = Color(255, 255, 0),
 		light_gray = Color(197, 197, 197),
 		green = Color(0, 255, 0),
 		light_green = Color(100, 255, 100),
+		gray = Color(167, 167, 167)
 	}
 
 	local old_color = _OLD_COLOR_FN_ or Color
@@ -71,6 +71,12 @@ do
 		else
 			return old_color(r, g, b, a)
 		end
+	end
+
+	function ix.util.RegisterColor(name, color, force)
+		if (!force and colors[name]) then return end
+
+		colors[name] = color
 	end
 end
 

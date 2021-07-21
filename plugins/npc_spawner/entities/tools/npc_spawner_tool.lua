@@ -1,9 +1,10 @@
-TOOL.Category = 'Gmodz'
+TOOL.Category = 'GmodZ'
 TOOL.Name = 'NPC Spawner'
 TOOL.Command = nil
 TOOL.ConfigName = ''
 
 local ClassName = "npc_spawner_tool"
+local PluginName = "npc_spawner"
 
 local function lang(id)
 	return "#tool." .. ClassName .. "." .. id
@@ -70,7 +71,7 @@ TOOL.ClientConVar['SF_8192'] = 1
 
 if (SERVER) then
 	function TOOL:SetKVs(index, PLUGIN)
-		PLUGIN = PLUGIN or ix.plugin.Get("npc_spawner")
+		PLUGIN = PLUGIN or ix.plugin.Get(PluginName)
 
 		for key in pairs(cvars) do
 			if (cvars_type[key]) then
@@ -164,7 +165,7 @@ if (SERVER) then
 			return false
 		end
 
-		local PLUGIN = ix.plugin.Get("npc_spawner")
+		local PLUGIN = ix.plugin.Get(PluginName)
 		if (!PLUGIN) then return false end
 
 		local stop = nil
@@ -190,7 +191,7 @@ if (SERVER) then
 		local data = {
 			position = trace.HitPos + trace.HitNormal * 0.04,
 			angles = ang,
-			title = "Spawner #" .. #PLUGIN.spawners + 1,
+			title = "NPC Spawner #" .. #PLUGIN.spawners + 1,
 			spawnedNPCs = {},
 			totalSpawnedNPCs = 0
 		}
@@ -236,8 +237,8 @@ if (SERVER) then
 			return false
 		end
 
-		local PLUGIN = ix.plugin.Get("npc_spawner")
-		if (!PLUGIN) then return false end
+		local PLUGIN = ix.plugin.Get(PluginName)
+		if (!PLUGIN or table.IsEmpty(PLUGIN.spawners)) then return false end
 
 		local location = trace.HitPos + trace.HitNormal * 0.04
 		local index
@@ -250,6 +251,8 @@ if (SERVER) then
 		end
 
 		if (index) then
+			owner:Notify("Точка спавна была удалена.")
+
 			for ent in pairs(PLUGIN.spawners[index].spawnedNPCs or {}) do
 				if (IsValid(ent) and !ent:IsPlayer()) then
 					ent:Remove()
@@ -277,7 +280,7 @@ if (SERVER) then
 			return false
 		end
 
-		local PLUGIN = ix.plugin.Get("npc_spawner")
+		local PLUGIN = ix.plugin.Get(PluginName)
 		if (!PLUGIN) then return false end
 
 		local location = trace.HitPos + trace.HitNormal * 0.04
@@ -319,8 +322,8 @@ if (SERVER) then
 			return false
 		end
 
-		local PLUGIN = ix.plugin.Get("npc_spawner")
-		if (!PLUGIN) then return false end
+		local PLUGIN = ix.plugin.Get(PluginName)
+		if (!PLUGIN or table.IsEmpty(PLUGIN.spawners)) then return false end
 
 		net.Start("ixNPCSpawnerSync")
 			net.WriteTable(PLUGIN.spawners)
@@ -474,17 +477,17 @@ if (CLIENT) then
 	local PLUGIN
 
 	function TOOL:DrawHUD()
-		PLUGIN = PLUGIN or ix.plugin.Get("npc_spawner")
+		PLUGIN = PLUGIN or ix.plugin.Get(PluginName)
 
-		if (!PLUGIN.spawners) then return false end
+		if (!PLUGIN or !PLUGIN.spawners) then return false end
 		local spawners = PLUGIN.spawners or {}
 		if (table.IsEmpty(spawners)) then return false end
 
 		local trace = self:GetOwner():GetEyeTraceNoCursor()
 		local location = trace.HitPos + trace.HitNormal * 0.04
 
-		for _, v in ipairs(PLUGIN.spawners or {}) do
-			local col = !v.static and color_white or Color(167, 167, 167)
+		for _, v in ipairs(spawners) do
+			local col = !v.static and color_white or Color("gray")
 			local a = v.position:ToScreen()
 			local title = Format("%s (%s)", v.title, v.npc)
 
@@ -494,34 +497,34 @@ if (CLIENT) then
 			surface.DrawRect(a.x - tW * 0.5 - 5, a.y - 50, tW + 10, tH * 5)
 
 			for _, v2 in ipairs(ents.FindInSphere(v.position, v.spawnradius or cvars.spawnradius)) do
-				if (IsValid(v2) and (v2:IsPlayer() and v2:GetMoveType() != MOVETYPE_NOCLIP or v2:IsNPC())) then
-					col = Color(255, 0, 0)
+				if (IsValid(v2) and (v2:IsPlayer() and v2:GetMoveType() != MOVETYPE_NOCLIP or v2:IsNPC() or v2:IsNextBot())) then
+					col = Color("red")
 					break
 				end
 			end
 
 			if (LocalPlayer():GetMoveType() != MOVETYPE_NOCLIP and LocalPlayer():GetPos():DistToSqr(v.position) < nearDist) then
-				col = Color(255, 0, 0)
+				col = Color("red")
 			end
 
 			if (self:AreaInRect(v, location)) then
 				if (!v.static) then
-					col = Color(0, 255, 0)
+					col = Color("green")
 				end
 			end
 
 			local space = 10
 
-			surface.SetDrawColor(Color(0, 255, 255))
+			surface.SetDrawColor(Color("sky_blue"))
 			surface.DrawRect(a.x, a.y, 8, 8)
 
 			draw.SimpleTextOutlined(title, "DermaDefaultBold", a.x, a.y - space, col, 1, 1, 1, color_black)
 
 			space = space + 15
-			draw.SimpleTextOutlined("Wep: " .. v.weapon, "DermaDefaultBold", a.x, a.y - space, Color(255, 255, 0), 1, 1, 1, color_black)
+			draw.SimpleTextOutlined("Wep: " .. v.weapon, "DermaDefaultBold", a.x, a.y - space, Color("yellow"), 1, 1, 1, color_black)
 
 			space = space + 15
-			draw.SimpleTextOutlined(Format("MaxNPCs: %d, Delay: %d", v.maximum, v.delay), "DermaDefaultBold", a.x, a.y - space, Color(255, 255, 0), 1, 1, 1, color_black)
+			draw.SimpleTextOutlined(Format("MaxNPCs: %d, Delay: %d", v.maximum, v.delay), "DermaDefaultBold", a.x, a.y - space, Color("yellow"), 1, 1, 1, color_black)
 		end
 	end
 end

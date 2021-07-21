@@ -7,9 +7,9 @@ ITEM.defDurability = 100
 ITEM.damageReduction = { [HITGROUP_HEAD] = 0.45 }
 ITEM.dropHat = true
 
-if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 2 }
+ITEM.rarity = { weight = 2 }
 
+if (SERVER) then
 	function ITEM:OnInstanced(index)
 		if (index == 0) then
 			self:SetData("durability", math.random(0, self.defDurability * math.Rand(0.5, 0.75)), false)

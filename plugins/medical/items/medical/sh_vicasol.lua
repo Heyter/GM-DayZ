@@ -1,9 +1,9 @@
 ITEM.name = "Vicasol"
 ITEM.model = "models/gmodz/medical/vicasol.mdl"
 ITEM.description = ""
+ITEM.useSound = "gmodz/items/medical/pills_use.wav"
 
--- TODO sound
-ITEM.useSound = nil
+ITEM.rarity = { weight = 90 }
 
 if (SERVER) then
 	function ITEM:OnUse()
@@ -20,8 +20,4 @@ else
 		text[#text+1] = "Stops bleeding over time"
 		return text
 	end
-end
-
-if (SERVER) then
-	ITEM.rarity = { common = true, weight = 90 }
 end

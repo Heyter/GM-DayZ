@@ -52,9 +52,8 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 			isHead = nil
 		end
 
-		print("pre", damageInfo:GetDamage())
+
 		hook.Run("PlayerTakeDamageClothes", client, damageInfo, attacker)
-		print("post", damageInfo:GetDamage())
 		local damage = damageInfo:GetDamage()
 
 		if (item) then

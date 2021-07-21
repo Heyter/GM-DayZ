@@ -3,14 +3,14 @@ ITEM.model = "models/gmodz/medical/epinephrine.mdl"
 ITEM.description = "epinephrine"
 
 ITEM.price = 500
-ITEM.useSound = "gmodz/items/syringe/use2.wav"
+ITEM.useSound = "gmodz/items/medical/inject_use.wav"
+
+ITEM.rarity = { weight = 40 }
 
 if (SERVER) then
 	function ITEM:OnUse()
 		self.player:AddBuff("epinephrine")
 	end
-
-	ITEM.rarity = { rare = true, weight = 40 }
 else
 	function ITEM:ExtendDesc(text)
 		local buff = ix.buff.list["epinephrine"]

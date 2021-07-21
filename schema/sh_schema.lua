@@ -107,4 +107,142 @@ function Schema:PlayerEmitPainSound(client, hit_group, bNotRandom, bNotDefaultHi
 	end
 end
 
+function ix.plugin.LoadEntities(path)
+	local bLoadedTools
+	local files, folders
+
+	local function IncludeFiles(path2, bClientOnly)
+		if (SERVER and !bClientOnly) then
+			if (file.Exists(path2.."init.lua", "LUA")) then
+				ix.util.Include(path2.."init.lua", "server")
+			elseif (file.Exists(path2.."shared.lua", "LUA")) then
+				ix.util.Include(path2.."shared.lua")
+			end
+
+			if (file.Exists(path2.."cl_init.lua", "LUA")) then
+				ix.util.Include(path2.."cl_init.lua", "client")
+			end
+		elseif (file.Exists(path2.."cl_init.lua", "LUA")) then
+			ix.util.Include(path2.."cl_init.lua", "client")
+		elseif (file.Exists(path2.."shared.lua", "LUA")) then
+			ix.util.Include(path2.."shared.lua")
+		end
+	end
+
+	local function HandleEntityInclusion(folder, variable, register, default, clientOnly, create, complete)
+		files, folders = file.Find(path.."/"..folder.."/*", "LUA")
+		default = default or {}
+
+		for _, v in ipairs(folders) do
+			local path2 = path.."/"..folder.."/"..v.."/"
+			v = ix.util.StripRealmPrefix(v)
+
+			_G[variable] = table.Copy(default)
+
+			if (!isfunction(create)) then
+				_G[variable].ClassName = v
+			else
+				create(v)
+			end
+
+			IncludeFiles(path2, clientOnly)
+
+			if (clientOnly) then
+				if (CLIENT) then
+					register(_G[variable], v)
+				end
+			else
+				register(_G[variable], v)
+			end
+
+			if (isfunction(complete)) then
+				complete(_G[variable])
+			end
+
+			_G[variable] = nil
+		end
+
+		for _, v in ipairs(files) do
+			local niceName = ix.util.StripRealmPrefix(string.StripExtension(v))
+
+			_G[variable] = table.Copy(default)
+
+			if (!isfunction(create)) then
+				_G[variable].ClassName = niceName
+			else
+				create(niceName)
+			end
+
+			ix.util.Include(path.."/"..folder.."/"..v, clientOnly and "client" or "shared")
+
+			if (clientOnly) then
+				if (CLIENT) then
+					register(_G[variable], niceName)
+				end
+			else
+				register(_G[variable], niceName)
+			end
+
+			if (isfunction(complete)) then
+				complete(_G[variable])
+			end
+
+			_G[variable] = nil
+		end
+	end
+
+	local function RegisterTool(tool, className)
+		local gmodTool = weapons.GetStored("gmod_tool")
+
+		if (className:sub(1, 3) == "sh_") then
+			className = className:sub(4)
+		end
+
+		if (gmodTool) then
+			gmodTool.Tool[className] = tool
+			gmodTool.Tool[className]:CreateConVars()
+		else
+			-- this should never happen
+			ErrorNoHalt(string.format("attempted to register tool '%s' with invalid gmod_tool weapon", className))
+		end
+
+		bLoadedTools = true
+	end
+
+	-- Include entities.
+	HandleEntityInclusion("entities", "ENT", scripted_ents.Register, {
+		Type = "anim",
+		Base = "base_gmodentity",
+		Spawnable = true
+	}, false, nil, function(ent)
+		if (SERVER and ent.Holdable == true) then
+			ix.allowedHoldableClasses[ent.ClassName] = true
+		end
+	end)
+
+	-- Include weapons.
+	HandleEntityInclusion("weapons", "SWEP", weapons.Register, {
+		Primary = {},
+		Secondary = {},
+		Base = "weapon_base"
+	})
+
+	HandleEntityInclusion("tools", "TOOL", RegisterTool, {}, false, function(className)
+		if (className:sub(1, 3) == "sh_") then
+			className = className:sub(4)
+		end
+
+		TOOL = ix.meta.tool:Create()
+		TOOL.Mode = className
+	end)
+
+	-- Include effects.
+	HandleEntityInclusion("effects", "EFFECT", effects and effects.Register, nil, true)
+
+	-- only reload spawn menu if any new tools were registered
+	if (CLIENT and bLoadedTools) then
+		RunConsoleCommand("spawnmenu_reload")
+	end
+end
+
 collectgarbage()

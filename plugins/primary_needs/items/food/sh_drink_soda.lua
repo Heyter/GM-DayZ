@@ -4,7 +4,7 @@ ITEM.description = "A blue can filled with some carbonated flavoured water."
 
 ITEM.thirstAmount = 0.4
 ITEM.price = 40
-ITEM.useSound = "gmodz/primary_needs/soda.wav"
+ITEM.useSound = "gmodz/items/food/soda.wav"
 
 ITEM.iconCam = {
 	pos = Vector(76.027618408203, 63.794639587402, 46.273990631104),
@@ -12,6 +12,4 @@ ITEM.iconCam = {
 	fov = 4.292031810357,
 }
 
-if (SERVER) then
-	ITEM.rarity = { common = true, weight = 100 }
-end
+ITEM.rarity = { weight = 100 }

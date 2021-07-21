@@ -134,6 +134,10 @@ net.Receive("ixStashDepositItem", function(len, client)
 
 	if (item:GetData("equip")) then
 		client:RemoveEquippableItem(item)
+
+		if (item:GetData("equip")) then
+			return
+		end
 	end
 
 	local bAllItems = net.ReadBool()

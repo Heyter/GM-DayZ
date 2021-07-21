@@ -492,7 +492,7 @@ function SWEP:SecondaryAttack()
 			self:GetOwner():EmitSound("Weapon_Crossbow.BoltHitBody")
 			self:SetNextSecondaryFire(CurTime() + 1.5)
 			self:SetNextPrimaryFire(CurTime() + 1.5)
-		elseif (!entity:IsNPC() and self:CanHoldObject(entity)) then
+		elseif ((!entity:IsNPC() and !entity:IsNextBot()) and self:CanHoldObject(entity)) then
 			self:GetOwner():SetLocalVar("bIsHoldingObject", true)
 			self:PickupObject(entity)
 			self:PlayPickupSound(trace.SurfaceProps)

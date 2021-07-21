@@ -2,7 +2,9 @@ ITEM.name = "Adrenaline shot"
 ITEM.model = "models/gmodz/medical/adrenaline.mdl"
 ITEM.description = "Sterile disposable syringe with a dose of adrenaline - the main hormone of the adrenal medulla. It is used to enhance the physiological response associated with the preparation of all muscles to increase activity temporarily boosts strength endurance. Relieves the sensation of pain."
 
-ITEM.useSound = "gmodz/items/syringe/use2.wav"
+ITEM.useSound = "gmodz/items/medical/inject_use.wav"
+
+ITEM.rarity = { weight = 45 }
 
 if (SERVER) then
 	function ITEM:OnUse()
@@ -19,8 +21,4 @@ else
 
 		return text
 	end
-end
-
-if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 45 }
 end

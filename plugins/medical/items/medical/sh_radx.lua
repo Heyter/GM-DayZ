@@ -4,8 +4,7 @@ ITEM.description = "Protects against radiation exposure."
 
 ITEM.radiationAmount = -75
 ITEM.price = 350
-
-ITEM.useSound = "gmodz/items/syringe/use.mp3"
+ITEM.useSound = "gmodz/items/medical/inject_use.wav"
 
 if (SERVER) then
 	function ITEM:OnUse()
@@ -19,6 +18,4 @@ else
 	end
 end
 
-if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 70 }
-end
+ITEM.rarity = { weight = 70 }

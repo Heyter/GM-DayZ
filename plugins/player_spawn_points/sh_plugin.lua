@@ -28,13 +28,23 @@ if (CLIENT) then
 		hook.Add("PostDrawTranslucentRenderables", PLUGIN.name, function()
 			local wep = LocalPlayer():GetActiveWeapon()
 
-			if (IsValid(wep) and wep:GetClass() == 'gmod_tool' and LocalPlayer():GetTool("player_spawn_points")) then
+			if (IsValid(wep) and wep:GetClass() == 'gmod_tool' and GetConVarString("gmod_toolmode") == "player_spawn_points_tool") then
 				for _, v in ipairs(PLUGIN.spawners) do
-					if (IsValid(v.drawModel)) then
+					if (IsValid(v.drawModel) and v.position) then
 						v.drawModel:SetPos(v.position)
-						v.drawModel:SetAngles(v.angles)
+
+						if (v.angles) then
+							v.drawModel:SetAngles(v.angles)
+						end
+
 						v.drawModel:SetupBones()
 						v.drawModel:DrawModel()
+					end
+				end
+			else
+				for _, v in ipairs(PLUGIN.spawners) do
+					if (IsValid(v.drawModel)) then
+						v.drawModel:SetNoDraw(true)
 					end
 				end
 			end

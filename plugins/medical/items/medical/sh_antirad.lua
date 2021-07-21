@@ -7,12 +7,10 @@ ITEM.price = 200
 
 ITEM.useSound = "gmodz/items/antirad/use.wav"
 
+ITEM.rarity = { weight = 70 }
+
 function ITEM:OnCanUse()
 	if (self.player:GetRadiationTotal() <= 0) then
 		return false
 	end
-end
-
-if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 70 }
 end

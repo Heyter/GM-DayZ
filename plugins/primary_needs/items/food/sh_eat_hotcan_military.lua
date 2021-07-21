@@ -6,8 +6,6 @@ ITEM.hungerAmount = 0.23
 ITEM.thirstAmount = 0.05
 ITEM.healthAmount = 5
 ITEM.price = 110
-ITEM.useSound = "gmodz/primary_needs/eating_long.wav"
+ITEM.useSound = "gmodz/items/food/eating_long.wav"
 
-if (SERVER) then
-	ITEM.rarity = { common = true, weight = 95 }
-end
+ITEM.rarity = { weight = 95 }

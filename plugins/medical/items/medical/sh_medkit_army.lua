@@ -4,9 +4,9 @@ ITEM.description = "Includes medicine for faster blood coagulation, as well as p
 
 ITEM.healthAmount = 100
 ITEM.price = 650
+ITEM.useSound = "gmodz/items/medical/medkit_use.wav"
 
--- TODO sound
-ITEM.useSound = nil
+ITEM.rarity = { weight = 10 }
 
 function ITEM:OnCanUse()
 	if (self.player:Health() >= self.player:GetMaxHealth()) then
@@ -15,8 +15,6 @@ function ITEM:OnCanUse()
 end
 
 if (SERVER) then
-	ITEM.rarity = { rare = true, weight = 10 }
-
 	function ITEM:OnUse()
 		self.player:HealBleeding()
 		self.player:HealLeg()

@@ -20,6 +20,4 @@ else
 	end
 end
 
-if (SERVER) then
-	ITEM.rarity = { common = true, weight = 100 }
-end
+ITEM.rarity = { weight = 100 }

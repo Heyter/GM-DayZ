@@ -51,6 +51,10 @@ net.Receive("ixMerchantTrade", function(len, client)
 
 		if (item:GetData("equip")) then
 			client:RemoveEquippableItem(item)
+
+			if (item:GetData("equip")) then
+				return
+			end
 		end
 
 		if (item:UseStackItem() and !item:Remove()) then

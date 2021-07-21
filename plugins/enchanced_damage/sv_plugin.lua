@@ -202,6 +202,6 @@ function playerMeta:HealBleeding(amount)
 
 	if (amount) then
 		self:SetHealth(math.min(self:GetMaxHealth(), self:Health() + amount))
-		self:ScreenFade(SCREENFADE.IN, Color("lime", 128), 0.3, 0)
+		self:ScreenFade(SCREENFADE.IN, Color("green", 128), 0.3, 0)
 	end
 end

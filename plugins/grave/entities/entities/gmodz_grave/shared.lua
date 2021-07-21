@@ -1,6 +1,6 @@
 ENT.Base = "base_entity"
 ENT.Type = "anim"
-ENT.Category = "Gmodz"
+ENT.Category = "GmodZ"
 ENT.PrintName = "Grave"
 ENT.Author = "STEAM_0:1:29606990"
 ENT.Spawnable = false

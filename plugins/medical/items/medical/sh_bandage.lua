@@ -3,9 +3,9 @@ ITEM.model = "models/gmodz/medical/bandage.mdl"
 ITEM.description = "Small roll of gauze cloth."
 
 ITEM.healthAmount = 5
+ITEM.useSound = "gmodz/items/medical/bandage_use.wav"
 
--- TODO sound
-ITEM.useSound = nil
+ITEM.rarity = { weight = 100 }
 
 if (SERVER) then
 	function ITEM:OnUse()
@@ -16,8 +16,4 @@ else
 		text[#text+1] = "Stops bleeding"
 		return text
 	end
-end
-
-if (SERVER) then
-	ITEM.rarity = { common = true, weight = 100 }
 end
