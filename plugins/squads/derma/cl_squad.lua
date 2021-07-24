@@ -1,11 +1,15 @@
 local function ButtonPaint(panel, w, h)
+	surface.SetDrawColor(40, 40, 40, 255)
+	surface.DrawRect(0, 0, w, h)
+
+	local hovered = Color(60, 60, 60, 255)
+
 	if (panel:IsHovered()) then
-		surface.SetDrawColor(ix.config.Get("color"))
-	else
-		surface.SetDrawColor(0, 0, 0, 150)
+		hovered = ix.config.Get("color")
 	end
 
-	surface.DrawRect(0, 0, w, h)
+	surface.SetDrawColor(hovered)
+	surface.DrawOutlinedRect(0, 0, w, h, 1)
 end
 
 local function VBarPaint(panel)
@@ -56,12 +60,12 @@ local PANEL = {}
 
 function PANEL:Init()
 	self:SetSize(ScrW() * 0.6, ScrH() * 0.7)
-	self:SetTitle("SQUAD MENU")
+	self:SetTitle(L"squad_menu_title")
 	self:Center()
 	self:MakePopup()
 	self:SetDraggable(true)
+	self:SetSkin("Default")
 
-	self.holder_name = "Input squad name"
 	self.netData = {}
 	self.categoryPanels = {}
 	self.memberTags = {}
@@ -133,19 +137,6 @@ function PANEL:SetMembers(data, bNotTnitLeftSide)
 		nametag:SetAvatar(sid)
 		nametag:SizeToContents()
 		nametag.sq_rank = rank
-		nametag.Paint = function(t, w, h)
-			if (t:IsHovered()) then
-				t:SetCursor("hand")
-
-				surface.SetDrawColor(ColorAlpha(ix.config.Get("color"), 200 * math.abs(math.sin(CurTime() * 1))))
-				surface.DrawRect(t.avatar:GetWide(), 0, w - t.avatar:GetWide(), h)
-			else
-				t:SetCursor("arrow")
-			end
-
-			surface.SetDrawColor(0, 0, 0, 200)
-			surface.DrawRect(0, 0, w, h)
-		end
 
 		self.memberTags[sid] = nametag
 
@@ -168,7 +159,7 @@ function PANEL:InitLeftSide(data)
 	if (self:IsLeader()) then
 		self.entryName = self.header:Add("DTextEntry")
 		self.entryName:SetFont("ixMenuButtonFont")
-		self.entryName:SetPlaceholderText(self.holder_name)
+		self.entryName:SetPlaceholderText(L"squad_menu_holdername")
 		self.entryName:SetPlaceholderColor(color_white)
 		self.entryName:SetTall(32)
 		self.entryName:Dock(TOP)
@@ -233,7 +224,7 @@ function PANEL:InitLeftSide(data)
 
 	local logo_lbl = self.logoSideLeft:Add("DLabel")
 	logo_lbl:SetFont("ixSmallFont")
-	logo_lbl:SetText("Logo")
+	logo_lbl:SetText(L"squad_menu_text_logo")
 	logo_lbl:SetTextColor(color_white)
 	logo_lbl:Dock(TOP)
 
@@ -241,8 +232,8 @@ function PANEL:InitLeftSide(data)
 		self.squadImg = self.logoSideLeft:Add("DImageButton")
 		self.squadImg.DoClick = function(t)
 			Derma_StringRequest(
-				"Squad Logo", 
-				"Link to image (only www.imgur.com)",
+				L"squad_menu_text_logo2", 
+				L"squad_menu_holderlogo",
 				"",
 				function(text)
 					if (#text == 0) then
@@ -288,7 +279,7 @@ end
 function PANEL:InitRightSide(data)
 	local message_lbl = self.rightPanel:Add("DLabel")
 	message_lbl:SetFont("ixSmallFont")
-	message_lbl:SetText("Message of the Day")
+	message_lbl:SetText(L"squad_menu_messageday")
 	message_lbl:SetTextColor(color_white)
 	message_lbl:Dock(TOP)
 
@@ -320,7 +311,7 @@ function PANEL:InitRightSide(data)
 	end ]]
 
 	if (self:IsLeader() or self:IsOfficer()) then
-		AddButonFooter(a1, "Invite member", true, function(t)
+		AddButonFooter(a1, L"squad_menu_btn_invite", true, function(t)
 			local menu = DermaMenu()
 
 			for _, v in ipairs(player.GetAll()) do
@@ -340,7 +331,7 @@ function PANEL:InitRightSide(data)
 	end
 
 	if (self:IsLeader()) then
-		AddButonFooter(a1, "Change squad color", true, function(t)
+		AddButonFooter(a1, L"squad_menu_btn_color", true, function(t)
 			local color = vgui.Create("DColorCombo")
 			color:SetupCloseButton(function() CloseDermaMenus() end)
 			color:SetColor(color_white)
@@ -354,16 +345,16 @@ function PANEL:InitRightSide(data)
 			menu:Open(gui.MouseX() + 8, gui.MouseY() + 10)
 		end)
 
-		AddButonFooter(a1, "Disband squad", true, function(t)
-			Derma_Query("Are you sure you want to disband your squad? This action is permanent!", "Disband squad", "Yes", function()
+		AddButonFooter(a1, L"squad_menu_btn_disband", true, function(t)
+			Derma_Query(L"squad_menu_btn_ask_disband", L"squad_menu_btn_disband", L"text_yes", function()
 				net.Start("ixSquadDisband")
 				net.SendToServer()
 
 				self:Remove()
-			end, "No")
+			end, L"text_no")
 		end)
 	else
-		AddButonFooter(a1, "Leave squad", true, function(t)
+		AddButonFooter(a1, L"squad_menu_btn_leave", true, function(t)
 			net.Start("ixSquadLeave")
 			net.SendToServer()
 
@@ -378,7 +369,7 @@ function PANEL:InitRightSide(data)
 		a1:Dock(BOTTOM)
 		a1:DockMargin(0, 4, 0, 4)
 
-		AddButonFooter(a1, "Edit (max characters: 2048)", nil, function(t)
+		AddButonFooter(a1, L"squad_menu_btn_editdesc", nil, function(t)
 			if (IsValid(self.notepad)) then
 				self.notepad:Remove()
 			end
@@ -387,11 +378,11 @@ function PANEL:InitRightSide(data)
 			self.notepad:SetSize(self.entryMessage:GetSize())
 			self.notepad:MakePopup()
 			self.notepad:SetPos(self:GetPos())
-			self.notepad:SetTitle("Message of the day")
+			self.notepad:SetTitle(L"squad_menu_messageday")
 
 			self.descNotepad = self.notepad:Add("DTextEntry")
 			self.descNotepad:SetFont("ixMenuButtonFontSmall")
-			self.descNotepad:SetPlaceholderText("Enter the message of the day")
+			self.descNotepad:SetPlaceholderText(L"squad_menu_holderdesc")
 			self.descNotepad:SetMultiline(true)
 			self.descNotepad:Dock(FILL)
 			self.descNotepad:SetText(self.entryMessage.text)
@@ -437,7 +428,7 @@ function PANEL:InitRightSide(data)
 
 			self.closeNotepad = self.notepad:Add("DButton")
 			self.closeNotepad:Dock(BOTTOM)
-			self.closeNotepad:SetText("Save")
+			self.closeNotepad:SetText(L"squad_menu_btn_save")
 			self.closeNotepad:SetTall(32)
 			self.closeNotepad.DoClick = function()
 				if (self.notepad.save_desc) then
@@ -460,7 +451,7 @@ function PANEL:AddCategory(title)
 		cat.Header:SetFont("ixSmallFont")
 		cat.Header:SetContentAlignment(4)
 		cat.Header.Paint = ButtonPaint
-		cat:SetLabel(L(title))
+		cat:SetLabel(L2("squad_menu_text_" .. title) or title)
 		cat:Dock(TOP)
 		cat.Think = function(t)
 			if ((t.nextThink or 0) < CurTime()) then
@@ -507,6 +498,15 @@ function PANEL:OnKeyCodeReleased(key_code)
 	end
 end
 
+function PANEL:Paint(w, h)
+	surface.SetDrawColor(24, 24, 24, 255)
+	surface.DrawRect(0, 0, w, h)
+
+	-- Title
+	surface.SetDrawColor(60, 60, 60, 255)
+	surface.DrawRect(0, 0, w, 24)
+end
+
 vgui.Register("ixSquadView", PANEL, "DFrame")
 
 PANEL = {}
@@ -526,10 +526,10 @@ function PANEL:OnMousePressed(code)
 
 		if (LocalPlayer():SteamID64() != self.steamid) then
 			menu:AddSpacer()
-			menu:AddOption("Send PM", function()
+			menu:AddOption(L"squad_menu_opt_sendpm", function()
 				Derma_StringRequest(
-					"SEND PM", 
-					"Message",
+					L"squad_menu_opt_sendpm":utf8upper(), 
+					L"squad_menu_opt_message",
 					"",
 					function(text)
 						if (#text > 0) then
@@ -555,33 +555,33 @@ function PANEL:OnMousePressed(code)
 				if (squad:IsLeader(LocalPlayer())) then
 					if (squad.members[self.steamid] == 0) then
 						menu:AddSpacer()
-						menu:AddOption("Raise to officer", function()
-							Derma_Query("Are you sure you want to raise?", "Raise", "Yes", function()
+						menu:AddOption(L"squad_menu_btn_raiseofficer", function()
+							Derma_Query(L"squad_menu_btn_ask_raiseofficer", L"squad_menu_btn_raise", L"text_yes", function()
 								net.Start("ixSquadRankChange")
 									net.WriteString(self.steamid)
 								net.SendToServer()
-							end, "No")
+							end, L"text_no")
 						end):SetImage("icon16/user_go.png")
 					else
 						menu:AddSpacer()
-						menu:AddOption("Demote to member", function()
-							Derma_Query("Are you sure you want to demote?", "Demote", "Yes", function()
+						menu:AddOption(L"squad_menu_btn_demote", function()
+							Derma_Query(L"squad_menu_btn_ask_demote", L"squad_menu_text_demote", L"text_yes", function()
 								net.Start("ixSquadRankChange")
 									net.WriteString(self.steamid)
 								net.SendToServer()
-							end, "No")
+							end, L"text_no")
 						end):SetImage("icon16/user.png")
 					end
 				end
 
 				if (rank != 0 and squad.members[self.steamid] == 0) then
 					menu:AddSpacer()
-					menu:AddOption("Kick member", function()
-						Derma_Query(Format("Are you sure you want to kick %s from %s?", self.name:GetText(), squad.name), "Kick member", "Yes", function()
+					menu:AddOption(L"squad_menu_btn_kickmember", function()
+						Derma_Query(L("squad_menu_text_kickmember", self.name:GetText(), squad.name), L"squad_menu_btn_kickmember", L"text_yes", function()
 							net.Start("ixSquadKickMember")
 								net.WriteString(self.steamid)
 							net.SendToServer()
-						end, "No")
+						end, L"text_no")
 					end):SetImage("icon16/user_delete.png")
 				end
 			end
@@ -632,6 +632,23 @@ function PANEL:Think()
 		end
 
 		self.next_think = CurTime() + 1
+	end
+end
+
+function PANEL:Paint(w, h)
+	if (self:IsHovered()) then
+		self:SetCursor("hand")
+
+		surface.SetDrawColor(46, 46, 46, 200)
+		surface.DrawRect(self.avatar:GetWide(), 0, w - self.avatar:GetWide(), h)
+
+		surface.SetDrawColor(ix.config.Get("color"))
+		surface.DrawOutlinedRect(self.avatar:GetWide(), 0, w - self.avatar:GetWide(), h)
+	else
+		self:SetCursor("arrow")
+
+		surface.SetDrawColor(35, 35, 35)
+		surface.DrawRect(0, 0, w, h)
 	end
 end
 

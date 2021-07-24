@@ -21,6 +21,8 @@ LANGUAGE = {
 	option_use = "Использовать",
 
 	Health = "Health",
+	text_yes = "Yes",
+	text_no = "No",
 
 	// primary_needs
 	well_fed = "Well fed",
@@ -103,4 +105,33 @@ LANGUAGE = {
 	Split = "Split",
 
 	split_enter_quantity = "Enter the quantity",
+
+	// squad
+	squad_menu_title = "SQUAD MENU",
+	squad_menu_messageday = "Message of the Day",
+	squad_menu_holdername = "Input squad name",
+	squad_menu_holderdesc = "Enter the message of the day",
+	squad_menu_opt_sendpm = "Send PM",
+	squad_menu_opt_message = "Message",
+	squad_menu_btn_raiseofficer = "Raise to officer",
+	squad_menu_btn_ask_raiseofficer = "Are you sure you want to raise?",
+	squad_menu_btn_raise = "Raise",
+	squad_menu_text_Leader = "Leader",
+	squad_menu_text_Officers = "Officers",
+	squad_menu_text_Members = "Members",
+	squad_menu_text_logo = "Logo",
+	squad_menu_text_logo2 = "Squad Logo",
+	squad_menu_holderlogo = "Link to image (only www.imgur.com)",
+	squad_menu_btn_invite = "Invite member",
+	squad_menu_btn_color = "Change squad color",
+	squad_menu_btn_disband = "Disband squad",
+	squad_menu_btn_ask_disband = "Are you sure you want to disband your squad? This action is permanent!",
+	squad_menu_btn_leave = "Leave squad",
+	squad_menu_btn_editdesc = "Edit (max characters: 2048)",
+	squad_menu_btn_save = "Save",
+	squad_menu_btn_demote = "Demote to member",
+	squad_menu_btn_ask_demote = "Are you sure you want to demote?",
+	squad_menu_text_demote = "Demote",
+	squad_menu_btn_kickmember = "Kick member",
+	squad_menu_text_kickmember = "Are you sure you want to kick %s from %s?",
 }

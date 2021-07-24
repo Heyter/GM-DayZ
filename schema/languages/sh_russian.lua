@@ -21,6 +21,8 @@ LANGUAGE = {
 	option_use = "Использовать",
 
 	Health = "Здоровье",
+	text_yes = "Да",
+	text_no = "Нет",
 
 	// primary_needs
 	well_fed = "Сыт",
@@ -103,4 +105,33 @@ LANGUAGE = {
 	Split = "Разделить",
 
 	split_enter_quantity = "Введите количество",
+
+	// squad
+	squad_menu_title = "МЕНЮ ОТРЯДА",
+	squad_menu_messageday = "Сообщение дня",
+	squad_menu_holdername = "Введите имя отряда",
+	squad_menu_holderdesc = "Введите сообщение дня",
+	squad_menu_opt_sendpm = "Отправить ЛС",
+	squad_menu_opt_message = "Сообщение",
+	squad_menu_btn_raiseofficer = "Повысить до офицера",
+	squad_menu_btn_ask_raiseofficer = "Вы уверены, что хотите повысить?",
+	squad_menu_btn_raise = "Повысить",
+	squad_menu_text_Leader = "Лидер",
+	squad_menu_text_Officers = "Офицеры",
+	squad_menu_text_Members = "Участники",
+	squad_menu_text_logo = "Логотип",
+	squad_menu_text_logo2 = "Логотип отряда",
+	squad_menu_holderlogo = "Ссылка на изображение (только www.imgur.com)",
+	squad_menu_btn_invite = "Пригласить участника",
+	squad_menu_btn_color = "Изменить цвет отряда",
+	squad_menu_btn_disband = "Распустить отряд",
+	squad_menu_btn_ask_disband = "Вы уверены, что хотите распустить свой отряд? Это действие необратимо!",
+	squad_menu_btn_leave = "Покинуть отряд",
+	squad_menu_btn_editdesc = "Изменить (макс. кол-во символов: 2048)",
+	squad_menu_btn_save = "Сохранить",
+	squad_menu_btn_demote = "Понизить до участника",
+	squad_menu_btn_ask_demote = "Вы уверены, что хотите понизить?",
+	squad_menu_text_demote = "Понижение",
+	squad_menu_btn_kickmember = "Выгнать участника",
+	squad_menu_text_kickmember = "Вы уверены, что хотите выгнать %s из %s?",
 }

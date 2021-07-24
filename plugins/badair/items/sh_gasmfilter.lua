@@ -5,6 +5,8 @@ ITEM.price = 80
 ITEM.isFilter = true
 ITEM.filterHealth = ix.config.Get("gasmask_filter", 600)
 
+ITEM.rarity = { weight = 30 }
+
 if (CLIENT) then
 	function ITEM:CanStack(combineItem)
 		return combineItem:GetFilterHealth() == self:GetFilterHealth()

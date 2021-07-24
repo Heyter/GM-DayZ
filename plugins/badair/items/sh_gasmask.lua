@@ -6,6 +6,8 @@ ITEM.isGasMask = true
 ITEM.price = 250
 ITEM.category = "Clothes"
 
+ITEM.rarity = { weight = 12 }
+
 ITEM.pacData = {
 	[1] = {
 		["children"] = {
