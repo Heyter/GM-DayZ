@@ -71,22 +71,6 @@ if (CLIENT) then
 		end
 	end
 
-	function PLUGIN:LoadFonts(font, genericFont)
-		surface.CreateFont("ixMerchant.Num", {
-			font = font,
-			size = math.max(ScreenScale(8), 20),
-			weight = 500,
-			extended = true
-		})
-
-		surface.CreateFont("ixMerchant.NumLarge", {
-			font = font,
-			size = math.max(ScreenScale(12), 46),
-			weight = 500,
-			extended = true
-		})
-	end
-
 	function PLUGIN:Think()
 		if (IsValid(ix.gui.merchant)) then
 			if (IsValid(ix.gui.menu) or !LocalPlayer():Alive() or !LocalPlayer():GetCharacter()) then

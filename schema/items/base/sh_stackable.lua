@@ -10,7 +10,7 @@ if (CLIENT) then
 		local quantity = item:GetData("quantity", 1)
 
 		if (quantity > 1) then
-			draw.SimpleTextOutlined("x" .. quantity, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined("x" .. quantity, "DermaDefault", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 	end
 

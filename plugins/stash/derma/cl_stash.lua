@@ -161,7 +161,7 @@ function PANEL:SetItem(itemTable)
 	end
 	self.icon.PaintOver = function(t, w, h)
 		if (self.stack > 1 and ix.gui.stash and ix.gui.stash:CanStackItem(self.itemTable)) then
-			draw.SimpleTextOutlined("x" .. self.stack, "ixMerchant.Num", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined("x" .. self.stack, "DermaDefault", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
 		if (itemTable and itemTable.PaintOver) then

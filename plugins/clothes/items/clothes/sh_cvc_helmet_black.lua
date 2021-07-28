@@ -11,14 +11,6 @@ ITEM.skin = 2
 
 ITEM.rarity = { weight = 2 }
 
-if (SERVER) then
-	function ITEM:OnInstanced(index)
-		if (index == 0) then
-			self:SetData("durability", math.random(0, self.defDurability * math.Rand(0.5, 0.75)), false)
-		end
-	end
-end
-
 ITEM.iconCam = {
 	pos = Vector(119.12911987305, 100.74072265625, 78.613121032715),
 	ang = Angle(25.168048858643, -139.87422180176, 10.754030227661),

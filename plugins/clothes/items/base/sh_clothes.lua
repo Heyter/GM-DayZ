@@ -14,6 +14,9 @@ ITEM.damageReduction = { [HITGROUP_HEAD] = 0 }
 -- слетает предмет с головы когда durability = 0, но применимо лишь для outfitCategory = hat
 ITEM.dropHat = false
 
+-- Прочность с которой будет спавниться предмет (min-max)
+ITEM.spawnDurability = {0.5, 1}
+
 --[[
 ITEM.pacData = {
 	[1] = {
@@ -52,12 +55,14 @@ if (CLIENT) then
 			x = x - 8 * 1.6
 		end
 
-		local durability = math.max(0, itemObj:GetData("durability", itemObj.defDurability))
-		-- 2.55 = (255 / 100)
-		local durabilityColor = Color(2.55 * (100 - durability), 2.55 * durability, 0, 255)
+		if (itemObj.useDurability) then
+			local durability = math.max(0, itemObj:GetData("durability", itemObj.defDurability))
+			-- 2.55 = (255 / 100)
+			local durabilityColor = Color(2.55 * (100 - durability), 2.55 * durability, 0, 255)
 
-		durability = (durability / itemObj.defDurability) * 100
-		draw.SimpleTextOutlined(math.Round(durability, 1) .. "%", "ixMerchant.Num", 1, h - 10, durabilityColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+			durability = (durability / itemObj.defDurability) * 100
+			draw.SimpleTextOutlined(math.Round(durability, 1) .. "%", "DermaDefault", 1, h - 10, durabilityColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+		end
 	end
 
 	function ITEM:PopulateTooltip(tooltip)
@@ -276,3 +281,11 @@ ITEM.functions.Repair = {
 		return true
 	end
 }
+
+if (SERVER) then
+	function ITEM:OnInstanced(index)
+		if (index == 0 and self.spawnDurability) then
+			self:SetData("durability", math.random(0, self.defDurability * math.Rand(self.spawnDurability[1], self.spawnDurability[2])), false)
+		end
+	end
+end

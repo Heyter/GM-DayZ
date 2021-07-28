@@ -63,7 +63,7 @@ if (CLIENT) then
 		icon:Dock(FILL)
 		icon:DockMargin(5, 5, 5, 10)
 		icon:InvalidateLayout(true)
-		icon:SetModel(data.model)
+		icon:SetModel(data:GetModel(), data:GetSkin())
 
 		icon:SetHelixTooltip(function(tooltip)
 			ix.hud.PopulateItemTooltip(tooltip, data)
