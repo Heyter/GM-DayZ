@@ -36,7 +36,7 @@ function ENT:Think()
 
 		for _, v in ipairs(ents.FindInCone(self.m_vecStart, self.m_angForward, self.RangeDistance, 0.8)) do
 			if (IsValid(v) and (v:IsPlayer() or v:IsNPC() or v:IsNextBot())) then
-				self.traceData.endpos = v:WorldSpaceCenter()
+				self.traceData.endpos = v:NearestPoint(self.m_vecStart)
 				if (util.TraceHull(self.traceData).Entity == v) then
 					self:Detonate()
 					break
@@ -113,27 +113,34 @@ function ENT:SphereDamage(attacker, position, radius, damage)
 	local adjustedDamage = damage
 	local tr
 
-	for _, v in ipairs(ents.FindInSphere(position, radius)) do
+	local info = DamageInfo()
+	info:SetAttacker(attacker)
+	info:SetInflictor(self)
+	info:SetDamageType(DMG_BLAST)
+	info:SetDamageForce(vector_up)
+	info:SetDamagePosition(position)
+
+	local tEnts = ents.FindInSphere(position, radius)
+	for i = 1, #tEnts do
+		local v = tEnts[i]
 		if (IsValid(v) and (v:IsPlayer() or v:IsNPC() or v:IsNextBot())) then
-			self.traceData.endpos = v:WorldSpaceCenter()
-			tr = util.TraceHull(self.traceData)
+			self.traceData.endpos = v:NearestPoint(position) --v:WorldSpaceCenter() -- v:BodyTarget(position)
+			// NearestPoint лучше всех определяет
+			tr = util.TraceLine(self.traceData)
 
 			// Взрыв может увидеть сущность
-			if (tr.Fraction >= 0.85 or tr.Entity == v) then
+			if (tr.Fraction >= 0.75 or tr.Entity == v) then
 				adjustedDamage = adjustedDamage - position:Distance(v:GetPos()) * falloff
+				adjustedDamage = adjustedDamage * tr.Fraction
 
 				if (adjustedDamage > 0.0) then
-					local info = DamageInfo()
 					info:SetDamage(adjustedDamage)
-					info:SetAttacker(attacker)
-					info:SetInflictor(self)
-					info:SetDamageType(DMG_BLAST)
-					info:SetDamageForce(position - v:GetPos())
-					info:SetDamagePosition(v:GetPos())
 
 					v:TakeDamageInfo(info)
 				end
 			end
 		end
 	end
+
+	info, tr = nil, nil
 end
