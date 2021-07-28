@@ -34,7 +34,9 @@ function ENT:Think()
 			self:Detonate()
 		end
 
-		for _, v in ipairs(ents.FindInCone(self.m_vecStart, self.m_angForward, self.RangeDistance, 0.8)) do
+		local tEnts = ents.FindInCone(self.m_vecStart, self.m_angForward, self.RangeDistance, 0.8)
+		for i = 1, #tEnts do
+			local v = tEnts[i]
 			if (IsValid(v) and (v:IsPlayer() or v:IsNPC() or v:IsNextBot())) then
 				self.traceData.endpos = v:NearestPoint(self.m_vecStart)
 				if (util.TraceHull(self.traceData).Entity == v) then
