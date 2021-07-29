@@ -6,7 +6,6 @@ ITEM.width = 2
 ITEM.height = 1
 
 ITEM.raiseDurability = 0.75
-ITEM.isClothesKit = nil
 ITEM.isWeaponKit = true
 ITEM.price = 500
 
