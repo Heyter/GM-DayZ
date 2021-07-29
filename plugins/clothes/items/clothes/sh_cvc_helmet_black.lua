@@ -6,6 +6,7 @@ ITEM.outfitCategory = "hat"
 ITEM.defDurability = 100
 ITEM.damageReduction = { [HITGROUP_HEAD] = 0.45 }
 ITEM.dropHat = true
+ITEM.categoryKit = "helmets"
 
 ITEM.skin = 2
 

@@ -9,6 +9,7 @@ ITEM.raiseDurability = 0.75
 ITEM.isClothesKit = true
 ITEM.isWeaponKit = nil
 ITEM.price = 500
+ITEM.categoryKit = "armors"
 
 ITEM.useSound = "gmodz/items/repair_outfit.wav"
 
