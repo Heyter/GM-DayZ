@@ -1,4 +1,4 @@
-ITEM.name = "Canned tuna"
+ITEM.name = "Canned meat"
 ITEM.model = "models/gmodz/food/canned_meat.mdl"
 ITEM.description = "Canned food, the label has long been ripped off, but judging by the consistency, there is meat inside."
 
