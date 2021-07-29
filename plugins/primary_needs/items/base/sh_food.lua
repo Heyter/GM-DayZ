@@ -113,7 +113,7 @@ ITEM.functions.use = {
 			if (isstring(item.useSound)) then
 				client:EmitSound(item.useSound, 60)
 			elseif (istable(item.useSound)) then
-				client:EmitSound(unpack(item.useSound))
+				client:EmitSound(#item.useSound[math.random(#item.useSound)])
 			end
 		end
 

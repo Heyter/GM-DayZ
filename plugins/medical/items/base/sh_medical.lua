@@ -8,7 +8,6 @@ ITEM.model = "models/healthvial.mdl"
 ITEM.category = "Medical"
 
 ITEM.useSound = "items/medshot4.wav"
--- ITEM.useSound = {"items/medshot4.wav", 60, 100} // soundName, soundLevel, pitchPercent
 
 ITEM.healthAmount = 0
 ITEM.staminaAmount = 0 -- процент (сколько добавить стамины при применение)
@@ -90,7 +89,7 @@ ITEM.functions.use = {
 			if (isstring(item.useSound)) then
 				client:EmitSound(item.useSound, 60)
 			elseif (istable(item.useSound)) then
-				client:EmitSound(unpack(item.useSound))
+				client:EmitSound(#item.useSound[math.random(#item.useSound)])
 			end
 		end
 

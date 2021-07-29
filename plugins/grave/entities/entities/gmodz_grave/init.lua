@@ -31,8 +31,6 @@ function ENT:Use(activator)
 end
 
 function ENT:Think()
-	if (self.DoNextThink or 0) > CurTime() then return end
-
 	if (!self:IsInWorld()) then
 		MsgC(Color("yellow"), "Grave - Removed, Outside Map!\n") 
 		self:Remove()
@@ -51,14 +49,15 @@ function ENT:Think()
 		local bMoney = self:GetMoney() < 1
 
 		if (!bItems or !bMoney) then
-			self.DoNextThink = CurTime() + 0.5
-			return
+			self:NextThink(CurTime() + 0.5)
+			return true
 		end
 
 		self:Remove()
 	end
 
-	self.DoNextThink = CurTime() + 1
+	self:NextThink(CurTime() + 1)
+	return true
 end
 
 function ENT:OnRemove()

@@ -14,6 +14,9 @@ ITEM.JamCapacity = 100 -- Rounds that can be fired non-stop before the gun jams,
 
 ITEM.ammo = nil -- type of the ammo
 
+-- Категория для рем.комплекта, должно совпадать и в ремнаборе и здесь.
+ITEM.categoryKit = "weapons"
+
 function ITEM:GetSellPrice(base_price, scale)
 	local attach_modifier = scale * table.Count(self:GetData("mods", {}))
 	local liquid_price = scale * (base_price + (base_price * attach_modifier)) * (self:GetData("durability", 100) / 100)
@@ -164,6 +167,48 @@ ITEM.functions.empty_clip = {
 	end
 }
 
+ITEM.functions.Repair = {
+	name = "Repair",
+	tip = "equipTip",
+	icon = "icon16/bullet_wrench.png",
+	OnRun = function(item)
+		local client = item.player
+		local itemKit
+
+		for _, v in pairs(client:GetCharacter():GetInventory():GetItems(true)) do
+			if (v.base == "base_repair_kit" and v.categoryKit and v.categoryKit == (item.categoryKit or "")) then
+				itemKit = v
+				break
+			end
+		end
+
+		if (itemKit) then
+			itemKit:UseRepair(item, client)
+			client:SetLocalVar("WeaponDurability", nil)
+
+			itemKit = nil
+		else
+			client:NotifyLocalized('RepairKitWrong')
+		end
+
+		return false
+	end,
+
+	OnCanRun = function(item)
+		if (item.player and (item.player.nextUseItem or 0) > CurTime() or item:GetData("durability", 100) >= 100) then
+			return false
+		end
+
+		if (CLIENT) then
+			if (!item.player:GetCharacter():GetInventory():HasItemOfBase("base_repair_kit")) then
+				return false
+			end
+		end
+
+		return true
+	end
+}
+
 ITEM.functions.combine = {
 	OnCanRun = function(item, data)
 		if (!data or !data[1] or item.player and (item.player.nextUseItem or 0) > CurTime()) then
@@ -192,7 +237,7 @@ ITEM.functions.combine = {
 			if (ix.arccw_support.Attach(item, combineItem.uniqueID)) then
 				combineItem:Remove()
 			end
-		elseif (combineItem.base == "base_repair_kit" and combineItem.isWeaponKit and item.useDurability and item:GetData("durability", 100) < 100) then
+		elseif (combineItem.base == "base_repair_kit" and combineItem.categoryKit == self.categoryKit and item.useDurability and item:GetData("durability", 100) < 100) then
 			combineItem:UseRepair(item, client)
 			client:SetLocalVar("WeaponDurability", nil)
 		end

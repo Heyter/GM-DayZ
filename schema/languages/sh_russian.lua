@@ -134,4 +134,8 @@ LANGUAGE = {
 	squad_menu_text_demote = "Понижение",
 	squad_menu_btn_kickmember = "Выгнать участника",
 	squad_menu_text_kickmember = "Вы уверены, что хотите выгнать %s из %s?",
+
+	// Flash window
+	optFlashWindow = "Мигающее окно",
+	optdFlashWindow = "Должно ли окно мигать когда игра свернута."
 }

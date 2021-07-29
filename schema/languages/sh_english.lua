@@ -134,4 +134,8 @@ LANGUAGE = {
 	squad_menu_text_demote = "Demote",
 	squad_menu_btn_kickmember = "Kick member",
 	squad_menu_text_kickmember = "Are you sure you want to kick %s from %s?",
+
+	// Flash window
+	optFlashWindow = "Flash Window",
+	optdFlashWindow = "Whether the window should blink when the game is minimized."
 }

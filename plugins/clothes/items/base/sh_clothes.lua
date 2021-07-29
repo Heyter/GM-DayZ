@@ -17,6 +17,9 @@ ITEM.dropHat = false
 -- Прочность с которой будет спавниться предмет (min-max)
 ITEM.spawnDurability = {0.5, 1}
 
+-- Категория для рем.комплекта, должно совпадать и в ремнаборе и здесь.
+ITEM.categoryKit = "clothes"
+
 --[[
 ITEM.pacData = {
 	[1] = {
@@ -234,7 +237,7 @@ ITEM.functions.combine = {
 		local combineItem = ix.item.instances[data[1]]
 		if (!combineItem) then return false end
 
-		if (combineItem.base == "base_repair_kit" and combineItem.isClothesKit and item.useDurability and item:GetData("durability", 100) < 100) then
+		if (combineItem.base == "base_repair_kit" and combineItem.categoryKit == item.categoryKit and item.useDurability and item:GetData("durability", 100) < 100) then
 			combineItem:UseRepair(item, item.player)
 		end
 
@@ -251,7 +254,7 @@ ITEM.functions.Repair = {
 		local itemKit
 
 		for _, v in pairs(client:GetCharacter():GetInventory():GetItems(true)) do
-			if (v.base == "base_repair_kit" and v.isClothesKit) then
+			if (v.base == "base_repair_kit" and v.categoryKit and v.categoryKit == (item.categoryKit or "")) then
 				itemKit = v
 				break
 			end

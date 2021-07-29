@@ -9,13 +9,10 @@ ITEM.height = 1
 
 ITEM.raiseDurability = 0 -- процент
 
--- Only allowed for weapons.
-ITEM.isWeaponKit = true
-
--- ITEM.isClothesKit = true
+-- Категория для рем.комплекта, должно совпадать и в ремнаборе и здесь.
+-- ITEM.categoryKit = "weapons"
 
 ITEM.useSound = "gmodz/durability/repair_weapon.wav"
--- ITEM.useSound = {"items/medshot4.wav", 60, 100} // soundName, soundLevel, pitchPercent
 ITEM.price = 0
 ITEM.maxQuantity = 16
 
@@ -34,7 +31,7 @@ if (SERVER) then
 			if (isstring(useSound)) then
 				client:EmitSound(useSound, 60)
 			elseif (istable(useSound)) then
-				client:EmitSound(unpack(useSound))
+				client:EmitSound(#useSound[math.random(#useSound)])
 			elseif (self.useSound and isfunction(self.useSound)) then
 				self:useSound(combineItem, client)
 			end

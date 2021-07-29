@@ -64,51 +64,5 @@ function PLUGIN:InitializedPlugins()
 				end
 			end
 		end
-
-		for _, v in pairs(ix.item.list) do
-			if (!v.isWeapon) then continue end
-
-			v.functions.Repair = {
-				name = "Repair",
-				tip = "equipTip",
-				icon = "icon16/bullet_wrench.png",
-				OnRun = function(item)
-					local client = item.player
-					local itemKit
-
-					for _, v in pairs(client:GetCharacter():GetInventory():GetItems(true)) do
-						if (v.base == "base_repair_kit" and v.isWeaponKit) then
-							itemKit = v
-							break
-						end
-					end
-
-					if (itemKit) then
-						itemKit:UseRepair(item, client)
-						client:SetLocalVar("WeaponDurability", nil)
-
-						itemKit = nil
-					else
-						client:NotifyLocalized('RepairKitWrong')
-					end
-
-					return false
-				end,
-
-				OnCanRun = function(item)
-					if (item.player and (item.player.nextUseItem or 0) > CurTime() or item:GetData("durability", 100) >= 100) then
-						return false
-					end
-
-					if (CLIENT) then
-						if (!item.player:GetCharacter():GetInventory():HasItemOfBase("base_repair_kit")) then
-							return false
-						end
-					end
-
-					return true
-				end
-			}
-		end
 	end
 end

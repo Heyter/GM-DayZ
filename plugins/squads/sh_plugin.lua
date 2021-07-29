@@ -87,7 +87,7 @@ if (CLIENT) then
 
 	do
 		local function SquadColor(target)
-			if (!LocalPlayer():GetCharacter() or !IsValid(target) or target == LocalPlayer()) then return end
+			if (!LocalPlayer():GetCharacter() or !IsValid(target) or target == LocalPlayer() or !target.SteamID64) then return end
 			local sq = ix.squad.list[LocalPlayer():GetCharacter():GetSquadID()]
 			if (sq and sq.members[target:SteamID64()]) then
 				return ix.option.Get("squadTeamColor", Color(51, 153, 255))

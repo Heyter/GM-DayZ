@@ -142,7 +142,7 @@ net.Receive("ixSquadSettings", function(_, client)
 				query:Where("owner", squad.owner)
 			query:Execute()
 
-			squad:Sync()
+			squad:Sync(nil, data.color)
 		end
 	end
 end)
