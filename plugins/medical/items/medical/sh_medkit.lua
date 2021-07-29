@@ -5,7 +5,7 @@ ITEM.description = "All-purpose single-use medkit. Allows to handle injuries of 
 ITEM.healthAmount = 20
 ITEM.radiationAmount = -250
 ITEM.price = 300
-ITEM.useSound = "gmodz/items/medical/medkit_use.wav"
+ITEM.useSound = "gmodz/items/medkit.wav"
 
 ITEM.rarity = { weight = 25 }
 

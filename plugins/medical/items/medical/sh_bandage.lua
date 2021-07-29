@@ -3,7 +3,7 @@ ITEM.model = "models/gmodz/medical/bandage.mdl"
 ITEM.description = "Small roll of gauze cloth."
 
 ITEM.healthAmount = 5
-ITEM.useSound = "gmodz/items/medical/bandage_use.wav"
+ITEM.useSound = "gmodz/items/bandage.wav"
 
 ITEM.rarity = { weight = 100 }
 

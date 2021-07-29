@@ -5,7 +5,7 @@ ITEM.description = "They heal significantly more health than other medkits, and 
 ITEM.healthAmount = 75
 ITEM.radiationAmount = -400
 ITEM.price = 800
-ITEM.useSound = "gmodz/items/medical/medkit_use.wav"
+ITEM.useSound = "gmodz/items/medkit.wav"
 
 ITEM.rarity = { weight = 10 }
 

@@ -4,7 +4,7 @@ ITEM.description = "Includes medicine for faster blood coagulation, as well as p
 
 ITEM.healthAmount = 100
 ITEM.price = 650
-ITEM.useSound = "gmodz/items/medical/medkit_use.wav"
+ITEM.useSound = "gmodz/items/medkit.wav"
 
 ITEM.rarity = { weight = 10 }
 

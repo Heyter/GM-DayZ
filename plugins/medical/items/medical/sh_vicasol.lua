@@ -1,7 +1,7 @@
 ITEM.name = "Vicasol"
 ITEM.model = "models/gmodz/medical/vicasol.mdl"
 ITEM.description = ""
-ITEM.useSound = "gmodz/items/medical/pills_use.wav"
+ITEM.useSound = "gmodz/items/antirad.wav"
 
 ITEM.rarity = { weight = 90 }
 
