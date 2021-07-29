@@ -93,7 +93,7 @@ function ITEM:Equip(client, bSound)
 	self:SetData("equip", true)
 
 	if (bSound) then
-		client:EmitSound("gasmaskon.wav", 80)
+		client:EmitSound("gmodz/player/gasmask_wear.wav", 80)
 		client:ScreenFade(1, color_black, 1, 0)
 	end
 end
@@ -111,7 +111,7 @@ function ITEM:Unequip(client, bSound)
 	self:SetData("equip", nil)
 
 	if (bSound) then
-		client:EmitSound("gasmaskoff.wav", 80)
+		client:EmitSound("gmodz/player/gasmask_wear.wav", 80)
 		client:ScreenFade(1, color_black, 1, 0)
 	end
 end

@@ -52,8 +52,8 @@ do
 end
 
 if (CLIENT) then
-	local gasmaskTexture2 = Material("gasmask_fnl")
-	local gasmaskTexture = Material("shtr_01")
+	local gasmaskTexture2 = Material("gmdz/gasmask")
+	local gasmaskTexture = Material("gmdz/shtr")
 	local w, h, gw, gh, margin, move, healthFactor, ft
 	local nextBreath = CurTime()
 	local exhale = false
@@ -74,8 +74,8 @@ if (CLIENT) then
 	function PLUGIN:HUDPaintBackground()
 		if (canEffect(LocalPlayer())) then
 			w, h = ScrW(), ScrH()
-			gw, gh = h/3*4, h
-			-- gw, gh = h/1*2, h -- local gasmaskTexture2 = Material("morganicism/metroredux/gasmask/metromask2")
+			-- gw, gh = h/3*4, h
+			gw, gh = h/1*2, h -- local gasmaskTexture2 = Material("morganicism/metroredux/gasmask/metromask2")
 
 			surface.SetMaterial(gasmaskTexture)
 			for k, v in ipairs(shtrPos) do
@@ -104,7 +104,7 @@ if (CLIENT) then
 			healthFactor = math.Clamp(client:Health()/client:GetMaxHealth(), 0, 1)
 
 			if (!client.nextBreath or client.nextBreath < CurTime()) then
-				client:EmitSound(!exhale and "gmsk_in.wav" or "gmsk_out.wav", 
+				client:EmitSound(!exhale and "gmodz/player/gasmask_inhale.wav" or "gmodz/player/gasmask_exhale.wav", 
 				(LocalPlayer() == client and client:ShouldDrawLocalPlayer() or item:GetHealth() <= 0) and 20 or 50, math.random(90, 100) + 15*(1 - healthFactor))
 				
 				local f = healthFactor*.5
