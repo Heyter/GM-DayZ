@@ -2,7 +2,7 @@ ITEM.name = "Army medkit"
 ITEM.model = "models/gmodz/medical/medkit_army.mdl"
 ITEM.description = "Includes medicine for faster blood coagulation, as well as painkillers, antibiotics, immunity stimulators, and more."
 
-ITEM.healthAmount = 100
+ITEM.healthAmount = 50
 ITEM.price = 650
 ITEM.useSound = "gmodz/items/medkit.wav"
 
