@@ -98,30 +98,30 @@ function ENT:ChooseSound(key, delay, force)
 	local soundPath
 
 	if (key == "alert") then
-		soundPath = "npc/bandit/enemy_" .. math.random(1, 12) .. ".ogg"
+		soundPath = "gmodz/npc/bandit/enemy_" .. math.random(1, 12) .. ".ogg"
 	elseif (key == "death") then
-		soundPath = "npc/bandit/death_" .. math.random(1, 7) .. ".ogg"
+		soundPath = "gmodz/npc/bandit/death_" .. math.random(1, 7) .. ".ogg"
 	elseif (key == "pain") then
-		soundPath = "npc/bandit/hit_" .. math.random(1, 7) .. ".ogg"
+		soundPath = "gmodz/npc/bandit/hit_" .. math.random(1, 7) .. ".ogg"
 	elseif (key == "walk" or key == "idle") then
-		soundPath = "npc/bandit/idle_" .. math.random(1, 35) .. ".ogg"
-	elseif (key == "grenade_prep") then
+		soundPath = "gmodz/npc/bandit/idle_" .. math.random(1, 35) .. ".ogg"
+	elseif (key == "gmodz/grenade_prep") then
 		soundPath = "npc/bandit/grenade_" .. math.random(1, 3) .. ".ogg"
-	elseif (key == "grenade_throw") then
-		soundPath = "npc/bandit/grenade_ready_" .. math.random(1, 7) .. ".ogg"
+	elseif (key == "gmodz/grenade_throw") then
+		soundPath = "gmodz/npc/bandit/grenade_ready_" .. math.random(1, 7) .. ".ogg"
 	elseif (key == "help") then
-		soundPath = "npc/bandit/help_" .. math.random(1, 7) .. ".ogg"
+		soundPath = "gmodz/npc/bandit/help_" .. math.random(1, 7) .. ".ogg"
 	elseif (key == "ally") then
-		soundPath = "npc/bandit/tolls_" .. math.random(1, 5) .. ".ogg"
+		soundPath = "gmodz/npc/bandit/tolls_" .. math.random(1, 5) .. ".ogg"
 	elseif (key == "enemy_lost") then
-		soundPath = "npc/bandit/search_" .. math.random(1, 18) .. ".ogg"
+		soundPath = "gmodz/npc/bandit/search_" .. math.random(1, 18) .. ".ogg"
 	elseif (key == "friendly") then
-		soundPath = "npc/bandit/search_" .. math.random(1, 5) .. ".ogg"
+		soundPath = "gmodz/npc/bandit/search_" .. math.random(1, 5) .. ".ogg"
 	elseif (key == "attack") then
 		if (math.random(1, 2) == 1) then
-			soundPath = "npc/bandit/attack_" .. math.random(1, 9) .. ".ogg"
+			soundPath = "gmodz/npc/bandit/attack_" .. math.random(1, 9) .. ".ogg"
 		else
-			soundPath = "npc/bandit/detour_" .. math.random(1, 10) .. ".ogg"
+			soundPath = "gmodz/npc/bandit/detour_" .. math.random(1, 10) .. ".ogg"
 		end
 	end
 

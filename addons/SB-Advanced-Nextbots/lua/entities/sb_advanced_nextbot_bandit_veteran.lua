@@ -17,8 +17,8 @@ if CLIENT then
 	return
 end
 
-ENT.Model = "models/player/stalker_bandit_veteran.mdl"
-ENT.RagdollModel = "models/rebel/stalker_bandit_veteran.mdl"
+ENT.Model = "models/gmodz/npc/bandit.mdl"
+ENT.RagdollModel = "models/gmodz/npc/bandit.mdl"
 
 ENT.GrenadeMinDistance = math.pow(400, 2)
 ENT.GrenadeMaxDistance = math.pow(890, 2)

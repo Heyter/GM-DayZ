@@ -1,6 +1,6 @@
 ITEM.name = "Ghillie suit"
 ITEM.desc = "A ghillie suit, also known as a yowie suit, or camo tent, is a type of camouflage clothing designed to resemble heavy foliage."
-ITEM.model = "models/props/cs_militia/footlocker01_closed.mdl"
+ITEM.model = "models/Items/BoxMRounds.mdl"
 
 ITEM.useDurability = nil
 ITEM.defDurability = 5000
