@@ -6,6 +6,6 @@ ITEM.hungerAmount = 0.3
 ITEM.thirstAmount = 0.05
 ITEM.healthAmount = 7
 ITEM.price = 125
-ITEM.useSound = {"gmodz/items/food1.wav", "gmodz/items/food2.wav", "gmodz/items/food3.wav", "gmodz/items/food4.wav", "gmodz/items/food5.wav"}
+ITEM.useSound = "gmodz/items/food4.wav"
 
 ITEM.rarity = { weight = 90 }
