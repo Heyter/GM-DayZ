@@ -1,5 +1,5 @@
 ITEM.name = "Weapon repair kit"
-ITEM.model = "models/lostsignalproject/items/repair/toolkit_wp.mdl"
+ITEM.model = "models/gmodz/misc/repair_kit_weapon.mdl"
 ITEM.description = ""
 
 ITEM.width = 2
@@ -9,6 +9,8 @@ ITEM.raiseDurability = 0.75
 ITEM.isClothesKit = nil
 ITEM.isWeaponKit = true
 ITEM.price = 500
+
+ITEM.useSound = "gmodz/items/repair_weapon.wav"
 
 ITEM.rarity = { weight = 7 }
 

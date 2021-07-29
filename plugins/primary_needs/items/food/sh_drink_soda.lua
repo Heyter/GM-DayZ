@@ -4,7 +4,7 @@ ITEM.description = "A blue can filled with some carbonated flavoured water."
 
 ITEM.thirstAmount = 0.4
 ITEM.price = 40
-ITEM.useSound = "gmodz/items/food/soda.wav"
+ITEM.useSound = "gmodz/items/can.wav"
 
 ITEM.iconCam = {
 	pos = Vector(76.027618408203, 63.794639587402, 46.273990631104),

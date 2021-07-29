@@ -8,6 +8,6 @@ ITEM.healthAmount = 10
 ITEM.staminaAmount = 1
 ITEM.staminaRegenTime = 60
 ITEM.price = 850
-ITEM.useSound = "gmodz/items/food/irp_eat.wav"
+ITEM.useSound = {"gmodz/items/food1.wav", "gmodz/items/food2.wav", "gmodz/items/food3.wav", "gmodz/items/food4.wav", "gmodz/items/food5.wav"}
 
 ITEM.rarity = { weight = 10 }

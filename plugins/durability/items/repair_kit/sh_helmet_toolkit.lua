@@ -1,5 +1,5 @@
-ITEM.name = "Clothes repair kit"
-ITEM.model = "models/gmodz/misc/repair_kit_armor.mdl"
+ITEM.name = "Helmet repair kit"
+ITEM.model = "models/gmodz/misc/repair_kit_helmet.mdl"
 ITEM.description = ""
 
 ITEM.width = 2

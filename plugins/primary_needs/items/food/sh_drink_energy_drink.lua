@@ -7,6 +7,6 @@ ITEM.hungerAmount = 0.05
 ITEM.staminaAmount = 0.7
 ITEM.staminaRegenTime = 25
 ITEM.price = 120
-ITEM.useSound = "gmodz/items/food/soda.wav"
+ITEM.useSound = "gmodz/items/can.wav"
 
 ITEM.rarity = { weight = 100 }

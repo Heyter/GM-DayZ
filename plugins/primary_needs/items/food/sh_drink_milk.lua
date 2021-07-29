@@ -1,9 +1,8 @@
-ITEM.name = "Bottled Water"
-ITEM.model = "models/gmodz/food/water.mdl"
+ITEM.name = "Old milk"
+ITEM.model = "models/props_junk/garbage_milkcarton002a.mdl"
 ITEM.description = "A bottle filled with clear water."
 
-ITEM.thirstAmount = 0.65
-ITEM.radiationAmount = -100
+ITEM.thirstAmount = 0.45
 ITEM.price = 70
 ITEM.useSound = "gmodz/items/water.wav"
 

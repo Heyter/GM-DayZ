@@ -1,6 +1,6 @@
-ITEM.name = "Bottled Water"
-ITEM.model = "models/gmodz/food/water.mdl"
-ITEM.description = "A bottle filled with clear water."
+ITEM.name = "Vodka"
+ITEM.model = "models/gmodz/food/vodka.mdl"
+ITEM.description = ""
 
 ITEM.thirstAmount = 0.65
 ITEM.radiationAmount = -100
