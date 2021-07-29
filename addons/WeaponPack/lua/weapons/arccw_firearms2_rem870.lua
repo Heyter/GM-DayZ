@@ -22,7 +22,7 @@ SWEP.DefaultBodygroups = "00000000"
 SWEP.DefaultSkin = 0
 
 SWEP.Damage = 9
-SWEP.DamageMin = 4 -- damage done at maximum range
+SWEP.DamageMin = 9 -- damage done at maximum range
 SWEP.Range = 90 -- in METRES
 SWEP.Penetration = 3
 SWEP.DamageType = DMG_BULLET
@@ -37,10 +37,10 @@ SWEP.ShotgunReload = true
 SWEP.ManualAction = true
 SWEP.NoLastCycle = true
 
-SWEP.Recoil = 3
+SWEP.Recoil = 7
 SWEP.RecoilSide = 0.15
 SWEP.RecoilRise = 0.03
-SWEP.RecoilPunch = 2.5
+SWEP.RecoilPunch = 0
 SWEP.VisualRecoilMult = 0
 SWEP.RecoilVMShake = 0
 

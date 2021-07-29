@@ -21,10 +21,10 @@ SWEP.ViewModelFOV = 60
 SWEP.DefaultBodygroups = "00000000"
 SWEP.DefaultSkin = 0
 
-SWEP.Damage = 40
-SWEP.DamageMin = 25 -- damage done at maximum range
+SWEP.Damage = 47
+SWEP.DamageMin = 47 -- damage done at maximum range
 SWEP.Range = 800 -- in METRES
-SWEP.Penetration = 7
+SWEP.Penetration = 15
 SWEP.DamageType = DMG_BULLET
 SWEP.MuzzleVelocity = 850 -- projectile or phys bullet muzzle velocity
 
@@ -33,10 +33,10 @@ SWEP.TracerNum = 0 -- tracer every X
 SWEP.ChamberSize = 1 -- how many rounds can be chambered.
 SWEP.Primary.ClipSize = 10 -- DefaultClip is automatically set.
 
-SWEP.Recoil = 1.6
+SWEP.Recoil = 2.5
 SWEP.RecoilSide = 0.15
 SWEP.RecoilRise = 0.09
-SWEP.RecoilPunch = 2
+SWEP.RecoilPunch = 0
 SWEP.VisualRecoilMult = 0
 SWEP.RecoilVMShake = 0
 

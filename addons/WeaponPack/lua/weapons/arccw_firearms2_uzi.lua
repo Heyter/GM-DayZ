@@ -21,8 +21,8 @@ SWEP.ViewModelFOV = 60
 SWEP.DefaultBodygroups = "00000000"
 SWEP.DefaultSkin = 0
 
-SWEP.Damage = 21
-SWEP.DamageMin = 6 -- damage done at maximum range
+SWEP.Damage = 20
+SWEP.DamageMin = 20 -- damage done at maximum range
 SWEP.Range = 200 -- in METRES
 SWEP.Penetration = 4
 SWEP.DamageType = DMG_BULLET
@@ -33,10 +33,10 @@ SWEP.TracerNum = 0 -- tracer every X
 SWEP.ChamberSize = 1 -- how many rounds can be chambered.
 SWEP.Primary.ClipSize = 32 -- DefaultClip is automatically set.
 
-SWEP.Recoil = 1
+SWEP.Recoil = 1.2
 SWEP.RecoilSide = 0.1
 SWEP.RecoilRise = 0.05
-SWEP.RecoilPunch = 1
+SWEP.RecoilPunch = 0
 SWEP.VisualRecoilMult = 0
 SWEP.RecoilVMShake = 0
 

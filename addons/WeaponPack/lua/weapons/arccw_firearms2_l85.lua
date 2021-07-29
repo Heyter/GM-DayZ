@@ -22,9 +22,9 @@ SWEP.DefaultBodygroups = "00000000"
 SWEP.DefaultSkin = 0
 
 SWEP.Damage = 32
-SWEP.DamageMin = 17 -- damage done at maximum range
+SWEP.DamageMin = 32 -- damage done at maximum range
 SWEP.Range = 400 -- in METRES
-SWEP.Penetration = 4
+SWEP.Penetration = 12
 SWEP.DamageType = DMG_BULLET
 SWEP.MuzzleVelocity = 940 -- projectile or phys bullet muzzle velocity
 
@@ -36,7 +36,7 @@ SWEP.Primary.ClipSize = 30 -- DefaultClip is automatically set.
 SWEP.Recoil = 1.6
 SWEP.RecoilSide = 0.06
 SWEP.RecoilRise = 0.09
-SWEP.RecoilPunch = 1.5
+SWEP.RecoilPunch = 0
 SWEP.VisualRecoilMult = 0
 SWEP.RecoilVMShake = 0
 
@@ -90,7 +90,7 @@ SWEP.SpeedMult = 0.85
 SWEP.SightedSpeedMult = 0.75
 
 SWEP.IronSightStruct = {
-    Pos = Vector(-1.639, -1.3, -0.16),
+    Pos = Vector(-1.639, -1.2, -0.16),
     Ang = Angle(-0.2, 0.05, 0),
     Magnification = 1.3,
     SwitchToSound = {"fas2/weapon_sightraise.wav", "fas2/weapon_sightraise2.wav"}, -- sound that plays when switching to this sight

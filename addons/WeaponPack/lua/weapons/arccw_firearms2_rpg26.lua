@@ -31,10 +31,10 @@ SWEP.MuzzleVelocity = 120000
 SWEP.ChamberSize = 0 -- how many rounds can be chambered.
 SWEP.Primary.ClipSize = 1 -- DefaultClip is automatically set.
 
-SWEP.Recoil = 3
+SWEP.Recoil = 7
 SWEP.RecoilSide = 0.05
 SWEP.RecoilRise = 0.1
-SWEP.RecoilPunch = 4.5
+SWEP.RecoilPunch = 0
 SWEP.VisualRecoilMult = 0
 SWEP.RecoilVMShake = 0
 
