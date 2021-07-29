@@ -28,7 +28,7 @@ ITEM.pacData = {
 					["Size"] = 1,
 					["EditorExpand"] = true,
 					["Model"] = "models/gmodz/equipments/cvc_helmet.mdl",
-					["Position"] = Vector(1.1599999666214, -0.62000000476837, 0),
+					["Position"] = Vector(-0.9, -0.62000000476837, 0),
 					["Skin"] = 0,
 					["Name"] = "helmet"
 				},
