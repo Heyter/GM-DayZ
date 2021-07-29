@@ -8,7 +8,3 @@ ITEM.price = 65
 ITEM.useSound = "gmodz/items/food1.wav"
 
 ITEM.rarity = { weight = 100 }
-
-if (SERVER) then
-	ITEM.dropUsedItem = nil
-end
