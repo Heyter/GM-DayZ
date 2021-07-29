@@ -6,7 +6,6 @@ ITEM.outfitCategory = "hat"
 ITEM.defDurability = 100
 ITEM.damageReduction = { [HITGROUP_HEAD] = 0.45 }
 ITEM.dropHat = true
-ITEM.categoryKit = "helmets"
 
 ITEM.rarity = { weight = 2 }
 
@@ -29,7 +28,7 @@ ITEM.pacData = {
 					["Size"] = 1,
 					["EditorExpand"] = true,
 					["Model"] = "models/gmodz/equipments/cvc_helmet.mdl",
-					["Position"] = Vector(-0.9, -0.62000000476837, 0),
+					["Position"] = Vector(-0.9, -1, 0),
 					["Skin"] = 0,
 					["Name"] = "helmet"
 				},
