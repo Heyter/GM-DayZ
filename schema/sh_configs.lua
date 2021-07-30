@@ -1,6 +1,4 @@
-ix.currency.symbol = ""
-ix.currency.singular = ""
-ix.currency.plural = "RU"
+ix.currency.Set("", "", "RU", "models/gmodz/misc/dollar.mdl")
 
 ix.config.SetDefault("font", "Jura")
 ix.config.SetDefault("genericFont", "Malgun Gothic")
