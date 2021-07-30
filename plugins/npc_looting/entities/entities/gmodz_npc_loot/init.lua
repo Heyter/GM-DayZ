@@ -26,7 +26,7 @@ function ENT:Use(activator)
 		ix.storage.Open(activator, inventory, {
 			entity = self,
 			name = "Loot",
-			searchTime = 0.5,
+			--searchTime = 0.5,
 			data = {money = self:GetMoney()},
 			bMultipleUsers = true,
 			OnPlayerOpen = function()

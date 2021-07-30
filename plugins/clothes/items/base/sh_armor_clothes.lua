@@ -58,7 +58,7 @@ if (CLIENT) then
 		local upperName = self.outfitCategory:sub(1, 1):upper() .. self.outfitCategory:sub(2)
 
 		local panel = tooltip:AddRowAfter("description", "extendDesc")
-		panel:SetText(Format("Slot: %s", L(upperName)))
+		panel:SetText(L("clothes_text_slot", L(upperName)))
 		panel:SetTextColor(color_white)
 		panel:SetExpensiveShadow(1, color_black)
 		panel:SizeToContents()

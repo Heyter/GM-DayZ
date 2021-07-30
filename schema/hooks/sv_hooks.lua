@@ -316,3 +316,62 @@ end)
 		-- end
 	-- end
 --end
+
+--[[ Storage take all items ]]
+util.AddNetworkString("ixStorageTakeAll")
+
+-- TODO: если игрок закрыл меню, то брякать цикл
+net.Receive("ixStorageTakeAll", function(_, client)
+	local character = client:GetCharacter()
+	if (!character or !client:Alive()) then return end
+
+	if ((client.ixStorageTakeAll or 0) < CurTime()) then
+		client.ixStorageTakeAll = CurTime() + 1
+	else
+		return
+	end
+
+	local storageID = net.ReadUInt(32)
+	local inventory = client.ixOpenStorage
+
+	if (!inventory or !inventory.storageInfo or storageID != inventory:GetID()) then
+		return
+	end
+
+	local entity = inventory.storageInfo.entity
+
+	if (!IsValid(entity) or
+		(!entity:IsPlayer() and (!isfunction(entity.GetMoney) or !isfunction(entity.SetMoney))) or
+		(entity:IsPlayer() and !entity:GetCharacter())) then
+		return
+	end
+
+	entity = entity:IsPlayer() and entity:GetCharacter() or entity
+	local amount = entity:GetMoney()
+
+	if (amount > 0) then
+		character:SetMoney(character:GetMoney() + amount)
+
+		local total = entity:GetMoney() - amount
+		entity:SetMoney(total)
+
+		net.Start("ixStorageMoneyUpdate")
+			net.WriteUInt(storageID, 32)
+			net.WriteUInt(total, 32)
+		net.Send(inventory:GetReceivers())
+
+		ix.log.Add(client, "storageMoneyTake", entity, amount, total)
+	end
+
+	local items = inventory:GetItems(true)
+	local charInvID = character:GetInventory():GetID()
+
+	if (charInvID > 0) then
+		for _, v in pairs(items) do
+			if (!IsValid(client) or !client:Alive() or !client.ixOpenStorage or !client:GetCharacter()) then break end
+			v:Transfer(charInvID, nil, nil, client)
+		end
+	end
+
+	items, charInvID = nil, nil
+end)

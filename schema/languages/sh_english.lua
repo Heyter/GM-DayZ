@@ -137,5 +137,19 @@ LANGUAGE = {
 
 	// Flash window
 	optFlashWindow = "Flash Window",
-	optdFlashWindow = "Whether the window should blink when the game is minimized."
+	optdFlashWindow = "Whether the window should blink when the game is minimized.",
+
+	// Inventory
+	text_rmb_takeallmoney = "RMB - take all the money",
+	text_rmb_giveallmoney = "RMB - give all the money",
+	text_rmb_dropallmoney = "RMB - drop all the money",
+	take_all = "Take all",
+
+	// Player spawn points
+	psp_btn_spawnatsafe = "Spawn at Safe Zone",
+	psp_btn_spawnrandomly = "Spawn randomly",
+	psp_btn_disconnect = "Disconnect",
+
+	// clothes
+	clothes_text_slot = "Slot: %s",
 }

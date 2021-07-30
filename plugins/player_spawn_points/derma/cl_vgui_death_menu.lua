@@ -36,7 +36,7 @@ function PANEL:Init()
 	self.disconnect:Dock(LEFT)
 	self.disconnect:SetWide(self.space)
 	self.disconnect:SetFont(self.ButtonFont)
-	self.disconnect:SetText("Disconnect")
+	self.disconnect:SetText(L"psp_btn_disconnect")
 	self.disconnect:SetContentAlignment(5)
 	self.disconnect:DockMargin(10, 10, 0, 10)
 	self.disconnect.Paint = paint_button
@@ -44,8 +44,8 @@ function PANEL:Init()
 		RunConsoleCommand("disconnect")
 	end
 
-	self.spawn1 = self:AddButton("Spawn at Safe Zone", true)
-	self.spawn2 = self:AddButton("Spawn randomly")
+	self.spawn1 = self:AddButton(L"psp_btn_spawnatsafe", true)
+	self.spawn2 = self:AddButton(L"psp_btn_spawnrandomly")
 
 	self.disconnect:SetTextColor(color_white)
 	self.spawn1:ResetState()

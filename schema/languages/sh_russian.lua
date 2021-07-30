@@ -137,5 +137,19 @@ LANGUAGE = {
 
 	// Flash window
 	optFlashWindow = "Мигающее окно",
-	optdFlashWindow = "Должно ли окно мигать когда игра свернута."
+	optdFlashWindow = "Должно ли окно мигать когда игра свернута.",
+
+	// Inventory
+	text_rmb_takeallmoney = "ПКМ - взять все деньги",
+	text_rmb_giveallmoney = "ПКМ - положить все деньги",
+	text_rmb_dropallmoney = "ПКМ - выкинуть все деньги",
+	take_all = "Взять всё",
+
+	// Player spawn points
+	psp_btn_spawnatsafe = "Безопасная зона",
+	psp_btn_spawnrandomly = "Случайное место",
+	psp_btn_disconnect = "Отключиться",
+
+	// clothes
+	clothes_text_slot = "Слот: %s",
 }

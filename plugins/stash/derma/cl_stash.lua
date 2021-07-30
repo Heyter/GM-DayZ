@@ -11,7 +11,7 @@ function PANEL:Init()
 	self:Dock(BOTTOM)
 
 	self.moneyBtn = self:Add("DButton")
-	self.moneyBtn:Dock(TOP)
+	self.moneyBtn:Dock(FILL)
 	self.moneyBtn:SetFont("ixGenericFont")
 	self.moneyBtn:SetText("")
 	self.moneyBtn:SetIcon("icon16/money_dollar.png")
@@ -20,18 +20,29 @@ function PANEL:Init()
 	self.moneyBtn.Paint = function(panel, width, height)
 		panel.set_color = ix.config.Get("color")
 
-		if (panel:IsHovered()) then
+		if (panel:GetDisabled()) then
+			panel.set_color = panel.set_color:Darken(50)
+		elseif (panel.Depressed) then
+			panel.set_color = panel.set_color:Darken(35)
+		elseif (panel.Hovered) then
 			panel.set_color = panel.set_color:Darken(25)
 		end
 
-		derma.SkinFunc("DrawImportantBackground", 0, 0, width, height, panel.set_color)
+		surface.SetDrawColor(panel.set_color)
+		surface.DrawRect(0, 0, width, height)
+
+		surface.SetDrawColor(0, 0, 0, 180)
+		surface.DrawOutlinedRect(0, 0, width, height)
+
+		surface.SetDrawColor(180, 180, 180, 2)
+		surface.DrawOutlinedRect(1, 1, width - 2, height - 2)
 	end
 
 	self.moneyBtn.OnMousePressed = function(_, code)
 		if (code == MOUSE_LEFT) then
 			surface.PlaySound("ui/buttonclick.wav")
 
-			Derma_NumericRequest(L"stash_title", L"stash_enter_money", self.money, function(text)
+			Derma_NumericRequest("", L"stash_enter_money", self.money, function(text)
 				local amount = math.max(0, math.Round(tonumber(text) or 0))
 
 				if (amount != 0) then

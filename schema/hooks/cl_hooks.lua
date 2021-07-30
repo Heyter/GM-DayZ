@@ -266,6 +266,7 @@ hook.Add("CreateMenuButtons", "ixInventory", function(tabs)
 	tabs["inv"] = {
 		bDefault = true,
 		Create = function(info, container)
+			local character = LocalPlayer():GetCharacter()
 			local canvas = container:Add("DTileLayout")
 			local canvasLayout = canvas.PerformLayout
 			canvas.PerformLayout = nil -- we'll layout after we add the panels instead of each time one is added
@@ -284,7 +285,7 @@ hook.Add("CreateMenuButtons", "ixInventory", function(tabs)
 			panel.bNoBackgroundBlur = true
 			panel.childPanels = {}
 
-			local inventory = LocalPlayer():GetCharacter():GetInventory()
+			local inventory = character:GetInventory()
 
 			if (inventory) then
 				panel:SetInventory(inventory)
@@ -292,30 +293,27 @@ hook.Add("CreateMenuButtons", "ixInventory", function(tabs)
 
 			ix.gui.inv1 = panel
 
-			local panel2 = panel:Add("EditablePanel")
-			panel2:Dock(BOTTOM)
-			panel2:DockPadding(1, 1, 1, 1)
-			panel:SetTall(panel:GetTall() + panel2:GetTall() + 4)
-
-			local money = panel2:Add("ixStashMoney")
-			money:Dock(FILL)
-			money:SetMoney(LocalPlayer():GetCharacter():GetMoney())
-			money.Think = function(t)
-				if (t.money != LocalPlayer():GetCharacter():GetMoney()) then
-					t:SetMoney(LocalPlayer():GetCharacter():GetMoney())
+			local invMoney = panel:Add("ixStashMoney")
+			invMoney.moneyBtn:SetTooltip(L"text_rmb_dropallmoney")
+			invMoney:SetMoney(character:GetMoney())
+			invMoney:SetVisible(true)
+			invMoney.Think = function(t)
+				if (t.money != character:GetMoney()) then
+					t:SetMoney(character:GetMoney())
 				end
 			end
-			money.OnTransfer = function(_, amount, keyCode)
-				if (LocalPlayer():GetCharacter():GetMoney() <= 0) then
+			invMoney.OnTransfer = function(_, amount, keyCode)
+				if (character:GetMoney() <= 0) then
 					return
 				end
 
 				if (keyCode == MOUSE_RIGHT) then
-					amount = LocalPlayer():GetCharacter():GetMoney()
+					amount = character:GetMoney()
 				end
 
 				LocalPlayer():ConCommand("say /DropMoney " .. amount)
 			end
+			panel:SetTall(panel:GetTall() + invMoney:GetTall() + 2)
 
 			if (ix.option.Get("openBags", true)) then
 				for _, v in pairs(inventory:GetItems()) do
