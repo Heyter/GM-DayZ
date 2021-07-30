@@ -102,4 +102,10 @@ if (CLIENT) then
 			)
 		cam.End2D()
 	end)
+
+	hook.Add( "HUDShouldDraw", "Hide_CHudDamageIndicator", function( name )
+		if (name == "CHudDamageIndicator" and LocalPlayer():Health() <= 0) then
+			return false
+		end
+	end)
 end

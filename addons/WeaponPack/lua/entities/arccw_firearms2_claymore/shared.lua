@@ -9,8 +9,9 @@ ENT.AdminSpawnable = false
 ENT.Model = "models/weapons/fas2/world/explosives/m18a1.mdl"
 ENT.Ammo = "arccw_firearms2_nade_claymore"
 ENT.FuseTime = 120
-ENT.Armed = false
 ENT.RenderGroup = RENDERGROUP_BOTH
+
+ENT.bNoPersist = true
 
 if (CLIENT) then
 	ENT.MatLaser = Material("sprites/tp_beam001") -- sprites/physbeama ; sprites/physgbeamb
@@ -21,6 +22,10 @@ end
 
 ENT.BaseHealth = 1
 ENT.RangeDistance = 200 -- Дистанция обнаружения
+
+function ENT:SetupDataTables()
+	self:NetworkVar("Bool", 0, "Armed")
+end
 
 if (CLIENT) then
 	local red = Color(255, 0, 0)
@@ -36,14 +41,16 @@ if (CLIENT) then
 		if (LocalPlayer():GetPos():DistToSqr(self:GetPos()) > 1048576) then return end -- 1024 * 1024
 		self:DrawModel()
 
-		local v1 = self:GetPos() + self:GetForward() + self:GetUp() * 12
-		local v2 = self:GetPos() + self:GetRight() * 5 + self:GetForward() * 10 + self:GetUp() * 12
-		render.SetMaterial(self.MatLaser)
-		render.DrawBeam(v1, v2, 1, 0, 1, red)
+		if (self:GetArmed()) then
+			local v1 = self:GetPos() + self:GetForward() + self:GetUp() * 12
+			local v2 = self:GetPos() + self:GetRight() * 5 + self:GetForward() * 10 + self:GetUp() * 12
+			render.SetMaterial(self.MatLaser)
+			render.DrawBeam(v1, v2, 1, 0, 1, red)
 
-		v2 = self:GetPos() + self:GetRight() * -5 + self:GetForward() * 10 + self:GetUp() * 12
-		render.SetMaterial(self.MatLaser)
-		render.DrawBeam(v1, v2, 1, 0, 1, red)
+			v2 = self:GetPos() + self:GetRight() * -5 + self:GetForward() * 10 + self:GetUp() * 12
+			render.SetMaterial(self.MatLaser)
+			render.DrawBeam(v1, v2, 1, 0, 1, red)
+		end
 
 		--[[ DEBUG CODE ]]
 --[[ 		local mins = self:OBBMins()

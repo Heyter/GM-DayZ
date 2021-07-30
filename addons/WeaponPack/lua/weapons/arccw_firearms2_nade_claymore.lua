@@ -151,12 +151,12 @@ function SWEP:Throw()
     self:SetGrenadePrimed(false)
 	if !istable(self.claymoreData) then return end
 
-	local owner = self.claymoreData[3]
+	self:PlayAnimation("throw", 1, false, 0, true)
+	self:SetTimer(0.5, function()
+		local owner = self.claymoreData[3]
 
-	if (IsValid(owner) and owner:Alive()) then
-		self:PlayAnimation("throw", 1, false, 0, true)
-
-		self:SetTimer(0.5, function()
+		if (IsValid(owner) and owner:Alive()) then
+			local item = SERVER and self.ixItem
 			local trace = self.claymoreData[1]
 			local ang = trace.HitNormal:Angle()
 			ang.pitch = ang.pitch + 90
@@ -171,20 +171,51 @@ function SWEP:Throw()
 			entity:Spawn()
 			entity:Activate()
 
-			self:TakePrimaryAmmo(1)
-
-			if self:Clip1() == 0 and self:Ammo1() >= 1 and !self.Singleton then
-				self:SetClip1(1)
-				owner:SetAmmo(self:Ammo1() - 1, self.Primary.Ammo)
+			if (item and item.Unequip) then
+				item:Unequip(owner, false, true)
+				entity.isIxItem = true
 			else
-				owner:StripWeapon(self:GetClass())
+				self:TakePrimaryAmmo(1)
+
+				if self:Clip1() == 0 and self:Ammo1() >= 1 and !self.Singleton then
+					self:SetClip1(1)
+					owner:SetAmmo(self:Ammo1() - 1, self.Primary.Ammo)
+				else
+					owner:StripWeapon(self:GetClass())
+				end
 			end
-		end)
-		self:SetTimer(self:GetAnimKeyTime("throw"), function()
-			if !self:IsValid() then return end
-			self:PlayAnimation("draw")
-		end)
-	end
+
+			if (SH_SZ) then
+				local armed = true
+
+				if (owner:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) != SH_SZ.OUTSIDE) then
+					armed = nil
+				end
+
+				if (armed) then
+					for _, sz in ipairs(SH_SZ.SafeZones or {}) do
+						if (IsValid(sz.zone) and owner:GetPos():DistToSqr(sz.points[1]) <= (sz.size * sz.size) * 2) then
+							armed = nil
+							break
+						end
+					end
+				end
+
+				entity:SetArmed(armed)
+
+				-- Отключить ENT:Think()
+				if (!armed) then
+					entity:AddEFlags(EFL_NO_THINK_FUNCTION)
+				end
+			else
+				entity:SetArmed(true)
+			end
+		end
+	end)
+	self:SetTimer(self:GetAnimKeyTime("throw"), function()
+		if !self:IsValid() then return end
+		self:PlayAnimation("draw")
+	end)
 
     self:SetNextPrimaryFire(CurTime() + 1)
     self.GrenadePrimeAlt = nil

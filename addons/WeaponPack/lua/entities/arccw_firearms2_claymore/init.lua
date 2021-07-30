@@ -14,7 +14,6 @@ function ENT:Initialize()
 	self:SetOwner(NULL)
 	self.FuseTime = CurTime() + GetConVar("arccw_equipmenttime"):GetInt()
 	self:EmitSound("fas2/claymore/claymore_plant.wav")
-	self.Armed = true
 
 	self.m_vecStart = self:GetPos() + self:GetUp() * 15
 	--self.m_vecEnd = self.m_vecStart + self:GetForward() * self.RangeDistance
@@ -29,33 +28,33 @@ function ENT:Initialize()
 end
 
 function ENT:Think()
-	if self.Armed then
-		if self.FuseTime < CurTime() then
-			self:Detonate()
-		end
+	if self.FuseTime < CurTime() then
+		self:Detonate(self:GetArmed())
+	end
 
+	if self:GetArmed() then
 		local tEnts = ents.FindInCone(self.m_vecStart, self.m_angForward, self.RangeDistance, 0.8)
 		for i = 1, #tEnts do
 			local v = tEnts[i]
 			if (IsValid(v) and (v:IsPlayer() or v:IsNPC() or v:IsNextBot())) then
 				self.traceData.endpos = v:NearestPoint(self.m_vecStart)
 				if (util.TraceHull(self.traceData).Entity == v) then
-					self:Detonate()
+					self:Detonate(true)
 					break
 				end
 			end
 		end
-
-		self:NextThink(CurTime() + 0.1)
-		return true
 	end
+
+	self:NextThink(CurTime() + 0.1)
+	return true
 end
 
 function ENT:OnTakeDamage(info)
 	self:SetHealth(self:Health() - info:GetDamage())
 
-	if (self:Health() <= 0 and self.Armed) then
-		self:Detonate()
+	if (self:Health() <= 0) then
+		self:Detonate(self:GetArmed())
 	end
 end
 
@@ -64,12 +63,12 @@ function ENT:UpdateTransmitState()
 end
 
 function ENT:Use(activator)
-	if activator:IsPlayer() then
-		if weapons.GetStored(self.Ammo).Primary.Ammo ~= "" then
-			activator:GiveAmmo(1, weapons.GetStored(self.Ammo).Primary.Ammo)
+	if (!self.isIxItem) then return end
+	if (activator:IsPlayer() and activator:GetCharacter()) then
+		if (!activator:GetCharacter():GetInventory():Add(self.Ammo, 1)) then
+			activator:NotifyLocalized("noFit")
+			return
 		end
-
-		activator:Give(self.Ammo, true)
 	end
 
 	self:EmitSound("weapons/arccw/c4/c4_disarm.wav", 75)
@@ -79,32 +78,32 @@ end
 -- Кешировать не забываем.
 local ang1 = Angle(0, 90, 0)
 local ang2 = Angle(0, 120, 0)
-function ENT:Detonate()
-	self.Armed = nil
+function ENT:Detonate(isArmed)
+	if (self.Detonated) then return end
+	self.Detonated = true
 
-	local ed = EffectData()
-	ed:SetOrigin(self:GetPos())
+	if (isArmed) then
+		local damage = 140
+		if self:WaterLevel() >= 1 then
+			ParticleEffect("water_explosion_final", self:GetPos(), ang1, self)
+			self:EmitSound("weapons/underwater_explode" .. math.random(3, 4) .. ".wav", 120, 100, 1, CHAN_AUTO)
 
-	local damage = 140
-	if self:WaterLevel() >= 1 then
-		ParticleEffect("water_explosion_final", ed:GetOrigin(), ang1, nil)
-		self:EmitSound("weapons/underwater_explode" .. math.random(3, 4) .. ".wav", 120, 100, 1, CHAN_AUTO)
+			damage = damage / 2
+		else
+			ParticleEffect("explosion_HE_claymore", self:GetPos(), ang2, self)
+			self:EmitSound("fas2/claymore/claymore_explode_1.wav", 100, 100, 1, CHAN_AUTO)
+			self:EmitSound("fas2/claymore/claymore_explode_1_distant", 140, 100, 1, CHAN_WEAPON)
+		end
 
-		damage = damage / 2
-	else
-		ParticleEffect("explosion_HE_claymore", ed:GetOrigin(), ang2, nil)
-		self:EmitSound("fas2/claymore/claymore_explode_1.wav", 100, 100, 1, CHAN_AUTO)
-		self:EmitSound("fas2/claymore/claymore_explode_1_distant", 140, 100, 1, CHAN_WEAPON)
+		local owner = self.Owner
+
+		if (!IsValid(owner)) then
+			owner = game.GetWorld()
+		end
+
+		self:SphereDamage(owner, self:GetPos(), self.ExplodeRadius, self.ExplodeDamage)
 	end
 
-	local owner = self.Owner
-
-	if (!IsValid(owner)) then
-		owner = game.GetWorld()
-	end
-
-	self:SphereDamage(owner, ed:GetOrigin(), self.ExplodeRadius, self.ExplodeDamage)
-	--util.BlastDamage(self, owner, ed:GetOrigin(), self.ExplodeRadius, self.ExplodeDamage)
 	self:Remove()
 end
 
