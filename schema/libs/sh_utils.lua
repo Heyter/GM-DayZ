@@ -10,7 +10,7 @@ if (CLIENT) then
 		local health, healthMax = client:Health(), client:GetMaxHealth()
 
 		if ((health / healthMax) < .95) then
-			health_color = ix.util.LerpColorHSV(nil, nil, healthMax, health, 0)
+			health_color = ix.color.LerpHSV(nil, nil, healthMax, health, 0)
 		end
 
 		return health_color

@@ -153,11 +153,11 @@ if (CLIENT) then
 			end
 
 			ix.squad.list[id] = nil
-			LocalPlayer():Notify("The leader has disbanded the squad!")
+			LocalPlayer():NotifyLocalized("squad_leader_disbanded")
 		elseif (ix.squad.list[id]) then
 			if (ix.squad.list[id].members[LocalPlayer():SteamID64()]) then
 				ix.squad.list[id].members[LocalPlayer():SteamID64()] = nil
-				LocalPlayer():Notify("You were kicked out of the squad!")
+				LocalPlayer():NotifyLocalized("squad_kicked")
 			end
 
 			local panel = ix.gui.squad
@@ -179,7 +179,7 @@ if (CLIENT) then
 		if (ix.squad.list[id]) then
 			ix.squad.list[id] = nil
 
-			LocalPlayer():Notify("You have successfully left the squad.")
+			LocalPlayer():NotifyLocalized("squad_successfully_left")
 		end
 	end)
 end

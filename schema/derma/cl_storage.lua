@@ -89,11 +89,11 @@ function PANEL:Init()
 		panel.set_color = ix.config.Get("color")
 
 		if (panel:GetDisabled()) then
-			panel.set_color = panel.set_color:Darken(50)
+			panel.set_color = ix.color.Darken(panel.set_color, 50)
 		elseif (panel.Depressed) then
-			panel.set_color = panel.set_color:Darken(35)
+			panel.set_color = ix.color.Darken(panel.set_color, 35)
 		elseif (panel.Hovered) then
-			panel.set_color = panel.set_color:Darken(25)
+			panel.set_color = ix.color.Darken(panel.set_color, 25)
 		end
 
 		surface.SetDrawColor(panel.set_color)
@@ -132,9 +132,16 @@ function PANEL:Init()
 	self.takeBtn:SizeToContents()
 	self.takeBtn.Paint = self.moneyBtn.Paint
 	self.takeBtn.DoClick = function()
-		if (IsValid(ix.gui.openedStorage) and ix.gui.openedStorage.storageID) then
+		local storage = ix.gui.openedStorage
+
+		if (IsValid(storage) and isnumber(storage.storageID)) then
+			local inventory = ix.item.inventories[storage.storageInventory.invID]
+			if (table.IsEmpty(inventory:GetItems(true)) and storage.storageMoney:GetMoney() == 0) then
+				return
+			end
+
 			net.Start("ixStorageTakeAll")
-				net.WriteUInt(ix.gui.openedStorage.storageID, 32)
+				net.WriteUInt(storage.storageID, 32)
 			net.SendToServer()
 		end
 	end

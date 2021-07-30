@@ -21,11 +21,11 @@ function PANEL:Init()
 		panel.set_color = ix.config.Get("color")
 
 		if (panel:GetDisabled()) then
-			panel.set_color = panel.set_color:Darken(50)
+			panel.set_color = ix.color.Darken(panel.set_color, 50)
 		elseif (panel.Depressed) then
-			panel.set_color = panel.set_color:Darken(35)
+			panel.set_color = ix.color.Darken(panel.set_color, 35)
 		elseif (panel.Hovered) then
-			panel.set_color = panel.set_color:Darken(25)
+			panel.set_color = ix.color.Darken(panel.set_color, 25)
 		end
 
 		surface.SetDrawColor(panel.set_color)

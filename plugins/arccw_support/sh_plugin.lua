@@ -291,6 +291,7 @@ function PLUGIN:InitPostEntity()
 
 					SWEP.Primary.DefaultClip = 0
 					SWEP.InitialDefaultClip = nil
+					SWEP.isIxItem = true
 
 					if (CLIENT) then
 						function SWEP:GetPresets() return {} end
@@ -358,7 +359,7 @@ if (CLIENT) then
 
 	local oldWeapon
 	function PLUGIN:PlayerWeaponChanged(client, weapon)
-		if (!IsValid(weapon) or oldWeapon == weapon) then return end
+		if (!IsValid(weapon) or oldWeapon == weapon or !weapon.isIxItem) then return end
 		oldWeapon = weapon
 
 		local weaponItem
@@ -381,7 +382,7 @@ if (CLIENT) then
 	end
 
 	function PLUGIN:ArcCW_PlayerCanAttach(client, weapon, attID, slot, detach)
-		if (ix.arccw_support.free_atts[attID]) then
+		if (ix.arccw_support.free_atts[attID] or !weapon.isIxItem) then
 			return
 		end
 

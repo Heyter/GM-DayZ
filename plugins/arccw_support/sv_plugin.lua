@@ -26,7 +26,7 @@ function ix.arccw_support.Attach(itemWeapon, attID)
 		end
 
 		if (mods[slot]) then
-			client:Notify("This type of item is already mounted on the weapon!")
+			client:NotifyLocalized("arccw_alreadyAttached")
 			return false
 		end
 
@@ -137,7 +137,9 @@ end
 function ix.arccw_support.InitWeapon(client, weapon)
 	if (IsValid(weapon) and IsValid(client)) then
 		for _, i in pairs(weapon.Attachments) do
-			i.Installed = nil
+			if (!i.Integral) then
+				i.Installed = nil
+			end
 		end
 
 		local weaponItem = weapon.ixItem
@@ -272,7 +274,7 @@ end)
 
 -- HOOKS --
 function PLUGIN:ArcCW_PlayerCanAttach(client, weapon, attID, slot, detach)
-	if (ix.arccw_support.free_atts[attID] or (client.StopArcAttach or 0) > CurTime()) then
+	if (ix.arccw_support.free_atts[attID] or !weapon.isIxItem or (client.StopArcAttach or 0) > CurTime()) then
 		return
 	end
 
@@ -323,7 +325,7 @@ function PLUGIN:ArcCW_PlayerCanAttach(client, weapon, attID, slot, detach)
 end
 
 function PLUGIN:PlayerCanPickupWeapon(client, weapon)
-	if (weapon.ArcCW and !weapon.Singleton) then
+	if (weapon.ArcCW and !weapon.Singleton and weapon.isIxItem) then
 		-- if (!ArcCW.EnableCustomization or GetConVar("arccw_enable_customization"):GetInt() < 0 or GetConVar("arccw_attinv_free"):GetBool()) then
 			-- return
 		-- end

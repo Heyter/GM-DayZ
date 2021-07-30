@@ -96,14 +96,14 @@ function ix.squad.ChangeRank(target, client)
 					character:SetSquadOfficer(1)
 					squad.members[steamID64] = 1
 
-					target:Notify("You were promoted to rank officer.")
-					client:NotifyLocalized("Member %s was promoted to rank officer.", target:Name())
+					target:NotifyLocalized("squad_promoted_rank")
+					client:NotifyLocalized("squad_promoted_rank2", target:Name())
 				else
 					character:SetSquadOfficer(0)
 					squad.members[steamID64] = 0
 
-					target:Notify("You were demoted to rank member.")
-					client:NotifyLocalized("Member %s was demoted to rank member.", target:Name())
+					target:NotifyLocalized("squad_demoted_rank")
+					client:NotifyLocalized("squad_demoted_rank2", target:Name())
 				end
 
 				squad:Sync()
@@ -131,8 +131,8 @@ function ix.squad.AddMember(target, client, bNotNotify)
 				squad:Sync()
 
 				if (!bNotNotify) then
-					client:NotifyLocalized("%s accepted your invitation to the squad.", target:Name())
-					target:NotifyLocalized("You have been added to a squad: %s", squad.name)
+					client:NotifyLocalized("squad_invite_accepted", target:Name())
+					target:NotifyLocalized("squad_invite_accepted2", squad.name)
 				end
 			end
 		end
@@ -237,11 +237,11 @@ function ix.squad.ChangeRank_Offline(steamID64, client)
 
 			if (squad.members[steamID64] == 0) then
 				squad.members[steamID64] = 1
-				client:NotifyLocalized("Member %s was promoted to rank officer.", steamID64)
+				client:NotifyLocalized("squad_promoted_rank2", steamID64)
 				is_officer = 1
 			else
 				squad.members[steamID64] = 0
-				client:NotifyLocalized("Member %s was demoted to rank member.", steamID64)
+				client:NotifyLocalized("squad_demoted_rank2", steamID64)
 			end
 
 			squad:Sync()

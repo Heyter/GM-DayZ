@@ -24,6 +24,8 @@ LANGUAGE = {
 	text_yes = "Yes",
 	text_no = "No",
 
+	global_ooc_disabled = "Global OOC is disabled on this server.",
+
 	// primary_needs
 	well_fed = "Well fed",
 	needs_hunger = "Hunger",
@@ -99,6 +101,7 @@ LANGUAGE = {
 
 	// ArcCW
 	["Empty clip"] = "Empty clip",
+	arccw_alreadyAttached = "This slot is occupied!",
 
 	Consume = "Consume",
 	Attach = "Attach",
@@ -134,6 +137,19 @@ LANGUAGE = {
 	squad_menu_text_demote = "Demote",
 	squad_menu_btn_kickmember = "Kick member",
 	squad_menu_text_kickmember = "Are you sure you want to kick %s from %s?",
+	squad_leader_disbanded = "The leader has disbanded the squad!",
+	squad_kicked = "You were kicked out of the squad!",
+	squad_successfully_left = "You have successfully left the squad.",
+	squad_create_wait = "The squad is in the process of being created, wait.",
+	squad_promoted_rank = "You were promoted to rank officer.",
+	squad_promoted_rank2 = "Member %s was promoted to rank officer.",
+	squad_demoted_rank = "You were demoted to rank member.",
+	squad_demoted_rank2 = "Member %s was demoted to rank member.",
+	squad_successfully_created = "Squad %s was successfully created!",
+	squad_invite = "%s invites you to his squad %s. Type in chat /saccept",
+	squad_invite_accepted = "%s accepted your invitation to the squad.",
+	squad_invite_accepted2 = "You have been added to a squad: %s",
+	
 
 	// Flash window
 	optFlashWindow = "Flash Window",

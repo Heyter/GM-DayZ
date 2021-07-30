@@ -41,7 +41,7 @@ if (CLIENT) then
 end
 
 function PLUGIN:InitializedChatClasses()
-	local clr_gray = color_white:Darken(100)
+	local clr_gray = ix.color.Darken(color_white, 100)
 
 	for _, v in ipairs({"me", "it", "roll", "looc"}) do
 		local class = ix.chat.classes[v]
@@ -117,7 +117,7 @@ function PLUGIN:InitializedChatClasses()
 			end
 
 			if (!ix.config.Get("allowGlobalOOC")) then
-				speaker:NotifyLocalized("Global OOC is disabled on this server.")
+				speaker:NotifyLocalized("global_ooc_disabled")
 				return false
 			else
 				local delay = ix.config.Get("oocDelay", 10)

@@ -186,7 +186,7 @@ function map.Open()
 			if (self:MouseInRect(x, y, ix.map.signSize[1], ix.map.signSize[2])) then
 				self:SetCursor(self.current_index and "blank" or "hand")
 
-				clr = Color(clr.r, clr.g, clr.b):Darken(25)
+				clr = ix.color.Darken(clr, 25)
 			end
 
 			--local x1, y1 = map.ToScreen(LocalPlayer():GetPos(), w, h)

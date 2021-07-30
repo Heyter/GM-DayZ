@@ -8,7 +8,7 @@ ix.config.SetDefault("maxCharacters", 1)
 ix.config.SetDefault("allowVoice", true)
 ix.config.SetDefault("communityURL", "https://steamcommunity.com/id/meow1337")
 ix.config.SetDefault("weaponAlwaysRaised", true)
-ix.config.SetDefault("color", Color(75, 119, 190, 255))
+--ix.config.SetDefault("color", Color(75, 119, 190, 255))
 ix.config.SetDefault("thirdperson", true)
 ix.config.SetDefault("itemPickupTime", 0)
 

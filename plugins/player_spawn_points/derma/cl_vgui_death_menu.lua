@@ -3,7 +3,7 @@ local function paint_button(t, w, h)
 	local clr = gray
 
 	if (t:IsHovered()) then
-		clr = gray:Lighten(15)
+		clr = ix.color.Lighten(gray, 15)
 	end
 
 	surface.SetDrawColor(clr)

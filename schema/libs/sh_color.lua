@@ -1,36 +1,34 @@
+ix.color = ix.color or {}
+
 local colorMeta = FindMetaTable('Color')
 
-do
-	function colorMeta:Pulsate(c) -- used for flashing colors
+function ix.color.Lighten(colot, amount)
+	return Color(
+		math.Clamp(colot.r + amount, 0, 255),
+		math.Clamp(colot.g + amount, 0, 255),
+		math.Clamp(colot.b + amount, 0, 255),
+		colot.a
+	)
+end
+
+function ix.color.Darken(colot, amount)
+	return Color(
+		math.Clamp(colot.r - amount, 0, 255),
+		math.Clamp(colot.g - amount, 0, 255),
+		math.Clamp(colot.b - amount, 0, 255),
+		colot.a
+	)
+end
+
+--do
+--[[ 	function colorMeta:Pulsate(c) -- used for flashing colors
 		return (math.abs(math.sin(CurTime() * c)))
 	end
 
 	function colorMeta:Fluctuate(c) -- used for flashing colors
 		return (math.cos(CurTime() * c) + 1) / 2
-	end
-
-	function colorMeta:Lighten(amt)
-	  return Color(
-		math.Clamp(self.r + amt, 0, 255),
-		math.Clamp(self.g + amt, 0, 255),
-		math.Clamp(self.b + amt, 0, 255),
-		self.a
-	  )
-	end
-
-	function colorMeta:Darken(amt)
-		return Color(
-			math.Clamp(self.r - amt, 0, 255),
-			math.Clamp(self.g - amt, 0, 255),
-			math.Clamp(self.b - amt, 0, 255),
-			self.a
-		)
-	end
-
-	function colorMeta:Alpha(amt)
-		return ColorAlpha(self, amt or 255)
-	end
-end
+	end ]]
+--end
 
 function Color(r, g, b, a)
 	return setmetatable({
@@ -73,19 +71,11 @@ do
 		end
 	end
 
-	function ix.util.RegisterColor(name, color, force)
+	function ix.color.Register(name, color, force)
 		if (!force and colors[name]) then return end
 
 		colors[name] = color
 	end
-end
-
-function colorMeta:Copy()
-	return Color(self.r, self.g, self.b, self.a)
-end
-
-function colorMeta:Unpack()
-	return self.r, self.g, self.b, self.a
 end
 
 do
@@ -95,7 +85,7 @@ do
 		return (val - min) / delta
 	end
 
-	function ix.util.LerpColorHSV(start_color, end_color, maxValue, currentValue, minValue)
+	function ix.color.LerpHSV(start_color, end_color, maxValue, currentValue, minValue)
 		start_color = Color("green")
 		end_color = Color("red")
 

@@ -24,6 +24,8 @@ LANGUAGE = {
 	text_yes = "Да",
 	text_no = "Нет",
 
+	global_ooc_disabled = "Глобальный OOC отключен на сервере.",
+
 	// primary_needs
 	well_fed = "Сыт",
 	needs_hunger = "Голод",
@@ -99,6 +101,7 @@ LANGUAGE = {
 
 	// ArcCW
 	["Empty clip"] = "Разрядить обойму",
+	arccw_alreadyAttached = "Этот слот занят!",
 
 	Consume = "Употребить",
 	Attach = "Прикрепить",
@@ -134,6 +137,18 @@ LANGUAGE = {
 	squad_menu_text_demote = "Понижение",
 	squad_menu_btn_kickmember = "Выгнать участника",
 	squad_menu_text_kickmember = "Вы уверены, что хотите выгнать %s из %s?",
+	squad_leader_disbanded = "Лидер распустил отряд!",
+	squad_kicked = "Вас исключили из отряда!",
+	squad_successfully_left = "Вы успешно покинули отряд.",
+	squad_create_wait = "Отряд находится в процессе создания, подождите.",
+	squad_promoted_rank = "Вас повысили до офицера.",
+	squad_promoted_rank2 = "Участник %s был повышен до офицера.",
+	squad_demoted_rank = "Вы были понижен до участника.",
+	squad_demoted_rank2 = "Участник %s был понижен до участника",
+	squad_successfully_created = "Отряд %s был успешно создан!",
+	squad_invite = "%s приглашает вас в свой отряд %s. Введите в чате /saccept",
+	squad_invite_accepted = "%s принял ваше приглашение в отряд.",
+	squad_invite_accepted2 = "Вы были добавлены в отряд: %s",
 
 	// Flash window
 	optFlashWindow = "Мигающее окно",

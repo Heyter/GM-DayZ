@@ -18,7 +18,7 @@ end
 if (CLIENT) then
 	function ITEM:PaintOver(item, w, h)
 		local rounds = item:GetData("rounds", item.ammoAmount)
-		local color = ix.util.LerpColorHSV(nil, nil, item.maxRounds, rounds, 0)
+		local color = ix.color.LerpHSV(nil, nil, item.maxRounds, rounds, 0)
 
 		draw.SimpleTextOutlined(rounds, "DermaDefault", 1, 5, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 	end

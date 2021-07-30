@@ -21,7 +21,7 @@ if (CLIENT) then
 
 		prefix = Format("%s %s", prefix, L"bleeding_blood_loss") -- КРОВОТЕЧЕНИЕ
 
-		return prefix, ix.util.LerpColorHSV(nil, nil, ix.bleeding.max_level, ix.bleeding.max_level - level, 0)
+		return prefix, ix.color.LerpHSV(nil, nil, ix.bleeding.max_level, ix.bleeding.max_level - level, 0)
 	end
 end
 

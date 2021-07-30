@@ -60,7 +60,7 @@ net.Receive("ixSquadCreate", function(_, client)
 	if ((client.ixSquadCreateTry or 0) < CurTime()) then
 		client.ixSquadCreateTry = CurTime() + 30
 	else
-		client:Notify("The squad is in the process of being created, wait.")
+		client:NotifyLocalized("squad_create_wait")
 		return
 	end
 
@@ -81,7 +81,7 @@ net.Receive("ixSquadCreate", function(_, client)
 			character:SetSquadID(squad.owner)
 			squad:Sync(client)
 
-			client:NotifyLocalized("Squad %s was successfully created!", squad.name)
+			client:NotifyLocalized("squad_successfully_created", squad.name)
 			client.ixSquadCreateTry = nil
 		end
 	end)
@@ -157,7 +157,7 @@ net.Receive("ixSquadInvite", function(_, client)
 	local target = net.ReadEntity()
 
 	if (IsValid(target) and client:GetPos():DistToSqr(target:GetPos()) < 160 * 160) then
-		target:NotifyLocalized("%s invites you to his squad %s. Type in chat /saccept", client:Nick(), squad.name)
+		target:NotifyLocalized("squad_invite", client:Nick(), squad.name)
 		target.squad_invite = {CurTime() + 30, client:UserID()}
 	end
 end)

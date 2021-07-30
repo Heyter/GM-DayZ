@@ -320,7 +320,6 @@ end)
 --[[ Storage take all items ]]
 util.AddNetworkString("ixStorageTakeAll")
 
--- TODO: если игрок закрыл меню, то брякать цикл
 net.Receive("ixStorageTakeAll", function(_, client)
 	local character = client:GetCharacter()
 	if (!character or !client:Alive()) then return end
