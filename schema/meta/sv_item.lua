@@ -77,7 +77,7 @@ function ITEM:Transfer(invID, x, y, client, noReplication, isLogical)
 	if (curInv) then
 		if (invID and invID > 0 and inventory) then
 			local targetInv = inventory
-			local isTakeItem = (self.invID or 0) == 0 and self.isStackable
+			local isTakeItem = (self.invID or 0) == 0 and self.isStackable -- при поднятие вещи с земли
 
 			if ((self.invID or 0) == 0 and !self.isStackable) then
 				local bagInv

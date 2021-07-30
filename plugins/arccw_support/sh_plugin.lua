@@ -412,3 +412,19 @@ if (CLIENT) then
 		end
 	end
 end
+
+-- Helix stuff
+do
+	local playerMeta = FindMetaTable("Player")
+	function playerMeta:IsWepRaised()
+		return true
+	end
+
+	function playerMeta:CanShootWeapon()
+		return true
+	end
+
+	if (SERVER) then
+		function playerMeta:SetWepRaised() end
+	end
+end
