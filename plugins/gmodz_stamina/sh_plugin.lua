@@ -32,6 +32,6 @@ ix.util.Include("sv_plugin.lua", "server")
 
 function PLUGIN:PlayerJumpModifier(client, brth)
 	if (brth) then
-		client.playerJumpModifier = math.max(0, client.playerJumpModifier - 50)
+		client.playerJumpModifier = 5
 	end
 end

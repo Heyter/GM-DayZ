@@ -103,6 +103,10 @@ function ITEM:Transfer(invID, x, y, client, noReplication, isLogical)
 					-- we are transferring this item from one inventory to another
 					curInv:Remove(self.id, false, true, true)
 
+					if (result == "stack") then
+						targetInv:Remove(self.id, false, true, true)
+					end
+
 					if (self.OnTransferred) then
 						self:OnTransferred(curInv, inventory)
 					end

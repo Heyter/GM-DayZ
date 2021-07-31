@@ -28,61 +28,63 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 		return false, "invalidItem"
 	end
 
-	if (!split and (item.invID or 0) == 0 and item.isStackable) then
-		local resetData
+	if (!split and item.isStackable) then
+		local remainingQuantity = ((item.data or {}).quantity or quantity)
+		local maxQuantity = item.maxQuantity
 
-		if (!isnumber(uniqueID)) then
-			resetData = true
-			item.data = (data or {})
-		end
+		if (remainingQuantity < maxQuantity) then
+			local resetData
 
-		local items = targetInv:GetItemsByUniqueID(item.uniqueID, true)
-
-		if (items) then
-			local remainingQuantity = ((item.data or {}).quantity or quantity)
-			local maxQuantity = item.maxQuantity
-
-			for _, targetItem in pairs(items) do
-				local targetQuantity = ((targetItem.data or {}).quantity or 1)
-				if (targetQuantity >= maxQuantity) then continue end
-				if (item.CanStack and item:CanStack(targetItem) == false) then continue end
-
-				local totalQuantity = targetQuantity + remainingQuantity
-				if (totalQuantity > maxQuantity) then
-					targetItem:SetData("quantity", maxQuantity)
-					item:SetData("quantity", totalQuantity - maxQuantity)
-					break
-				else
-					targetItem:SetData("quantity", remainingQuantity + targetQuantity)
-					remainingQuantity = 0
-					break
-				end
+			if (!isnumber(uniqueID)) then
+				resetData = true
+				item.data = (data or {})
 			end
 
-			if (remainingQuantity == 0) then
-				if (isnumber(uniqueID)) then
-					if (item.OnRemoved) then
-						item:OnRemoved()
+			local items = targetInv:GetItemsByUniqueID(item.uniqueID, true)
+
+			if (items) then
+				for _, targetItem in pairs(items) do
+					local targetQuantity = ((targetItem.data or {}).quantity or 1)
+					if (targetQuantity >= maxQuantity) then continue end
+					if (item.CanStack and item:CanStack(targetItem) == false) then continue end
+
+					local totalQuantity = targetQuantity + remainingQuantity
+					if (totalQuantity > maxQuantity) then
+						targetItem:SetData("quantity", maxQuantity)
+						item:SetData("quantity", totalQuantity - maxQuantity)
+						break
+					else
+						targetItem:SetData("quantity", remainingQuantity + targetQuantity)
+						remainingQuantity = 0
+						break
+					end
+				end
+
+				if (remainingQuantity == 0) then
+					if (isnumber(uniqueID)) then
+						if (item.OnRemoved) then
+							item:OnRemoved()
+						end
+
+						local query = mysql:Delete("ix_items")
+							query:Where("item_id", item.id)
+						query:Execute()
+
+						ix.item.instances[item.id] = nil
+						item = nil
 					end
 
-					local query = mysql:Delete("ix_items")
-						query:Where("item_id", item.id)
-					query:Execute()
+					if (resetData) then
+						item.data = {}
+					end
 
-					ix.item.instances[item.id] = nil
-					item = nil
+					return true, "stack"
 				end
-
-				if (resetData) then
-					item.data = {}
-				end
-
-				return true
 			end
-		end
 
-		if (resetData) then
-			item.data = {}
+			if (resetData) then
+				item.data = {}
+			end
 		end
 	end
 

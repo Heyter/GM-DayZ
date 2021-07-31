@@ -34,7 +34,7 @@ if (CLIENT) then
 	end)
 end
 
-hook.Add("PlayerSpeedModifier", "Clothes.PlayerSpeedModifier", function(client, walkSpeed)
+hook.Add("PlayerSpeedModifier", "Clothes.PlayerSpeedModifier", function(client, brth)
 	for _, v in pairs(client:GetClothesItem()) do
 		if (v.speedModify) then
 			client.playerSpeedModifier = client.playerSpeedModifier + v.speedModify
@@ -44,9 +44,11 @@ end)
 
 -- brth = отдышка
 hook.Add("PlayerJumpModifier", "Clothes.PlayerJumpModifier", function(client, brth)
-	for _, v in pairs(client:GetClothesItem()) do
-		if (v.jumpModify) then
-			client.playerJumpModifier = math.max(0, client.playerJumpModifier + v.jumpModify)
+	if (!brth) then
+		for _, v in pairs(client:GetClothesItem()) do
+			if (v.jumpModify) then
+				client.playerJumpModifier = math.max(0, client.playerJumpModifier + v.jumpModify)
+			end
 		end
 	end
 end)

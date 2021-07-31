@@ -6,8 +6,10 @@ local function CalcStaminaChange(client)
 
 	local runSpeed = ix.config.Get("runSpeed")
 	local walkSpeed = ix.config.Get("walkSpeed")
+	local brth = client:GetNetVar("brth", false)
+	local disableSprint = hook.Run("PlayerDisableSprint", client) or client.disableSprint or brth
 
-	if (client.disableSprint) then
+	if (disableSprint) then
 		runSpeed = walkSpeed
 	elseif (client:WaterLevel() > 1) then
 		runSpeed = runSpeed * 0.775
@@ -15,7 +17,7 @@ local function CalcStaminaChange(client)
 
 	local offset
 
-	if (client:KeyDown(IN_SPEED) and !client.disableSprint and client:GetVelocity():LengthSqr() >= (walkSpeed * walkSpeed)) then
+	if (client:KeyDown(IN_SPEED) and disableSprint and client:GetVelocity():LengthSqr() >= (walkSpeed * walkSpeed)) then
 		offset = -ix.config.Get("staminaDrain", 1)
 	else
 		offset = client:Crouching() and ix.config.Get("staminaCrouchRegeneration", 2) or ix.config.Get("staminaRegeneration", 1.75)
@@ -29,12 +31,12 @@ local function CalcStaminaChange(client)
 	if (current != value) then
 		client:SetLocalVar("stm", value)
 
-		if (value == 0 and !client:GetNetVar("brth", false)) then
+		if (value == 0 and !brth) then
 			client:SetRunSpeed(walkSpeed)
 			client:SetNetVar("brth", true)
 
 			-- hook.Run("PlayerStaminaLost", client)
-		elseif (value >= 25 and client:GetNetVar("brth", false)) then
+		elseif (value >= 25 and brth) then
 			client:SetRunSpeed(runSpeed)
 			client:SetJumpPower(ix.config.Get("jumpPower", 200))
 			client:SetNetVar("brth", nil)
@@ -82,6 +84,7 @@ function PLUGIN:KeyPress(client, key)
 				if (value < 0) then
 					client:SetNetVar("brth", true)
 					client:SetLocalVar("stm", 0)
+					client:SetRunSpeed(ix.config.Get("walkSpeed"))
 				else
 					client:ConsumeStamina(staminaUse)
 				end
@@ -104,4 +107,12 @@ function playerMeta:ConsumeStamina(amount)
 	local value = math.Clamp(current - amount, 0, 100)
 
 	self:SetLocalVar("stm", value)
+end
+
+function playerMeta:DisableStamina(bDisable)
+	if (!bDisable and !self:GetNetVar("brth", false)) then
+		self:SetRunSpeed(ix.config.Get("runSpeed"))
+	else
+		self:SetRunSpeed(ix.config.Get("walkSpeed"))
+	end
 end

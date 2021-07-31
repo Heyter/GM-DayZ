@@ -281,7 +281,7 @@ end
 function ITEM:OnEquipped(client)
 	if (self.disableSprint) then
 		client.disableSprint = true
-		client:SetRunSpeed(ix.config.Get("walkSpeed"))
+		client:DisableStamina(true)
 	end
 
 	client:SetClothesItem(self.outfitCategory, self)
@@ -289,7 +289,7 @@ end
 
 function ITEM:OnUnequipped(client)
 	client.disableSprint = nil
-	client:SetRunSpeed(ix.config.Get("runSpeed"))
+	client:DisableStamina(false)
 	client:SetClothesItem(self.outfitCategory, nil)
 end
 

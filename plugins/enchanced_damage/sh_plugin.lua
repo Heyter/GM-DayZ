@@ -62,36 +62,45 @@ end
 function PLUGIN:Move(client, mv)
 	if (!client:GetCharacter() or !client:Alive() or client:GetMoveType() != MOVETYPE_WALK) then return end
 
-	local additive, walkSpeed = 0, mv:GetMaxSpeed()
+	local walkSpeed = mv:GetMaxSpeed()
+	local brth = client:GetNetVar("brth", false)
 
 	if (client:HasBuff("adrenaline")) then
-		additive = additive + 30
-	end
-
-	if (client:IsBrokenLeg()) then
-		walkSpeed = (additive < 1 and client:GetWalkSpeed() * .8 or walkSpeed * .8) + additive
-	elseif (additive > 0) then
-		walkSpeed = walkSpeed + additive
+		walkSpeed = walkSpeed + 30
 	end
 
 	client.playerSpeedModifier = 0
-	hook.Run("PlayerSpeedModifier", client, walkSpeed)
-	walkSpeed = walkSpeed + client.playerSpeedModifier
+	hook.Run("PlayerSpeedModifier", client, brth)
+	walkSpeed = math.max(1, walkSpeed + client.playerSpeedModifier)
 
 	mv:SetMaxSpeed(walkSpeed)
 	mv:SetMaxClientSpeed(walkSpeed)
 
 	client.playerJumpModifier = ix.config.Get("jumpPower", 200)
-	hook.Run("PlayerJumpModifier", client, client:GetNetVar("brth", false))
+	hook.Run("PlayerJumpModifier", client, brth)
 
 	if (client:GetJumpPower() != client.playerJumpModifier) then
 		client:SetJumpPower(client.playerJumpModifier)
 	end
 end
 
-function PLUGIN:PlayerJumpModifier(client)
-	if (client:IsBrokenLeg()) then
+function PLUGIN:PlayerJumpModifier(client, brth)
+	if (client:IsBrokenLeg() and !brth) then
 		client.playerJumpModifier = math.max(0, client.playerJumpModifier - 100)
+	end
+end
+
+function PLUGIN:PlayerSpeedModifier(client, brth)
+	if (client:IsBrokenLeg()) then
+		client.playerSpeedModifier = client.playerSpeedModifier - 100
+	end
+end
+
+if (SERVER) then
+	function PLUGIN:PlayerDisableSprint(client)
+		if (client:IsBrokenLeg()) then
+			return true
+		end
 	end
 end
 
