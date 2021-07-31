@@ -60,7 +60,7 @@ function PLUGIN:ScaleNPCDamage(entity, hit_group, dmg_info)
 end
 
 function PLUGIN:Move(client, mv)
-	if (client:GetMoveType() != MOVETYPE_WALK) then return end
+	if (!client:GetCharacter() or !client:Alive() or client:GetMoveType() != MOVETYPE_WALK) then return end
 
 	local additive, walkSpeed = 0, mv:GetMaxSpeed()
 
@@ -73,6 +73,10 @@ function PLUGIN:Move(client, mv)
 	elseif (additive > 0) then
 		walkSpeed = walkSpeed + additive
 	end
+
+	client.playerSpeedModifier = 0
+	hook.Run("PlayerSpeedModifier", client, walkSpeed)
+	walkSpeed = walkSpeed + client.playerSpeedModifier
 
 	mv:SetMaxSpeed(walkSpeed)
 	mv:SetMaxClientSpeed(walkSpeed)

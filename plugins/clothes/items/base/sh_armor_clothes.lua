@@ -13,6 +13,9 @@ ITEM.spawnDurability = {0.6, 1}
 -- Категория для рем.комплекта, должно совпадать и в ремнаборе и здесь.
 ITEM.categoryKit = "armors"
 
+-- Модификатор скорости игрока (можно отрицательные значения).
+--ITEM.speedModify = 30
+
 --[[
 -- This will change a player's skin after changing the model. Keep in mind it starts at 0.
 ITEM.newSkin = 1

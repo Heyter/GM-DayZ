@@ -1,3 +1,6 @@
+util.AddNetworkString("ixClothesSet")
+util.AddNetworkString("ixClothesClear")
+
 local function DropHat(client, model, itemID, dir)
 	local entity = ents.Create("ix_item")
 	entity:Spawn()
@@ -51,7 +54,6 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 			item = item["suit"]
 			isHead = nil
 		end
-
 
 		hook.Run("PlayerTakeDamageClothes", client, damageInfo, attacker)
 		local damage = damageInfo:GetDamage()
@@ -118,15 +120,21 @@ end
 
 function PLUGIN:OnPlayerGraveCreate(client)
 	client.ixClothes = {}
+
+	net.Start("ixClothesClear")
+	net.Send(client)
 end
 
 FindMetaTable("Player").SetClothesItem = function(self, category, item)
 	self.ixClothes = self.ixClothes or {}
 	self.ixClothes[category] = item
-end
 
-FindMetaTable("Player").GetClothesItem = function(self)
-	return (self.ixClothes or {})
+	net.Start("ixClothesSet")
+		net.WriteString(category)
+		if (item) then
+			net.WriteUInt(item.id, 32)
+		end
+	net.Send(self)
 end
 
 --[[ concommand.Add("bot_ads", function()
