@@ -136,12 +136,47 @@ function PANEL:Init()
 
 		if (IsValid(storage) and isnumber(storage.storageID)) then
 			local inventory = ix.item.inventories[storage.storageInventory.invID]
-			if (table.IsEmpty(inventory:GetItems(true)) and storage.storageMoney:GetMoney() == 0) then
+			local items = inventory:GetItems(true)
+			local noMoney = storage.storageMoney:GetMoney() == 0
+			if (table.IsEmpty(items) and noMoney) then
 				return
+			end
+
+			local can_fit = false
+			if (noMoney) then
+				if (!IsValid(ix.gui.inv1)) then return end
+				inventory = LocalPlayer():GetCharacter():GetInventory()
+				local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
+
+				for _, v in pairs(items) do
+					if (!inventory:CanItemFitStack(v, true)) then
+						local w, h = v.width, v.height
+
+						for x = 1, invW do
+							for y = 1, invH do
+								if (ix.gui.inv1:IsAllEmpty(x, y, w, h)) then
+									can_fit = true
+									break
+								end
+							end
+							if can_fit then break end
+						end
+						if can_fit then break end
+					else
+						x2, y2 = 1, 1
+						break
+					end
+				end
+
+				if !can_fit then
+					LocalPlayer():NotifyLocalized("noFit")
+					return
+				end
 			end
 
 			net.Start("ixStorageTakeAll")
 				net.WriteUInt(storage.storageID, 32)
+				net.WriteBool(can_fit)
 			net.SendToServer()
 		end
 	end

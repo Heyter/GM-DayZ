@@ -362,13 +362,15 @@ net.Receive("ixStorageTakeAll", function(_, client)
 		ix.log.Add(client, "storageMoneyTake", entity, amount, total)
 	end
 
-	local items = inventory:GetItems(true)
-	local charInvID = character:GetInventory():GetID()
+	if (net.ReadBool()) then
+		local items = inventory:GetItems(true)
+		local charInvID = character:GetInventory():GetID()
 
-	if (charInvID > 0) then
-		for _, v in pairs(items) do
-			if (!IsValid(client) or !client:Alive() or !client.ixOpenStorage or !client:GetCharacter()) then break end
-			v:Transfer(charInvID, nil, nil, client)
+		if (charInvID > 0) then
+			for _, v in pairs(items) do
+				if (!IsValid(client) or !client:Alive() or !client.ixOpenStorage or !client:GetCharacter()) then break end
+				v:Transfer(charInvID, nil, nil, client)
+			end
 		end
 	end
 

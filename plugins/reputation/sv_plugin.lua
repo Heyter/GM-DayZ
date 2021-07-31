@@ -101,12 +101,21 @@ end
 
 function PLUGIN:PostPlayerLoadout(client)
 	local rep = client:GetReputation()
+	local repData = Schema.ranks[client:GetReputationLevel()] or {}
 
-	if (client.ResetPlayerModel) then
+	if (client.ResetPlayerModel and repData.setmodel) then
 		if (rep < 0) then
-			client:SetModel(Schema.BanditModels[ math.random( #Schema.BanditModels ) ])
+			if (isstring(repData.setmodel)) then
+				client:SetModel(repData.setmodel)
+			else
+				client:SetModel(Schema.BanditModels[ math.random( #Schema.BanditModels ) ])
+			end
 		elseif (rep > 0) then
-			client:SetModel(Schema.HeroModels[ math.random( #Schema.HeroModels ) ])
+			if (isstring(repData.setmodel)) then
+				client:SetModel(repData.setmodel)
+			else
+				client:SetModel(Schema.HeroModels[ math.random( #Schema.HeroModels ) ])
+			end
 		else
 			local model = client:GetCharacter():GetData("permament_model")
 
@@ -124,7 +133,7 @@ function PLUGIN:PostPlayerLoadout(client)
 		client.ResetPlayerModel = nil
 	end
 
-	if (rep / ix.config.Get("maxReputation", 1500) <= -0.5) then
+	if (repData.setmodel and rep < 0) then
 		client.IsBandit = true
 	else
 		client.IsBandit = nil

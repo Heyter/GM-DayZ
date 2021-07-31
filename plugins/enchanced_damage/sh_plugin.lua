@@ -81,17 +81,17 @@ function PLUGIN:Move(client, mv)
 	mv:SetMaxSpeed(walkSpeed)
 	mv:SetMaxClientSpeed(walkSpeed)
 
-	local jumpPower = ix.config.Get("jumpPower", 200)
-	jumpPower = hook.Run("PlayerStaminaJumpPower", client, jumpPower, client:GetNetVar("brth", false)) or jumpPower
+	client.playerJumpModifier = ix.config.Get("jumpPower", 200)
+	hook.Run("PlayerJumpModifier", client, client:GetNetVar("brth", false))
 
-	if (client:GetJumpPower() != jumpPower) then
-		client:SetJumpPower(jumpPower)
+	if (client:GetJumpPower() != client.playerJumpModifier) then
+		client:SetJumpPower(client.playerJumpModifier)
 	end
 end
 
-function PLUGIN:PlayerStaminaJumpPower(client, jumpPower, brth)
-	if (client:IsBrokenLeg() and !brth) then
-		return jumpPower * 0.4
+function PLUGIN:PlayerJumpModifier(client)
+	if (client:IsBrokenLeg()) then
+		client.playerJumpModifier = math.max(0, client.playerJumpModifier - 100)
 	end
 end
 

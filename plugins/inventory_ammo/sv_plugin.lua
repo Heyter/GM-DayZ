@@ -19,6 +19,12 @@ end
 
 -- Синхронизировать патроны из инвентаря по ammoID
 function playerMeta:UpdateInventoryAmmo(ammoID)
+	--print("UpdateInventoryAmmo", ammoID)
+
+	if (isnumber(ammoID)) then
+		ammoID = game.GetAmmoName(ammoID)
+	end
+
 	local count = 0
 
 	for _, v in pairs(self:GetItems()) do
@@ -32,6 +38,12 @@ end
 
 -- Забрать патроны из инвентаря
 function playerMeta:TakeInventoryAmmo(ammoID, amount)
+	--print("TakeInventoryAmmo", ammoID)
+
+	if (isnumber(ammoID)) then
+		ammoID = game.GetAmmoName(ammoID)
+	end
+
 	local clip1 = amount
 
 	for _, v in pairs(self:GetItems()) do

@@ -30,7 +30,7 @@ if (CLIENT) then
 	end)
 
 	net.Receive("ixClothesClear", function()
-		client.ixClothes = {}
+		LocalPlayer().ixClothes = {}
 	end)
 end
 
@@ -41,3 +41,38 @@ hook.Add("PlayerSpeedModifier", "Clothes.PlayerSpeedModifier", function(client, 
 		end
 	end
 end)
+
+-- brth = отдышка
+hook.Add("PlayerJumpModifier", "Clothes.PlayerJumpModifier", function(client, brth)
+	for _, v in pairs(client:GetClothesItem()) do
+		if (v.jumpModify) then
+			client.playerJumpModifier = math.max(0, client.playerJumpModifier + v.jumpModify)
+		end
+	end
+end)
+
+if (SERVER) then
+	hook.Add("PlayerFootstep", "Clothes.PlayerFootstep", function(client, _, foot, soundName, _)
+		for _, v in pairs(client:GetClothesItem()) do
+			if (v.isArmor and v.runSounds) then
+				client:EmitSound(v.runSounds[foot])
+				return true
+			end
+		end
+
+		client:EmitSound(soundName)
+		return true
+	end)
+else
+	hook.Add("PlayerFootstep", "Clothes.PlayerFootstep", function()
+		return true
+	end)
+end
+
+--[[ function PLUGIN:EntityEmitSound(data)
+    if !data.Entity:IsPlayer() then return end
+
+    if (data.SoundName):find("player/footsteps") then
+		return false
+    end
+end ]]

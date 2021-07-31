@@ -12,9 +12,22 @@ ITEM.spawnDurability = {0.6, 1}
 
 -- Категория для рем.комплекта, должно совпадать и в ремнаборе и здесь.
 ITEM.categoryKit = "armors"
+ITEM.isArmor = true
 
 -- Модификатор скорости игрока (можно отрицательные значения).
---ITEM.speedModify = 30
+-- ITEM.speedModify = 30
+
+-- Модификатор прыжка.
+-- ITEM.jumpModify = 50
+
+-- Запретить ли бегать (SHIFT)
+-- ITEM.disableSprint = true
+
+-- Изменение звука шагов (всего 2 шага. 0 и 1)
+--[[ ITEM.runSounds = {
+	[0] = "sound.wav",
+	[1] = "sound.wav"
+} ]]
 
 --[[
 -- This will change a player's skin after changing the model. Keep in mind it starts at 0.
@@ -266,10 +279,17 @@ function ITEM:OnRemoved()
 end
 
 function ITEM:OnEquipped(client)
+	if (self.disableSprint) then
+		client.disableSprint = true
+		client:SetRunSpeed(ix.config.Get("walkSpeed"))
+	end
+
 	client:SetClothesItem(self.outfitCategory, self)
 end
 
 function ITEM:OnUnequipped(client)
+	client.disableSprint = nil
+	client:SetRunSpeed(ix.config.Get("runSpeed"))
 	client:SetClothesItem(self.outfitCategory, nil)
 end
 
@@ -281,6 +301,14 @@ function ITEM:CanEquipOutfit()
 	return self:GetData("durability", self.defDurability or 100) > 0
 end
 
+if (SERVER) then
+	function ITEM:OnLoadout()
+		if (self:GetData("equip")) then
+			self:OnEquipped(self.player)
+		end
+	end
+end
+
 ITEM.functions.combine = {
 	OnCanRun = function(item, data)
 		if (!data or !data[1] or item.player and (item.player.nextUseItem or 0) > CurTime()) then
@@ -289,7 +317,7 @@ ITEM.functions.combine = {
 
 		if (CLIENT) then
 			local combineItem = ix.item.instances[data[1]]
-			if (!combineItem) then return false end
+			if (!combineItem or !item.useDurability) then return false end
 
 			if (combineItem.base == "base_repair_kit") then
 				if (!item.useDurability or item:GetData("durability", item.defDurability or 100) >= (item.defDurability or 100)) then return false end
@@ -303,7 +331,7 @@ ITEM.functions.combine = {
 		local combineItem = ix.item.instances[data[1]]
 		if (!combineItem) then return false end
 
-		if (combineItem.base == "base_repair_kit" and combineItem.categoryKit == item.categoryKit) then
+		if (combineItem.base == "base_repair_kit" and combineItem.categoryKit == item.categoryKit and item.useDurability) then
 			local maxD = item.defDurability or 100
 
 			if (item.useDurability and item:GetData("durability", maxD) < maxD) then

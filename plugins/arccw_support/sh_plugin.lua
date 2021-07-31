@@ -227,6 +227,7 @@ function PLUGIN:InitPostEntity()
 		local item, class, oldItem
 		local attachments = {}
 
+		-- Оружие
 		for _, SWEP in ipairs(weapons.GetList()) do
 			class = SWEP.ClassName
 
@@ -282,7 +283,7 @@ function PLUGIN:InitPostEntity()
 					if (SWEP.Primary.Ammo and #SWEP.Primary.Ammo > 0) then
 						for _, itemAmmo in pairs(ix.item.list) do
 							if ((itemAmmo.base == "base_ammo" or itemAmmo.base == "base_arccw_ammo") and itemAmmo.ammo == SWEP.Primary.Ammo) then
-								item.ammo = itemAmmo.uniqueID
+								item.ammo = itemAmmo.ammo
 								-- ix.item.list[item.ammo].maxRounds = SWEP.Primary.ForceDefaultClip or SWEP.Primary.ClipSize
 								break
 							end
@@ -305,6 +306,7 @@ function PLUGIN:InitPostEntity()
 			end
 		end
 
+		-- Обвесы на оружие
 		for attID, v in pairs(ArcCW.AttachmentTable) do
 			if (v.Free) then
 				ix.arccw_support.free_atts[attID] = 1
@@ -336,20 +338,23 @@ function PLUGIN:InitPostEntity()
 				end
 			end
 		end
-	end
-end
 
-function PLUGIN:InitializedPlugins()
-	game.AddAmmoType({
-		name = "762x39mm",
-		dmgtype = DMG_BULLET,
-		tracer = TRACER_LINE,
-		plydmg = 0,
-		npcdmg = 0,
-		force = 2000,
-		minsplash = 5,
-		maxsplash = 10
-	})
+		-- Добавление патронов в игру
+		for _, v in pairs(ix.item.list) do
+			if (v.base == "base_arccw_ammo") then
+				game.AddAmmoType({
+					name = v.ammo,
+					dmgtype = DMG_BULLET,
+					tracer = TRACER_LINE,
+					plydmg = 0,
+					npcdmg = 0,
+					force = 2000,
+					minsplash = 10,
+					maxsplash = 5
+				})
+			end
+		end
+	end
 end
 
 ix.util.Include("sv_plugin.lua")

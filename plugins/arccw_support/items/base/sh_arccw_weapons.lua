@@ -217,7 +217,7 @@ ITEM.functions.combine = {
 
 		if (CLIENT) then
 			local combineItem = ix.item.instances[data[1]]
-			if (!combineItem) then return false end
+			if (!combineItem or !item.useDurability) then return false end
 
 			if (combineItem.base == "base_repair_kit") then
 				if (!item.useDurability or item:GetData("durability", 100) >= 100) then return false end
@@ -237,7 +237,7 @@ ITEM.functions.combine = {
 			if (ix.arccw_support.Attach(item, combineItem.uniqueID)) then
 				combineItem:Remove()
 			end
-		elseif (combineItem.base == "base_repair_kit" and combineItem.categoryKit == self.categoryKit and item.useDurability and item:GetData("durability", 100) < 100) then
+		elseif (combineItem.base == "base_repair_kit" and combineItem.categoryKit == item.categoryKit and item.useDurability and item:GetData("durability", 100) < 100) then
 			combineItem:UseRepair(item, client)
 			client:SetLocalVar("WeaponDurability", nil)
 		end

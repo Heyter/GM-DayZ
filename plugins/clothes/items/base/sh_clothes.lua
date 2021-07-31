@@ -21,7 +21,13 @@ ITEM.spawnDurability = {0.5, 1}
 ITEM.categoryKit = "clothes"
 
 -- Модификатор скорости игрока (можно отрицательные значения).
---ITEM.speedModify = 30
+-- ITEM.speedModify = 30
+
+-- Модификатор прыжка.
+-- ITEM.jumpModify = 50
+
+-- Запретить ли бегать (SHIFT)
+-- ITEM.disableSprint = true
 
 --[[
 ITEM.pacData = {
@@ -203,10 +209,15 @@ function ITEM:OnRemoved()
 end
 
 function ITEM:OnEquipped(client)
+	if (self.disableSprint) then
+		client.disableSprint = true
+	end
+
 	client:SetClothesItem(self.outfitCategory, self)
 end
 
 function ITEM:OnUnequipped(client)
+	client.disableSprint = nil
 	client:SetClothesItem(self.outfitCategory, nil)
 end
 
@@ -218,6 +229,14 @@ function ITEM:CanEquipOutfit()
 	return self:GetData("durability", self.defDurability or 100) > 0
 end
 
+if (SERVER) then
+	function ITEM:OnLoadout()
+		if (self:GetData("equip")) then
+			self:OnEquipped(self.player)
+		end
+	end
+end
+
 ITEM.functions.combine = {
 	OnCanRun = function(item, data)
 		if (!data or !data[1] or item.player and (item.player.nextUseItem or 0) > CurTime()) then
@@ -226,7 +245,7 @@ ITEM.functions.combine = {
 
 		if (CLIENT) then
 			local combineItem = ix.item.instances[data[1]]
-			if (!combineItem) then return false end
+			if (!combineItem or !item.useDurability) then return false end
 
 			if (combineItem.base == "base_repair_kit") then
 				if (!item.useDurability or item:GetData("durability", 100) >= 100) then return false end
