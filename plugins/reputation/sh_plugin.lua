@@ -18,18 +18,8 @@ function Schema.AddReputationRank(level, name, color, langData)
 
 		Schema.ranks[level] = {name, color}
 	else
-		Schema.ranks[level] = {}
+		Schema.ranks[level] = true
 	end
-end
-
-function Schema.ModifyReputationRank(level, data)
-	local rank = Schema.ranks[level]
-
-	for k, v in pairs(data) do
-		rank[k] = v
-	end
-
-	Schema.ranks[level] = rank
 end
 
 do
@@ -37,19 +27,16 @@ do
 		english = "★ Rogue ★",
 		russian = "★ Изгой ★"
 	})
-	Schema.ModifyReputationRank(-6, {setmodel = true})
 
 	Schema.AddReputationRank(-5, "elite_bandit", Color(255, 0, 0), {
 		english = "★ Elite Bandit ★",
 		russian = "★ Элитный Бандит ★"
 	})
-	Schema.ModifyReputationRank(-5, {setmodel = true})
 
 	Schema.AddReputationRank(-4, "bandit", Color(255, 0, 0), {
 		english = "Bandit",
 		russian = "Бандит"
 	})
-	Schema.ModifyReputationRank(-4, {setmodel = true})
 
 	Schema.AddReputationRank(-3, "villain", Color(255, 0, 0), {
 		english = "Villain",
@@ -90,19 +77,16 @@ do
 		english = "Hero",
 		russian = "Герой"
 	})
-	Schema.ModifyReputationRank(4, {setmodel = true})
 
 	Schema.AddReputationRank(5, "elite_hero", Color(0, 150, 255), {
 		english = "★ Elite Hero ★",
 		russian = "★ Элитный Герой ★"
 	})
-	Schema.ModifyReputationRank(5, {setmodel = true})
 
 	Schema.AddReputationRank(6, "legend", Color(200, 0, 255), {
 		english = "★ Legend ★",
 		russian = "★ Легенда ★"
 	})
-	Schema.ModifyReputationRank(6, {setmodel = true})
 
 	Schema.rankLevels = #Schema.ranks
 	Schema.rankScaleRep = ix.config.Get("maxReputation", 1500) / Schema.rankLevels
