@@ -22,8 +22,6 @@ SWEP.PrimaryAuto = false
 
 SWEP.BulletsPerShoot = 1
 SWEP.FullShootDamage = 0
-
-SWEP.InternalSpreadDegrees = 0
 SWEP.MuzzleEffect = false
 
 SWEP.ShotSound = Sound("")
@@ -36,6 +34,9 @@ SWEP.NPCBurstMax = 0
 SWEP.NPCBurstDelay = 0
 SWEP.NPCRestMin = 0
 SWEP.NPCRestMax = 0
+
+SWEP.Tracer = 1
+SWEP.TracerType = "Tracer" -- https://wiki.facepunch.com/gmod/Enums/TRACER
 
 SWEP.Primary = {
 	Ammo = "None",
@@ -59,9 +60,6 @@ function SWEP:Initialize()
 
 	self:SetHoldType(self.HoldType)
 	self:SetClip1(self.PrimaryClip)
-
-	local spr = math.sin(math.rad(self.InternalSpreadDegrees)/2)
-	self.InternalSpread = Vector(spr,spr,spr)
 end
 
 function SWEP:OnReloaded()
@@ -71,9 +69,6 @@ function SWEP:OnReloaded()
 	self.Primary.Automatic = self.PrimaryAuto
 
 	self:SetHoldType(self.HoldType)
-
-	local spr = math.sin(math.rad(self.InternalSpreadDegrees)/2)
-	self.InternalSpread = Vector(spr,spr,spr)
 end
 
 function SWEP:CanPrimaryAttack()
@@ -88,15 +83,19 @@ function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
 
 	local owner = self:GetOwner()
+	local attach = self:GetAttachment(1)
+	self.InternalSpread = self.InternalSpread or math.sin(math.rad(self:GetNPCBulletSpread(owner:GetCurrentWeaponProficiency())) / 2)
 
 	owner:FireBullets({
 		Num = self.BulletsPerShoot,
 		Src = owner:GetShootPos(),
-		Dir = owner:GetAimVector(),
-		Spread = self.InternalSpread,
+		Dir = attach.Ang:Forward(), -- owner:GetAimVector(),
+		Spread = VectorRand(-self.InternalSpread, self.InternalSpread),
 		AmmoType = self:GetPrimaryAmmoType(),
 		Damage = self.FullShootDamage/self.BulletsPerShoot,
 		Attacker = owner,
+		Tracer = self.Tracer,
+		TracerName = self.TracerType
 	})
 
 	if SERVER and self.MuzzleEffect then
@@ -149,20 +148,16 @@ if CLIENT then
 		self:DrawModel()
 	end
 
-	function SWEP:GetTracerOrigin()
-		return wep:LookupAttachment("muzzle").Pos
-	end
-
 	net.Receive("SB_ANB_WEPBase.muzzle",function(len)
 		local wep = net.ReadEntity()
 		if !IsValid(wep) then return end
 
 		local ef = EffectData()
 		ef:SetEntity(wep)
-		ef:SetAttachment(wep:LookupAttachment("muzzle"))
+		ef:SetAttachment(1)
 		ef:SetScale(1)
 		ef:SetFlags(2)
-		util.Effect("MuzzleFlash",ef,false)
+		util.Effect("MuzzleFlash", ef, false)
 
 		if IsValid(wep:GetOwner()) then
 			wep:GetOwner():MuzzleFlash()

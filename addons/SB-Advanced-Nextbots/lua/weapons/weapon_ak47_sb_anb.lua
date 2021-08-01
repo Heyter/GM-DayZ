@@ -12,15 +12,13 @@ SWEP.PrimaryAuto = true
 
 SWEP.BulletsPerShoot = 1
 SWEP.FullShootDamage = 6
-
-SWEP.InternalSpreadDegrees = 0
 SWEP.MuzzleEffect = true
 
 SWEP.ShotSound = Sound("Weapon_smg1.NPC_Single")
 SWEP.ShotSoundLevel = 90
 SWEP.NextShootTime = 0.1
 
-SWEP.NPCSpreadDegrees = 5
+SWEP.NPCSpreadDegrees = 60 -- Разброс, чем выше значение тем сильнее.
 SWEP.NPCBurstMin = 2
 SWEP.NPCBurstMax = 5
 SWEP.NPCBurstDelay = 0.1

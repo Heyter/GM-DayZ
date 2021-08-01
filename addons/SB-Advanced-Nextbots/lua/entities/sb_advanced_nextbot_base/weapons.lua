@@ -351,7 +351,6 @@ end
 	Arg1: 
 	Ret1: Vector | Aim direction.
 --]]------------------------------------
-// TODO: Добавить оптимизацию, если виден враг, то делаем разброс (иначе нагрузка на CPU)
 function ENT:GetAimVector()
 	local dir = self:GetEyeAngles():Forward()
 
