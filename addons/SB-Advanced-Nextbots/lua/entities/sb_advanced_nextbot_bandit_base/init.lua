@@ -159,8 +159,14 @@ ENT.TaskList = {
 			if self.IsSeeEnemy then
 				self:SetDesiredEyeAngles((self.LastEnemyEyePos-self:GetShootPos()):Angle())
 
-				if IsValid(wep) and wep:Clip1() % wep:GetMaxClip1() == 0 then
-					self:WeaponReload()
+				if IsValid(wep) then
+					if (wep:Clip1() % wep:GetMaxClip1() == 0) then
+						self:WeaponReload()
+					end
+
+					if (wep:GetHoldType() != wep.HoldType) then
+						wep:SetHoldType(wep.HoldType)
+					end
 				end
 
 				if (self.CanMeleeAttack and self:IsInRange(self:GetEnemy(), self.MeleeAttackRange)) then
@@ -179,8 +185,14 @@ ENT.TaskList = {
 						self:ChooseSound("attack", math.random(5, 15))
 					end
 				end
-			elseif (IsValid(wep) and wep:Clip1() < wep:GetMaxClip1() / 2) then
-				self:WeaponReload()
+			elseif (IsValid(wep)) then
+				if (wep:Clip1() < wep:GetMaxClip1() / 2) then
+					self:WeaponReload()
+				end
+
+				if ((self.LastEnemyAlert or 0) < CurTime() and wep:GetHoldType() != "passive") then
+					wep:SetHoldType("passive")
+				end
 			end
 		end
 	},
@@ -233,12 +245,14 @@ ENT.TaskList = {
 
 				if self.IsSeeEnemy and IsValid(newenemy) then
 					self.LastEnemyPosition = newenemy:GetPos()
+					self.LastEnemyAlert = CurTime() + self.ForgetEnemyTime
 				end
 			end
 		end,
 		BehaveUpdate = function(self,data,interval)
 			self.UpdateEnemyHandler()
-		end
+		end,
+
 	},
 	["movement_handler"] = {
 		OnStart = function(self,data)
@@ -273,7 +287,7 @@ ENT.TaskList = {
 			end
 
 			self:StartTask(task,data)
-		end,
+		end
 	},
 	["movement_wait"] = {
 		OnStart = function(self,data)
@@ -749,7 +763,7 @@ end
 
 local INT_MIN = -2147483648
 function ENT:GetRelationship(ent)
-	if (self:GetClass() == ent:GetClass()) then
+	if (self:GetClass() == ent:GetClass() or ent:GetMoveType() == MOVETYPE_NOCLIP) then
 		return D_LI, INT_MIN
 	end
 

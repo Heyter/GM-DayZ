@@ -219,7 +219,6 @@ function ENT:TranslateActivity(act)
 		local newact
 		ProtectedCall(function() newact = self:GetActiveLuaWeapon():TranslateActivity(act) end)
 		self.m_PassIsNPCCheck = true
-		
 		return newact
 	end
 

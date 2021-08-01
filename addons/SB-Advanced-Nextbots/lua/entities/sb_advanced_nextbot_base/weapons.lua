@@ -16,19 +16,19 @@ for k,v in pairs(EngineAnalogs) do EngineAnalogsReverse[v] = k end
 --]]------------------------------------
 function ENT:Give(wepname)
 	local wep = ents.Create(wepname)
-	
+
 	if IsValid(wep) then
 		if !wep:IsScripted() and !EngineAnalogs[wepname] then
 			wep:Remove()
-			
+
 			return NULL
 		end
-	
+
 		wep:SetPos(self:GetPos())
 		wep:SetOwner(self)
 		wep:Spawn()
 		wep:Activate()
-		
+
 		return self:SetupWeapon(wep)
 	end
 end
@@ -51,17 +51,17 @@ end
 --]]------------------------------------
 function ENT:SetupWeapon(wep)
 	if !IsValid(wep) or wep==self:GetActiveWeapon() then return end
-	
+
 	-- Cannot hold engine weapons
 	if !wep:IsScripted() and !EngineAnalogs[wep:GetClass()] then return end
-	
+
 	-- Clear old weapon
 	if self:HasWeapon() then
 		self:GetActiveWeapon():Remove()
 	end
-	
+
 	ProtectedCall(function() self:OnWeaponEquip(wep) end)
-	
+
 	self:SetActiveWeapon(wep)
 	
 	-- Custom lua weapon analog for engine weapon, this need to have WEAPON metatable
@@ -77,32 +77,32 @@ function ENT:SetupWeapon(wep)
 		actwep:AddSolidFlags(FSOLID_NOT_SOLID)
 		actwep:AddEffects(EF_BONEMERGE)
 		actwep:SetTransmitWithParent(true)
-		
+
 		actwep:SetClip1(wep:Clip1())
 		actwep:SetClip2(wep:Clip2())
-		
+
 		hook.Add("Think",actwep,function(self)
 			wep:SetClip1(self:Clip1())
 			wep:SetClip2(self:Clip2())
 		end)
-		
+
 		hook.Add("EntityRemoved",actwep,function(self,ent)
 			if ent==wep then self:Remove() end
 		end)
 		actwep:DeleteOnRemove(wep)
-		
+
 		self.m_ActualWeapon = actwep
 	else
 		self.m_ActualWeapon = wep
 	end
-	
+
 	local actwep = self:GetActiveLuaWeapon()
 	actwep:SetWeaponHoldType(wep:GetHoldType())
-	
+
 	self:ReloadWeaponData()
-	
+
 	-- Actually setup weapon. Very similar to engine code.
-	
+
 	wep:SetVelocity(vector_origin)
 	wep:RemoveSolidFlags(FSOLID_TRIGGER)
 	wep:SetOwner(self)
@@ -115,9 +115,9 @@ function ENT:SetupWeapon(wep)
 	wep:AddSolidFlags(FSOLID_NOT_SOLID)
 	wep:SetLocalPos(vector_origin)
 	wep:SetLocalAngles(angle_zero)
-	
+
 	wep:SetTransmitWithParent(true)
-	
+
 	ProtectedCall(function() actwep:OwnerChanged() end)
 	ProtectedCall(function() actwep:Equip(self) end)
 	
@@ -351,14 +351,15 @@ end
 	Arg1: 
 	Ret1: Vector | Aim direction.
 --]]------------------------------------
+// TODO: Добавить оптимизацию, если виден враг, то делаем разброс (иначе нагрузка на CPU)
 function ENT:GetAimVector()
 	local dir = self:GetEyeAngles():Forward()
 
 	if self:HasWeapon() then
 		local deg = self:GetActiveLuaWeapon():GetNPCBulletSpread(self:GetCurrentWeaponProficiency())
-		deg = math.sin(math.rad(deg))/2
+		deg = math.sin(math.rad(deg)) / 2
 
-		dir:Add(Vector(math.Rand(-deg,deg),math.Rand(-deg,deg),math.Rand(-deg,deg)))
+		dir:Add(VectorRand(-deg, deg))
 	end
 
 	return dir
@@ -483,7 +484,7 @@ end
 	Ret1: bool | Should use bursts.
 --]]------------------------------------
 function ENT:ShouldWeaponAttackUseBurst(wep)
-	return true // TODO
+	return true // TODO: стрельба с задержкой между выстрелами
 end
 
 --[[------------------------------------
@@ -505,7 +506,7 @@ hook.Add("PlayerCanPickupWeapon","SBAdvancedNextBot",function(ply,wep)
 	end
 
 	-- Do not allow pickup engine weapon analogs
-	if EngineAnalogsReverse[wep:GetClass()] then
+	if EngineAnalogsReverse[wep:GetClass()] or wep.DontPickupWeapon then
 		return false
 	end
 end)
