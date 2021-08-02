@@ -74,13 +74,13 @@ ENT.LineOfSightMask = MASK_VISIBLE
 ENT.RandomWalkDistances = {25, 300}
 
 -- Bot's desired move speed
-ENT.MoveSpeed = 160
+ENT.MoveSpeed = 100
 
 -- Bot's desired run speed
 ENT.RunSpeed = 160
 
 -- Bot's desired walk speed
-ENT.WalkSpeed = 100
+ENT.WalkSpeed = 50
 
 ENT.AimSpeed = 200
 
@@ -116,7 +116,7 @@ function ENT:ChooseSound(key, delay, force)
 	elseif (key == "enemy_lost") then
 		soundPath = "gmodz/npc/bandit/search_" .. math.random(1, 18) .. ".ogg"
 	elseif (key == "friendly") then
-		soundPath = "gmodz/npc/bandit/search_" .. math.random(1, 5) .. ".ogg"
+		soundPath = "gmodz/npc/bandit/friendly_fire_" .. math.random(1, 9) .. ".ogg"
 	elseif (key == "attack") then
 		if (math.random(1, 2) == 1) then
 			soundPath = "gmodz/npc/bandit/attack_" .. math.random(1, 9) .. ".ogg"

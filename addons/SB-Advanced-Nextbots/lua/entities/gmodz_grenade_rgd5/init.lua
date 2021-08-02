@@ -34,7 +34,8 @@ function ENT:Explode()
 
 	local effect = EffectData()
 		effect:SetOrigin(pos)
-	util.Effect("Explosion", effect)
+	-- util.Effect("Explosion", effect)
+	ParticleEffect("explosion_grenade", effect:GetOrigin(), Angle(0, 0, 0), nil)
 
 	if (IsValid(self:GetOwner())) then
 		util.BlastDamage(self, self:GetOwner(), pos, self.Radius, self.Damage)

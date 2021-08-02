@@ -1,27 +1,27 @@
 AddCSLuaFile()
 
 SWEP.Base = "weapon_sb_anb_base"
-SWEP.PrintName = "AK47 SB ANB"
-SWEP.WorldModel = "models/weapons/fas2/world/rifles/ak47.mdl"
+SWEP.PrintName = "TOZ34 SB ANB"
+SWEP.WorldModel = "models/weapons/fas2/world/shotguns/toz34.mdl"
 SWEP.HoldType = "ar2"
 SWEP.Weight = 3
 
 SWEP.PrimaryAmmo = "SMG1"
-SWEP.PrimaryClip = 30
+SWEP.PrimaryClip = 2
 SWEP.PrimaryAuto = true
 
-SWEP.BulletsPerShoot = 1
-SWEP.FullShootDamage = 10
+SWEP.BulletsPerShoot = 12
+SWEP.FullShootDamage = 35
 SWEP.MuzzleEffect = true
 
-SWEP.ShotSound = Sound("Firearms2_AK47")
+SWEP.ShotSound = Sound("Firearms2_TOZ34")
 SWEP.ShotSoundLevel = 90
-SWEP.NextShootTime = 0.1
+SWEP.NextShootTime = 1
 
 SWEP.NPCSpreadDegrees = 100 -- Разброс, чем выше значение тем сильнее.
-SWEP.NPCBurstMin = 3
-SWEP.NPCBurstMax = 10
-SWEP.NPCBurstDelay = 0.1
+SWEP.NPCBurstMin = 1
+SWEP.NPCBurstMax = 1
+SWEP.NPCBurstDelay = 0.2
 SWEP.NPCRestMin = 0.75
 SWEP.NPCRestMax = 1
 

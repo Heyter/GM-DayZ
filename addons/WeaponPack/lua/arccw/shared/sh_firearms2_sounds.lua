@@ -111,7 +111,7 @@ ArcCW.Firearms2_Casings_ShotgunShell = {
 ARCCW_FAS_MS["Firearms2.Cloth_Movement"] = {"fas2/handling/generic_cloth_movement1.wav", "fas2/handling/generic_cloth_movement2.wav", "fas2/handling/generic_cloth_movement3.wav", "fas2/handling/generic_cloth_movement4.wav", "fas2/handling/generic_cloth_movement5.wav", "fas2/handling/generic_cloth_movement6.wav", "fas2/handling/generic_cloth_movement7.wav", "fas2/handling/generic_cloth_movement8.wav", "fas2/handling/generic_cloth_movement9.wav", "fas2/handling/generic_cloth_movement10.wav", "fas2/handling/generic_cloth_movement11.wav", "fas2/handling/generic_cloth_movement12.wav", "fas2/handling/generic_cloth_movement13.wav", "fas2/handling/generic_cloth_movement14.wav", "fas2/handling/generic_cloth_movement15.wav", "fas2/handling/generic_cloth_movement16.wav"}
 ARCCW_FAS_MS["Firearms2.Cloth_Fast"] = {"fas2/handling/generic_cloth_fast1.wav", "fas2/handling/generic_cloth_fast2.wav"}
 ARCCW_FAS_MS["Firearms2.Firemode_Switch"] = {"fas2/switch1.wav", "fas2/switch2.wav", "fas2/switch3.wav", "fas2/switch4.wav", "fas2/switch5.wav", "fas2/switch6.wav"}
--- ARCCW_FAS_MS["Firearms2.Magpouch"] = "fas2/handling/generic_magpouch1.wav"
+ARCCW_FAS_MS["Firearms2.Magpouch"] = "fas2/handling/generic_magpouch1.wav"
 ARCCW_FAS_MS["Firearms2.Magpouch_MachineGun"] = "fas2/handling/generic_magpouch_mg1.wav"
 ARCCW_FAS_MS["Firearms2.Magpouch_Pistol"] = "fas2/handling/generic_magpouch_pistol1.wav"
 ARCCW_FAS_MS["Firearms2.Magpouch_SMG"] = "fas2/handling/generic_magpouch_smg1.wav"
@@ -652,7 +652,7 @@ ARCCW_FAS_RIFLES_FS["Firearms2_AN94"] = {"fas2/an94/an94_fire1.wav", "fas2/an94/
 ARCCW_FAS_RIFLES_FS["Firearms2_GALIL"] = "fas2/galil/galil_fire1.wav"
 ARCCW_FAS_RIFLES_FS["Firearms2_TOZ34"] = "fas2/toz34/toz34_fire1.wav"
 ARCCW_FAS_RIFLES_FS["Firearms2_AK101"] = "fas2/ak101/ak101_fire1.wav"
-ARCCW_FAS_RIFLES_FS["Firearms2_REM870_TACTICAL"] = "fas2/rem870_tactical/rem870_tactical_fire1.wav"
+-- ARCCW_FAS_RIFLES_FS["Firearms2_REM870_TACTICAL"] = "fas2/rem870_tactical/rem870_tactical_fire1.wav"
 ARCCW_FAS_RIFLES_FS["Firearms2_RPG26"] = "fas2/rpg26/rpg26_fire1.wav"
 ARCCW_FAS_RIFLES_FS["Firearms2_AK104"] = "fas2/ak104/ak104_fire1.wav"
 ARCCW_FAS_RIFLES_FS["Firearms2_ASH12"] = "fas2/ash12/ash12_fire1.wav"
@@ -668,7 +668,7 @@ ARCCW_FAS_RIFLES_FS["Firearms2_KAR98K"] = "fas2/kar98k/kar98k_fire1.wav"
 ARCCW_FAS_RIFLES_FS["Firearms2_M40A3"] = "fas2/m40a3/m40a3_fire1.wav"
 ARCCW_FAS_RIFLES_FS["Firearms2_M110"] = "fas2/m110/m110_fire1.wav"
 ARCCW_FAS_RIFLES_FS["Firearms2_LR300"] = "fas2/lr300/lr300_fire1.wav"
-ARCCW_FAS_RIFLES_FS["Firearms2_MX4"] = "fas2/mx4/mx4_fire1.wav"
+-- ARCCW_FAS_RIFLES_FS["Firearms2_MX4"] = "fas2/mx4/mx4_fire1.wav"
 
 local tbl = {channel = CHAN_STATIC,
 	volume = 1,
