@@ -29,29 +29,35 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 	end
 
 	if (!split and item.isStackable) then
-		local remainingQuantity = ((item.data or {}).quantity or quantity)
-		local maxQuantity = item.maxQuantity
+		local resetData
+		local copyItem = item
+
+		if (!isnumber(uniqueID)) then
+			copyItem = setmetatable({id = uniqueID, data = (data or {})}, {
+				__index = item,
+				__eq = item.__eq,
+				__tostring = item.__tostring
+			})
+
+			resetData = true
+		end
+
+		local remainingQuantity = ((copyItem.data or {}).quantity or quantity)
+		local maxQuantity = copyItem.maxQuantity
 
 		if (remainingQuantity < maxQuantity) then
-			local resetData
-
-			if (!isnumber(uniqueID)) then
-				resetData = true
-				item.data = (data or {})
-			end
-
-			local items = targetInv:GetItemsByUniqueID(item.uniqueID, true)
+			local items = targetInv:GetItemsByUniqueID(copyItem.uniqueID, true)
 
 			if (items) then
 				for _, targetItem in pairs(items) do
 					local targetQuantity = ((targetItem.data or {}).quantity or 1)
 					if (targetQuantity >= maxQuantity) then continue end
-					if (item.CanStack and item:CanStack(targetItem) == false) then continue end
+					if (copyItem.CanStack and copyItem:CanStack(targetItem) == false) then continue end
 
 					local totalQuantity = targetQuantity + remainingQuantity
 					if (totalQuantity > maxQuantity) then
 						targetItem:SetData("quantity", maxQuantity)
-						item:SetData("quantity", totalQuantity - maxQuantity)
+						copyItem:SetData("quantity", totalQuantity - maxQuantity)
 						break
 					else
 						targetItem:SetData("quantity", remainingQuantity + targetQuantity)
@@ -62,29 +68,29 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 
 				if (remainingQuantity == 0) then
 					if (isnumber(uniqueID)) then
-						if (item.OnRemoved) then
-							item:OnRemoved()
+						if (copyItem.OnRemoved) then
+							copyItem:OnRemoved()
 						end
 
 						local query = mysql:Delete("ix_items")
-							query:Where("item_id", item.id)
+							query:Where("item_id", copyItem.id)
 						query:Execute()
 
-						ix.item.instances[item.id] = nil
-						item = nil
+						ix.item.instances[copyItem.id] = nil
+						copyItem = nil
 					end
 
 					if (resetData) then
-						item.data = {}
+						copyItem = nil
 					end
 
 					return true, "stack"
 				end
 			end
+		end
 
-			if (resetData) then
-				item.data = {}
-			end
+		if (resetData) then
+			copyItem = nil
 		end
 	end
 

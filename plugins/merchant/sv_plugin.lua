@@ -19,7 +19,7 @@ local save_count = 0
 
 net.Receive("ixMerchantTrade", function(len, client)
 	if ((client.ixMerchantTry or 0) < CurTime()) then
-		client.ixMerchantTry = CurTime() + 0.33
+		client.ixMerchantTry = CurTime() + 1
 	else
 		return
 	end
@@ -42,6 +42,8 @@ net.Receive("ixMerchantTrade", function(len, client)
 	local character = client:GetCharacter()
 	if (!character) then return end
 
+	local allStack = net.ReadBool()
+
 	if (isSellingToVendor) then -- продать торговцу шмот
 		local item = character:GetInventory():GetItems(true)[id]
 
@@ -57,14 +59,27 @@ net.Receive("ixMerchantTrade", function(len, client)
 			end
 		end
 
-		if (item:UseStackItem() and !item:Remove()) then
+		local result, newQuantity = item:UseStackItem(allStack, function(new, old)
+			local diff = old - (item.maxQuantity or 16)
+
+			if (diff > 0) then
+				return old - diff, new
+			end
+
+			return new, old
+		end)
+
+		if (result and !item:Remove()) then
 			character:GetInventory():HalfSync(client)
 			return client:NotifyLocalized("tellAdmin", "trd!iid")
 		end
 
 		local price = PLUGIN:CalculatePrice(item, isSellingToVendor, client)
+		price = price * newQuantity
 
-		character:GiveMoney(price)
+		if (price > 0) then
+			character:GiveMoney(price)
+		end
 		client:NotifyLocalized("businessSell", L(item.name, client), ix.currency.Get(price))
 
 		if (item.data) then
@@ -76,16 +91,38 @@ net.Receive("ixMerchantTrade", function(len, client)
 		end
 
 		local copyData = table.Copy(item.data or {})
-		copyData.quantity = 1
+		local index = #entity.items + 1
 
-		local item_id = #entity.items + 1
-		entity.items[item_id] = {
-			uniqueID = item.uniqueID,
-			price = price <= 0 and nil or price,
-			data = copyData
-		}
+		if (!item.isStackable) then
+			copyData.quantity = 1
+			entity.items[index] = {
+				uniqueID = item.uniqueID,
+				price = price,
+				data = copyData
+			}
+		else
+			copyData.quantity = nil
 
-		entity:SyncItems(item_id, entity.items[item_id], true)
+			for i, v in pairs(entity.items) do
+				if (v.uniqueID == item.uniqueID and v.price == price) then
+					index = i
+					break
+				end
+			end
+
+			local merchItem = entity.items[index] or {data = {}}
+			merchItem.uniqueID = merchItem.uniqueID or item.uniqueID
+			merchItem.price = merchItem.price or price
+			merchItem.data.quantity = (merchItem.data.quantity or 0) + newQuantity
+
+			for k, v in pairs(copyData) do
+				merchItem.data[k] = merchItem.data[k] or v
+			end
+
+			entity.items[index] = merchItem
+		end
+
+		entity:SyncItems(index, entity.items[index], true)
 		copyData = nil
 
 		save_count = save_count + 1
@@ -97,24 +134,55 @@ net.Receive("ixMerchantTrade", function(len, client)
 		local itemData = entity.items[id]
 		if (!itemData) then return end
 
+		local stockItem = ix.item.list[itemData.uniqueID]
+		if (!stockItem) then return end
+
 		local price = PLUGIN:CalculatePrice(itemData, isSellingToVendor, client)
 
+		local data
+		if (stockItem.isStackable) then
+			data = table.Copy(itemData.data or {})
+
+			if (allStack) then
+				local diff = data.quantity - (stockItem.maxQuantity or 16)
+
+				if (diff > 0) then
+					data.quantity = data.quantity - diff
+				end
+
+				price = price * data.quantity
+			else
+				data.quantity = 1
+			end
+		end
+
 		if (!character:HasMoney(price)) then
+			data = nil
 			return client:NotifyLocalized("canNotAfford")
 		end
 
-		if (!character:GetInventory():Add(itemData.uniqueID, 1, itemData.data)) then
+		if (!character:GetInventory():Add(itemData.uniqueID, 1, data or itemData.data)) then
 			client:NotifyLocalized("noFit")
 			return
 		end
 
-		local name = L(ix.item.list[itemData.uniqueID].name, client)
+		if (price > 0) then
+			character:TakeMoney(price)
+		end
+		client:NotifyLocalized("businessPurchase", L(stockItem.name, client), ix.currency.Get(price))
 
-		character:TakeMoney(price)
-		client:NotifyLocalized("businessPurchase", name, ix.currency.Get(price))
+		if (allStack and stockItem.isStackable and data) then
+			itemData.data.quantity = itemData.data.quantity - data.quantity
+		else
+			itemData.data.quantity = itemData.data.quantity - 1
+		end
 
-		entity.items[id] = nil
-		entity:SyncItems(id, nil, false)
+		if (itemData.data.quantity < 1) then
+			entity.items[id] = nil
+		else
+			entity.items[id] = itemData
+		end
+		entity:SyncItems(id, entity.items[id], false)
 
 		save_count = save_count + 1
 		if (save_count >= 15) then
@@ -129,6 +197,8 @@ function PLUGIN:SetRandomItems(maxItems, scale)
 	local items = {}
 
 	if (maxItems > 0) then
+		local index, itemData
+
 		for i = 1, maxItems do
 			local itemID = Schema.GetRandomWeightedItem(scale)
 
@@ -136,25 +206,43 @@ function PLUGIN:SetRandomItems(maxItems, scale)
 				local item = ix.item.list[itemID]
 				if (!item) then continue end
 
-				local itemData = {}
+				itemData = {}
 
 				if (item.isStackable) then
 					itemData.quantity = 1
+
+					for k, v in ipairs(items) do
+						if (v.uniqueID == item.uniqueID) then
+							index = k
+							break
+						end
+					end
 				end
 
 				if (item.useDurability) then
-					itemData.durability = (item.defDurability or 100) * math.Rand(0.01, 0.5)
+					itemData.durability = (item.defDurability or 100) * math.Rand(0.1, 1)
 				end
 
-				table.insert(items, {
-					uniqueID = itemID,
-					price = math.max(0, PLUGIN:CalculatePrice(item, true) / ix.config.Get("merchantSellPerc", 0.7)),
-					data = itemData
-				})
+				if (index and item.isStackable) then
+					local merchItem = items[index] or {data = {}}
+					merchItem.uniqueID = merchItem.uniqueID or item.uniqueID
+					merchItem.price = merchItem.price or price
+					merchItem.data.quantity = (merchItem.data.quantity or 0) + 1
 
-				itemData = nil
+					items[index] = merchItem
+				else
+					table.insert(items, {
+						uniqueID = itemID,
+						price = math.max(0, math.ceil(PLUGIN:CalculatePrice(item, true) / ix.config.Get("merchantSellPerc", 0.7))),
+						data = itemData
+					})
+				end
+
+				index = nil
 			end
 		end
+
+		index, itemData = nil, nil
 	end
 
 	return items

@@ -31,19 +31,28 @@ function PANEL:DecStack(key)
 	return false
 end
 
+function PANEL:ResetPrice(amt)
+	self.calc_price = PLUGIN:CalculatePrice(self.itemTable, false, LocalPlayer())
+
+	if (!self.calc_price or self.calc_price <= 0) then
+		text = L"free":utf8upper()
+	else
+		text = ix.currency.Get(self.calc_price)
+	end
+
+	if (text and self.price:GetText() != text) then
+		self.price:SetText(text)
+	end
+end
+
 function PANEL:SetItem(itemTable)
-	self.calc_price = PLUGIN:CalculatePrice(itemTable, false, LocalPlayer())
 	self.itemTable = itemTable
 	self.key = 0
+	self.isStackable = itemTable.isStackable
 
 	self.price = self:Add("DLabel")
 	self.price:Dock(BOTTOM)
-
-	if (!self.calc_price or self.calc_price <= 0) then
-		self.price:SetText(L"free":utf8upper())
-	else
-		self.price:SetText(ix.currency.Get(self.calc_price))
-	end
+	self:ResetPrice()
 
 	self.price:SetContentAlignment(5)
 	self.price:SetTextColor(color_white)
@@ -74,7 +83,7 @@ function PANEL:SetItem(itemTable)
 	end)
 	self.icon.DoClick = function(this)
 		if ((LocalPlayer().next_merchant_click or 0) < CurTime()) then
-			LocalPlayer().next_merchant_click = CurTime() + 0.5
+			LocalPlayer().next_merchant_click = CurTime() + 1.25
 		else
 			return
 		end
@@ -110,6 +119,7 @@ function PANEL:SetItem(itemTable)
 		net.Start("ixMerchantTrade")
 			net.WriteUInt(self.key, 32)
 			net.WriteBool(false)
+			net.WriteBool(input.IsShiftDown())
 		net.SendToServer()
 	end
 
@@ -169,6 +179,18 @@ function PANEL:Paint(w, h)
 	surface.DrawOutlinedRect(0, 0, w, h, 1)
 end
 
+function PANEL:Think()
+	if (input.IsShiftDown()) then
+		if (!self.nextRecalcPrice) then
+			self.nextRecalcPrice = true
+			self:ResetPrice()
+		end
+	elseif (self.nextRecalcPrice) then
+		self:ResetPrice()
+		self.nextRecalcPrice = nil
+	end
+end
+
 vgui.Register("ixMerchantItem", PANEL, "DPanel")
 
 DEFINE_BASECLASS("Panel")
@@ -202,6 +224,10 @@ function PANEL:Init()
 	-- Inventory label -> money
 	self.invMoney = ix.gui.inv1:Add("ixStashMoney")
 	self.invMoney.moneyBtn.OnMousePressed = nil
+	self.invMoney.moneyBtn:SetEnabled(false)
+	self.invMoney.moneyBtn.UpdateColours = function(label)
+		return label:SetTextStyleColor(color_white)
+	end
 	self.invMoney:SetVisible(false)
 
 	-- Merchant
@@ -269,16 +295,36 @@ function PANEL:SetLocalInventory(inventory, money)
 	self.invMoney:SetMoney(money)
 end
 
-function PANEL:TakeItem(key, item)
-	local idxPanel = self:CanStackItem(item, key)
-	local panel = self.items[idxPanel]
+function PANEL:TakeItem(key, item, amt)
+	local panel
 
-	self.entityItems[key] = nil
-	PLUGIN.virtual_items[key] = nil
+	if (!item.isStackable) then
+		local idxPanel = self:CanStackItem(item, key)
+		panel = self.items[idxPanel]
 
-	if (IsValid(panel) and panel:DecStack(key)) then
-		self.items[idxPanel] = nil
-		panel = nil
+		self.entityItems[key] = nil
+		PLUGIN.virtual_items[key] = nil
+
+		if (IsValid(panel) and panel:DecStack(key)) then
+			self.items[idxPanel] = nil
+			panel = nil
+		end
+	else
+		panel = self.items[key]
+
+		if (IsValid(panel)) then
+			panel.stack = amt
+			PLUGIN.virtual_items[key]:SetData("quantity", panel.stack)
+
+			if (panel.stack <= 0) then
+				self.entityItems[key] = nil
+				PLUGIN.virtual_items[key] = nil
+				self.items[key] = nil
+
+				panel:Remove()
+				panel = nil
+			end
+		end
 	end
 end
 
@@ -291,13 +337,15 @@ end
 function PANEL:CanStackItem(item, default)
 	local index = default or item.id
 
-	for idx, panel in pairs(self.items) do
-		if (!IsValid(panel) or panel.itemTable.uniqueID != item.uniqueID) then continue end
+	if (!item.isStackable) then
+		for idx, panel in pairs(self.items) do
+			if (!IsValid(panel) or panel.itemTable.uniqueID != item.uniqueID) then continue end
 
-		if (item.CanStack and item:CanStack(panel.itemTable, true) and (item.price or 0) == (panel.itemTable.price or 0)
-			or table.IsEmpty(item.data) and table.IsEmpty(panel.itemTable.data)) then
-			index = idx
-			break
+			if (item.CanStack and item:CanStack(panel.itemTable, true) and (item.price or 0) == (panel.itemTable.price or 0)
+				or table.IsEmpty(item.data) and table.IsEmpty(panel.itemTable.data)) then
+				index = idx
+				break
+			end
 		end
 	end
 
@@ -321,9 +369,19 @@ function PANEL:AddItem(key, itemTable)
 		itemSlot.key = key
 		itemSlot.idxPanel = index
 
+		if (item.isStackable) then
+			itemSlot.stack = item.data.quantity
+			PLUGIN.virtual_items[key]:SetData("quantity", item.data.quantity)
+		end
+
 		self.items[index] = itemSlot
 	else
-		self.items[index]:IncStack(key)
+		if (item.isStackable) then
+			self.items[index].stack = item.data.quantity
+			PLUGIN.virtual_items[key]:SetData("quantity", item.data.quantity)
+		else
+			self.items[index]:IncStack(key)
+		end
 	end
 end
 
@@ -379,9 +437,9 @@ function PANEL:SetupMerchant(items, entity)
 		end
 	end
 
-	for k in pairs(items) do
+--[[ 	for k in pairs(items) do
 		items[k].id = k
-	end
+	end ]]
 
 	self.entityItems = items
 

@@ -54,4 +54,11 @@ if (CLIENT) then
 			hud:drawText(perc, L"Endurance":utf8upper() .. " " .. string.ToMinutesSeconds(time))
 		end
 	end
+
+	-- Right mouse button + SHIFT
+	function PLUGIN:ItemPressedRightShift(icon, item)
+		if (item.base == "base_food") then
+			return item.functions.use, "use"
+		end
+	end
 end

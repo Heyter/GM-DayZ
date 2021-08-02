@@ -66,11 +66,19 @@ function ENT:Use(activator)
 end
 
 function ENT:SyncItems(id, data, isSelling)
-	net.Start("ixMerchantSync")
-		net.WriteUInt(id, 32)
-		net.WriteBool(isSelling)
-		net.WriteTable(data or {})
-	net.Send(self.receivers)
+	if (#self.receivers > 0) then
+		for k, v in ipairs(self.receivers) do
+			if (!IsValid(v)) then
+				table.remove(self.receivers, k)
+			end
+		end
+
+		net.Start("ixMerchantSync")
+			net.WriteUInt(id, 32)
+			net.WriteBool(isSelling)
+			net.WriteTable(data or {})
+		net.Send(self.receivers)
+	end
 end
 
 function ENT:RemoveReceiver(client)

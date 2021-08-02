@@ -266,7 +266,7 @@ function PANEL:OnMousePressed(code)
 		if (!input.IsShiftDown()) then
 			self:DoRightClick()
 		else
-			self:DoRightShiftClick() -- quick equip/unequip items
+			self:DoRightShiftClick() -- quick use items
 		end
 	end
 end
@@ -276,26 +276,29 @@ function PANEL:DoRightShiftClick()
 	self.nextClickTime = CurTime() + 0.5
 
 	local itemTable = self.itemTable
-	local inventory = self.inventoryID
+	local invID = self.inventoryID
+	local inventory = ix.item.inventories[invID]
 
-	if (itemTable and inventory) then
+	if (itemTable and inventory and inventory:OnCheckAccess(LocalPlayer())) then
 		itemTable.player = LocalPlayer()
 
-		local info, action
+		local info, action = hook.Run("ItemPressedRightShift", self, itemTable, inventory)
 
-		if (itemTable:GetData("equip")) then
-			info = itemTable.functions.EquipUn
-			action = "EquipUn"
-		else
-			info = itemTable.functions.Equip
-			action = "Equip"
+		if !(info and action) then
+			if (itemTable:GetData("equip")) then
+				info = itemTable.functions.EquipUn
+				action = "EquipUn"
+			else
+				info = itemTable.functions.Equip
+				action = "Equip"
+			end
 		end
 
 		if (info and info.OnCanRun and info.OnCanRun(itemTable) != false) then
 			net.Start("ixInventoryAction")
 				net.WriteString(action)
 				net.WriteUInt(itemTable.id, 32)
-				net.WriteUInt(inventory, 32)
+				net.WriteUInt(invID, 32)
 				net.WriteTable({})
 			net.SendToServer()
 		end

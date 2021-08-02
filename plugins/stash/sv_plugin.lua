@@ -188,22 +188,19 @@ net.Receive("ixStashDepositItem", function(len, client)
 	end
 
 	local stash = character:GetStash()
-	local stashItem
 	local copyData = table.Copy(item.data or {})
+	local index = #stash + 1
 
 	if (!item.isStackable) then -- оружием там и прочее
 		copyData.quantity = 1
 
-		for i = 1, newQuantity do
-			stash[#stash + 1] = {
-				uniqueID = item.uniqueID,
-				data = copyData
-			}
-		end
+		stash[index] = {
+			uniqueID = item.uniqueID,
+			data = copyData
+		}
 	else
 		copyData.quantity = nil
 
-		local index = #stash + 1
 		for i, v in pairs(stash) do
 			if (v.uniqueID == item.uniqueID) then
 				index = i
@@ -211,7 +208,7 @@ net.Receive("ixStashDepositItem", function(len, client)
 			end
 		end
 
-		stashItem = stash[index] or {data = {}}
+		local stashItem = stash[index] or {data = {}}
 		stashItem.uniqueID = item.uniqueID
 		stashItem.data.quantity = (stashItem.data.quantity or 0) + newQuantity
 

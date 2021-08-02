@@ -12,4 +12,11 @@ if (SERVER) then
 
 		id = nil
 	end
+else
+	-- Right mouse button + SHIFT
+	function PLUGIN:ItemPressedRightShift(icon, item)
+		if (item.base == "base_medical") then
+			return item.functions.use, "use"
+		end
+	end
 end

@@ -26,7 +26,8 @@ ix.config.Add("merchantInterval", 120, "Интервал обновлений а
 })
 
 function PLUGIN:CalculatePrice(item, isSellingToVendor, client)
-	local price = ix.item.list[item.uniqueID].price or 0
+	local stockItem = ix.item.list[item.uniqueID]
+	local price = stockItem.price or 0
 	local scale = ix.config.Get("merchantSellPerc", 0.7)
 
 	if (isSellingToVendor) then
@@ -41,6 +42,23 @@ function PLUGIN:CalculatePrice(item, isSellingToVendor, client)
 
 	if (client) then
 		price = hook.Run("MerchantCalculatePrice", client, price, scale, isSellingToVendor) or price
+	end
+
+	if (CLIENT) then
+		if (input.IsShiftDown()) then
+			if (!self.nextRecalcPrice) then
+				local quantity = item.data.quantity or 1
+				local diff = quantity - (stockItem.maxQuantity or 16)
+
+				if (diff > 0) then
+					quantity = quantity - diff
+				end
+
+				price = price * quantity
+			end
+		else
+			self.nextRecalcPrice = nil
+		end
 	end
 
 	return math.max(0, math.floor(price))
@@ -79,7 +97,28 @@ if (CLIENT) then
 		end
 	end
 
-	function PLUGIN:CreateItemInteractionMenu(itemPanel, menu, item)
+	-- Left mouse button + SHIFT
+	function PLUGIN:ItemPressedLeftShift(icon, item, invID)
+		local character = LocalPlayer():GetCharacter()
+
+		if (IsValid(ix.gui.merchant) and item) then
+			if (item.CanSell and item:CanSell() == false) then
+				return
+			end
+
+			local inventory = character:GetInventory()
+
+			if (inventory and inventory.slots and inventory:GetID() == invID) then
+				net.Start("ixMerchantTrade")
+					net.WriteUInt(item:GetID(), 32)
+					net.WriteBool(true)
+					net.WriteBool(input.IsShiftDown())
+				net.SendToServer()
+			end
+		end
+	end
+
+	function PLUGIN:CreateItemInteractionMenu(_, menu, item)
 		if (IsValid(ix.gui.merchant) and item) then
 			if (item.CanSell and item:CanSell() == false) then
 				return
@@ -97,6 +136,7 @@ if (CLIENT) then
 				net.Start("ixMerchantTrade")
 					net.WriteUInt(item:GetID(), 32)
 					net.WriteBool(true)
+					net.WriteBool(input.IsShiftDown())
 				net.SendToServer()
 			end):SetImage("icon16/basket_put.png")
 		end
@@ -119,8 +159,36 @@ if (CLIENT) then
 			local panel = tooltip:AddRowAfter("name", "merchant_price")
 			panel:SetImportant()
 			panel:SetText(Format("%s: %s", L"price", price))
+			panel.lastText = panel:GetText()
 			panel:SetBackgroundColor(color_white)
 			panel:SizeToContents()
+			panel.Think = function(t)
+				if (input.IsShiftDown()) then
+					if (!t.nextRecalcPrice) then
+						t.nextRecalcPrice = true
+
+						local price = PLUGIN:CalculatePrice(item, item.invID and true or false, LocalPlayer())
+						local text
+
+						if (!price or price < 1) then
+							text = L"free":utf8upper()
+						else
+							text = ix.currency.Get(price)
+						end
+
+						if (text) then
+							t:SetText(Format("%s: %s", L"price", text))
+							t:SizeToContents()
+							tooltip:SizeToContents()
+						end
+					end
+				elseif (t.nextRecalcPrice) then
+					t.nextRecalcPrice = nil
+					t:SetText(t.lastText)
+					t:SizeToContents()
+					tooltip:SizeToContents()
+				end
+			end
 		end
 	end
 
@@ -135,7 +203,7 @@ if (CLIENT) then
 			local item = PLUGIN.virtual_items[id]
 
 			if (item) then
-				ix.gui.merchant:TakeItem(id, item)
+				ix.gui.merchant:TakeItem(id, item, data.data and data.data.quantity or 0)
 			end
 		else
 			ix.gui.merchant:AddItem(id, data)

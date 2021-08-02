@@ -18,7 +18,7 @@ function PANEL:Init()
 	self.moneyBtn.Paint = function(panel, width, height)
 		panel.set_color = ix.config.Get("color")
 
-		if (panel:GetDisabled()) then
+		if (!panel:IsEnabled()) then
 			panel.set_color = ix.config.Get("color")
 		elseif (panel.Depressed) then
 			panel.set_color = ix.color.Darken(panel.set_color, 35)

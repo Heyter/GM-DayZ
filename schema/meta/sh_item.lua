@@ -41,6 +41,10 @@ function ITEM:SetData(key, value, receivers, noSave, noCheckEntity)
 end
 
 function ITEM:UseStackItem(bMaxQuantity, callback)
+	if (!self.isStackable) then
+		bMaxQuantity = nil
+	end
+
 	local quantity = self:GetData("quantity", 1)
 	local newQuantity = quantity - (bMaxQuantity and quantity or 1)
 
