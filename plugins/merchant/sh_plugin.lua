@@ -98,23 +98,23 @@ if (CLIENT) then
 	end
 
 	-- Left mouse button + SHIFT
-	function PLUGIN:ItemPressedLeftShift(icon, item, invID)
-		local character = LocalPlayer():GetCharacter()
+	function PLUGIN:ItemPressedLeftShift(icon, item)
+		if ((LocalPlayer().next_merchant_click or 0) < CurTime()) then
+			LocalPlayer().next_merchant_click = CurTime() + 1.25
+		else
+			return
+		end
 
 		if (IsValid(ix.gui.merchant) and item) then
 			if (item.CanSell and item:CanSell() == false) then
 				return
 			end
 
-			local inventory = character:GetInventory()
-
-			if (inventory and inventory.slots and inventory:GetID() == invID) then
-				net.Start("ixMerchantTrade")
-					net.WriteUInt(item:GetID(), 32)
-					net.WriteBool(true)
-					net.WriteBool(input.IsShiftDown())
-				net.SendToServer()
-			end
+			net.Start("ixMerchantTrade")
+				net.WriteUInt(item:GetID(), 32)
+				net.WriteBool(true)
+				net.WriteBool(true)
+			net.SendToServer()
 		end
 	end
 

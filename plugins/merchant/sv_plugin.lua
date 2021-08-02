@@ -138,8 +138,8 @@ net.Receive("ixMerchantTrade", function(len, client)
 		if (!stockItem) then return end
 
 		local price = PLUGIN:CalculatePrice(itemData, isSellingToVendor, client)
-
 		local data
+
 		if (stockItem.isStackable) then
 			data = table.Copy(itemData.data or {})
 

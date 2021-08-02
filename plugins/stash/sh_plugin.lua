@@ -164,15 +164,9 @@ if (CLIENT) then
 	end
 
 	-- Left mouse button + SHIFT
-	function PLUGIN:ItemPressedLeftShift(icon, item, invID)
-		local character = LocalPlayer():GetCharacter()
-
+	function PLUGIN:ItemPressedLeftShift(icon, item)
 		if (IsValid(ix.gui.stash)) then
-			local inventory = character:GetInventory()
-
-			if (inventory and inventory.slots and inventory:GetID() == invID) then
-				PLUGIN:DepositItem(character, icon, item)
-			end
+			PLUGIN:DepositItem(LocalPlayer():GetCharacter(), icon, item)
 		end
 	end
 

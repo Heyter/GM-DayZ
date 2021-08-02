@@ -256,9 +256,9 @@ function PANEL:OnMousePressed(code)
 			self.clickX, self.clickY = input.GetCursorPos()
 		else
 			local itemTable = self.itemTable
-			local inventory = self.inventoryID
+			local inventory = ix.item.inventories[self.inventoryID]
 
-			if (itemTable and inventory) then
+			if (itemTable and inventory and inventory:OnCheckAccess(LocalPlayer())) then
 				hook.Run("ItemPressedLeftShift", self, itemTable, inventory)
 			end
 		end
