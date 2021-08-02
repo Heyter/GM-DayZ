@@ -1,5 +1,3 @@
-local black_clr = ColorAlpha(color_black, 200)
-
 local PLUGIN = PLUGIN
 
 local PANEL = {}
@@ -50,7 +48,7 @@ function PANEL:SetItem(itemTable)
 	self.price:SetContentAlignment(5)
 	self.price:SetTextColor(color_white)
 	self.price:SetFont("ixSmallFont")
-	self.price:SetExpensiveShadow(1, black_clr)
+	self.price:SetExpensiveShadow(1, ColorAlpha(color_black, 200))
 
 	self.name = self:Add("DLabel")
 	self.name:Dock(TOP)
@@ -58,7 +56,7 @@ function PANEL:SetItem(itemTable)
 	self.name:SetContentAlignment(5)
 	self.name:SetTextColor(color_white)
 	self.name:SetFont("ixSmallFont")
-	self.name:SetExpensiveShadow(1, black_clr)
+	self.name:SetExpensiveShadow(1, ColorAlpha(color_black, 200))
 	self.name.Paint = function(this, w, h)
 		surface.SetDrawColor(0, 0, 0, 75)
 		surface.DrawRect(0, 0, w, h)
@@ -120,7 +118,7 @@ function PANEL:SetItem(itemTable)
 	end
 
 	self.icon.PaintOver = function(t, w, h)
-		if (self.stack > 1 and ix.gui.merchant and ix.gui.merchant:CanStackItem(self.itemTable)) then
+		if (self.stack > 1) then
 			draw.SimpleTextOutlined("x" .. self.stack, "DermaDefault", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
@@ -147,6 +145,15 @@ function PANEL:SetItem(itemTable)
 end
 
 function PANEL:Paint(w, h)
+	surface.SetDrawColor(40, 40, 40, 255)
+	surface.DrawRect(0, 0, w, h)
+
+	local hovered = Color(60, 60, 60, 255) // todo: вынести в SKIN
+
+	if (self:IsHovered() or self.icon:IsHovered()) then
+		hovered = ix.config.Get("color")
+	end
+
 	if (GLOBAL_TOOLTIP and IsValid(GLOBAL_TOOLTIP[1]) 
 		and self.itemTable and GLOBAL_TOOLTIP[2].uniqueID != self.itemTable.uniqueID 
 		and GLOBAL_TOOLTIP[2].CanTooltip 
@@ -154,16 +161,18 @@ function PANEL:Paint(w, h)
 
 		surface.SetDrawColor(Color(125, 125, 125, 30))
 		surface.DrawRect(2, 2, w - 4, h - 4)
+
+		hovered = ix.config.Get("color")
 	end
+
+	surface.SetDrawColor(hovered)
+	surface.DrawOutlinedRect(0, 0, w, h, 1)
 end
 
 vgui.Register("ixMerchantItem", PANEL, "DPanel")
 
 DEFINE_BASECLASS("Panel")
 PANEL = {}
-
-PANEL.cCategoryRect = Color(38, 38, 38, 255)
-PANEL.cCategoryBorder = Color(204, 204, 204, 100)
 
 AccessorFunc(PANEL, "fadeTime", "FadeTime", FORCE_NUMBER)
 AccessorFunc(PANEL, "frameMargin", "FrameMargin", FORCE_NUMBER)
@@ -191,8 +200,8 @@ function PANEL:Init()
 	end
 
 	-- Inventory label -> money
-	self.invMoney = ix.gui.inv1:Add("ixTradeMoney")
-	self.invMoney:ViewOnly()
+	self.invMoney = ix.gui.inv1:Add("ixStashMoney")
+	self.invMoney.moneyBtn.OnMousePressed = nil
 	self.invMoney:SetVisible(false)
 
 	-- Merchant
@@ -203,6 +212,14 @@ function PANEL:Init()
 	self.invMerchant:SetDraggable(true)
 	self.invMerchant:SetSizable(false)
 	self.invMerchant.bNoBackgroundBlur = true
+	self.invMerchant.Paint = function(_, w, h)
+		surface.SetDrawColor(24, 24, 24, 255)
+		surface.DrawRect(0, 0, w, h)
+
+		-- Title
+		surface.SetDrawColor(60, 60, 60, 255)
+		surface.DrawRect(0, 0, w, 24)
+	end
 	self.invMerchant.Close = function(t)
 		self:Remove()
 	end
@@ -317,10 +334,16 @@ function PANEL:AddCategory(item)
 		cat.Header:SetFont("ixSmallFont")
 		cat.Header:SetContentAlignment(5)
 		cat.Header.Paint = function(t, w, h)
-			surface.SetDrawColor(self.cCategoryRect)
+			surface.SetDrawColor(40, 40, 40, 255)
 			surface.DrawRect(0, 0, w, h)
 
-			surface.SetDrawColor(self.cCategoryBorder)
+			local hovered = Color(60, 60, 60, 255)
+
+			if (t:IsHovered()) then
+				hovered = ix.config.Get("color")
+			end
+
+			surface.SetDrawColor(hovered)
 			surface.DrawOutlinedRect(0, 0, w, h, 1)
 		end
 		cat:SetLabel(L(item.category))

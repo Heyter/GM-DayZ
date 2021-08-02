@@ -1,6 +1,4 @@
-local black_clr = ColorAlpha(color_black, 200)
 local PLUGIN = PLUGIN
-
 local PANEL = {}
 
 AccessorFunc(PANEL, "money", "Money", FORCE_NUMBER)
@@ -21,7 +19,7 @@ function PANEL:Init()
 		panel.set_color = ix.config.Get("color")
 
 		if (panel:GetDisabled()) then
-			panel.set_color = ix.color.Darken(panel.set_color, 50)
+			panel.set_color = ix.config.Get("color")
 		elseif (panel.Depressed) then
 			panel.set_color = ix.color.Darken(panel.set_color, 35)
 		elseif (panel.Hovered) then
@@ -38,7 +36,7 @@ function PANEL:Init()
 		surface.DrawOutlinedRect(1, 1, width - 2, height - 2)
 	end
 
-	self.moneyBtn.OnMousePressed = function(_, code)
+	self.moneyBtn.OnMousePressed = function(t, code)
 		if (code == MOUSE_LEFT) then
 			surface.PlaySound("ui/buttonclick.wav")
 
@@ -107,6 +105,7 @@ end
 function PANEL:SetItem(itemTable)
 	self.itemTable = itemTable
 	self.key = 0
+	self.isStackable = itemTable.isStackable
 
 	self.name = self:Add("DLabel")
 	self.name:Dock(TOP)
@@ -114,7 +113,7 @@ function PANEL:SetItem(itemTable)
 	self.name:SetContentAlignment(5)
 	self.name:SetTextColor(color_white)
 	self.name:SetFont("ixSmallFont")
-	self.name:SetExpensiveShadow(1, black_clr)
+	self.name:SetExpensiveShadow(1, ColorAlpha(color_black, 200))
 	self.name.Paint = function(this, w, h)
 		surface.SetDrawColor(0, 0, 0, 75)
 		surface.DrawRect(0, 0, w, h)
@@ -133,7 +132,7 @@ function PANEL:SetItem(itemTable)
 	end)
 	self.icon.DoClick = function(this)
 		if ((LocalPlayer().next_stash_click or 0) < CurTime()) then
-			LocalPlayer().next_stash_click = CurTime() + 0.5
+			LocalPlayer().next_stash_click = CurTime() + 1.25
 		else
 			return
 		end
@@ -162,16 +161,29 @@ function PANEL:SetItem(itemTable)
 			end
 		end
 
+		local allStack = input.IsShiftDown()
 		net.Start("ixStashWithdrawItem")
 			net.WriteUInt(self.key, 32)
+			net.WriteBool(allStack)
 		net.SendToServer()
 
 		if (IsValid(ix.gui.stash)) then
-			ix.gui.stash:TakeItem(self.key, self.itemTable)
+			local quantity = 1
+
+			if (allStack and self.isStackable) then
+				quantity = self.itemTable:GetData("quantity", 1)
+				local diff = quantity - (self.itemTable.maxQuantity or 16)
+
+				if (diff > 0) then
+					quantity = quantity - diff
+				end
+			end
+
+			ix.gui.stash:TakeItem(self.key, self.itemTable, quantity)
 		end
 	end
 	self.icon.PaintOver = function(t, w, h)
-		if (self.stack > 1 and ix.gui.stash and ix.gui.stash:CanStackItem(self.itemTable)) then
+		if (self.stack > 1 and !self.isStackable) then
 			draw.SimpleTextOutlined("x" .. self.stack, "DermaDefault", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
@@ -198,6 +210,15 @@ function PANEL:SetItem(itemTable)
 end
 
 function PANEL:Paint(w, h)
+	surface.SetDrawColor(40, 40, 40, 255)
+	surface.DrawRect(0, 0, w, h)
+
+	local hovered = Color(60, 60, 60, 255) // todo: вынести в SKIN
+
+	if (self:IsHovered() or self.icon:IsHovered()) then
+		hovered = ix.config.Get("color")
+	end
+
 	if (GLOBAL_TOOLTIP and IsValid(GLOBAL_TOOLTIP[1]) 
 		and self.itemTable and GLOBAL_TOOLTIP[2].uniqueID != self.itemTable.uniqueID 
 		and GLOBAL_TOOLTIP[2].CanTooltip 
@@ -205,7 +226,12 @@ function PANEL:Paint(w, h)
 
 		surface.SetDrawColor(Color(125, 125, 125, 30))
 		surface.DrawRect(2, 2, w - 4, h - 4)
+
+		hovered = ix.config.Get("color")
 	end
+
+	surface.SetDrawColor(hovered)
+	surface.DrawOutlinedRect(0, 0, w, h, 1)
 end
 
 vgui.Register("ixStashItem", PANEL, "DPanel")
@@ -282,6 +308,14 @@ function PANEL:Init()
 	self.invStash:SetDraggable(true)
 	self.invStash:SetSizable(false)
 	self.invStash.bNoBackgroundBlur = true
+	self.invStash.Paint = function(_, w, h)
+		surface.SetDrawColor(24, 24, 24, 255)
+		surface.DrawRect(0, 0, w, h)
+
+		-- Title
+		surface.SetDrawColor(60, 60, 60, 255)
+		surface.DrawRect(0, 0, w, 24)
+	end
 	self.invStash.Close = function(t)
 		self:Remove()
 	end
@@ -341,16 +375,36 @@ function PANEL:SetLocalInventory(inventory, money)
 	self.invMoney:SetMoney(money)
 end
 
-function PANEL:TakeItem(key, item)
-	local idxPanel = self:CanStackItem(item, key)
-	local panel = self.items[idxPanel]
+function PANEL:TakeItem(key, item, amt)
+	local panel
 
-	self.entityItems[key] = nil
-	PLUGIN.virtual_items[key] = nil
+	if (!item.isStackable) then
+		local idxPanel = self:CanStackItem(item, key)
+		panel = self.items[idxPanel]
 
-	if (IsValid(panel) and panel:DecStack(key)) then
-		self.items[idxPanel] = nil
-		panel = nil
+		self.entityItems[key] = nil
+		PLUGIN.virtual_items[key] = nil
+
+		if (IsValid(panel) and panel:DecStack(key)) then
+			self.items[idxPanel] = nil
+			panel = nil
+		end
+	else
+		panel = self.items[key]
+
+		if (IsValid(panel)) then
+			panel.stack = math.max(0, panel.stack - (amt or 1))
+			PLUGIN.virtual_items[key]:SetData("quantity", panel.stack)
+
+			if (panel.stack <= 0) then
+				self.entityItems[key] = nil
+				PLUGIN.virtual_items[key] = nil
+				self.items[key] = nil
+
+				panel:Remove()
+				panel = nil
+			end
+		end
 	end
 end
 
@@ -363,13 +417,15 @@ end
 function PANEL:CanStackItem(item, default)
 	local index = default or item.id
 
-	for idx, panel in pairs(self.items) do
-		if (!IsValid(panel) or panel.itemTable.uniqueID != item.uniqueID) then continue end
+	if (!item.isStackable) then
+		for idx, panel in pairs(self.items) do
+			if (!IsValid(panel) or panel.itemTable.uniqueID != item.uniqueID) then continue end
 
-		if (item.CanStack and item:CanStack(panel.itemTable, true) and (item.price or 0) == (panel.itemTable.price or 0)
-			or table.IsEmpty(item.data) and table.IsEmpty(panel.itemTable.data)) then
-			index = idx
-			break
+			if (item.CanStack and item:CanStack(panel.itemTable, true) and (item.price or 0) == (panel.itemTable.price or 0)
+				or table.IsEmpty(item.data) and table.IsEmpty(panel.itemTable.data)) then
+				index = idx
+				break
+			end
 		end
 	end
 
@@ -390,9 +446,19 @@ function PANEL:AddItem(key, itemTable)
 		itemSlot.key = key
 		itemSlot.idxPanel = index
 
+		if (item.isStackable) then
+			itemSlot.stack = item.data.quantity
+			PLUGIN.virtual_items[key]:SetData("quantity", item.data.quantity)
+		end
+
 		self.items[index] = itemSlot
 	else
-		self.items[index]:IncStack(key)
+		if (item.isStackable) then
+			self.items[index].stack = item.data.quantity
+			PLUGIN.virtual_items[key]:SetData("quantity", item.data.quantity)
+		else
+			self.items[index]:IncStack(key)
+		end
 	end
 end
 
@@ -403,10 +469,16 @@ function PANEL:AddCategory(item)
 		cat.Header:SetFont("ixSmallFont")
 		cat.Header:SetContentAlignment(5)
 		cat.Header.Paint = function(t, w, h)
-			surface.SetDrawColor(self.cCategoryRect)
+			surface.SetDrawColor(40, 40, 40, 255)
 			surface.DrawRect(0, 0, w, h)
 
-			surface.SetDrawColor(self.cCategoryBorder)
+			local hovered = Color(60, 60, 60, 255)
+
+			if (t:IsHovered()) then
+				hovered = ix.config.Get("color")
+			end
+
+			surface.SetDrawColor(hovered)
 			surface.DrawOutlinedRect(0, 0, w, h, 1)
 		end
 		cat:SetLabel(L(item.category))
@@ -445,7 +517,7 @@ function PANEL:SetStash(items)
 
 	-- init items
 	for k, data in SortedPairs(items) do
-		if k == 0 then continue end
+		if (k == 0) then continue end
 
 		self:AddItem(k, data)
 	end
@@ -495,12 +567,12 @@ function PANEL:Think()
 				end
 
 				-- Resync
-				local count = self.character:GetStashCount()
-				if (table.IsEmpty(self.categoryPanels) and count > 0) then
+				local weight = self.character:GetStashWeight()
+				if (table.IsEmpty(self.categoryPanels) and weight > 0) then
 					self:SetStash(self.character:GetStash())
 				end
 
-				self.invStash:SetTitle(L("stash_title_count", count, self.character:GetStashMax()))
+				self.invStash:SetTitle(L("stash_title_count", weight, self.character:GetStashWeightMax()))
 			end
 
 			self.nextThink = CurTime() + 0.25

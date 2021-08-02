@@ -63,8 +63,11 @@ net.Receive("ixStashDepositMoney", function(_, client)
 end)
 
 net.Receive("ixStashWithdrawItem", function(len, client)
+	local character = client:GetCharacter()
+	if (!character or !client:Alive()) then return end
+
 	if ((client.ixStashTry or 0) < CurTime()) then
-		client.ixStashTry = CurTime() + 0.33
+		client.ixStashTry = CurTime() + 1
 	else
 		return
 	end
@@ -75,37 +78,59 @@ net.Receive("ixStashWithdrawItem", function(len, client)
 	end
 
 	local id = net.ReadUInt(32)
-	if (!isnumber(id) or !client:Alive()) then return end
-
-	local character = client:GetCharacter()
-	if (!character) then return end
-
 	local stash = character:GetStash()
-	if (!stash[id]) then return end
+	local stashItem = stash[id]
 
-	if (!character:GetInventory():Add(stash[id].uniqueID, 1, stash[id].data)) then
+	if (!stashItem) then return end
+
+	local stockItem = ix.item.list[stashItem.uniqueID]
+	if (!stockItem) then return end
+
+	local allStack = net.ReadBool()
+	local data
+
+	if (stockItem.isStackable) then
+		data = table.Copy(stashItem.data or {})
+
+		if (allStack) then
+			local diff = data.quantity - (stockItem.maxQuantity or 16)
+
+			if (diff > 0) then
+				data.quantity = data.quantity - diff
+			end
+		else
+			data.quantity = 1
+		end
+	end
+
+	if (!character:GetInventory():Add(stash[id].uniqueID, 1, data or stashItem.data)) then
 		client:NotifyLocalized("noFit")
 		return
 	end
 
-	stash[id] = nil
-
-	-- calculate stash filled slots
-	local i = 0
-	for k, v in pairs(stash) do
-		if (k == 0 or v.data.noWeight) then continue end
-		i = i + 1
+	if (allStack and stockItem.isStackable and data) then
+		stashItem.data.quantity = stashItem.data.quantity - data.quantity
+	else
+		stashItem.data.quantity = stashItem.data.quantity - 1
 	end
+
+	if (stashItem.data.quantity < 1) then
+		stash[id] = nil
+	end
+
 	stash[0] = stash[0] or {}
-	stash[0].max = i
+	stash[0].weight = ix.stash.CalculateWeight(stash)
 
 	character:SetStash(stash)
-	stash = nil
+	data, stash = nil, nil
 end)
 
 net.Receive("ixStashDepositItem", function(len, client)
+	local character = client:GetCharacter()
+	if (!character or !client:Alive()) then return end
+
 	if ((client.ixStashTry or 0) < CurTime()) then
-		client.ixStashTry = CurTime() + 0.33
+		client.ixStashTry = CurTime() + 1
 	else
 		return
 	end
@@ -116,18 +141,16 @@ net.Receive("ixStashDepositItem", function(len, client)
 	end
 
 	local id = net.ReadUInt(32)
-	if (!isnumber(id) or !client:Alive()) then return end
+	if (!isnumber(id)) then return end
 
-	local character = client:GetCharacter()
-	if (!character) then return end
-
-	local totalStash, maxStash = character:GetStashCount(), character:GetStashMax()
-	if (totalStash >= maxStash) then
+	local totalWeight, maxWeight = character:GetStashWeight(), character:GetStashWeightMax()
+	if (totalWeight >= maxWeight) then
 		client:NotifyLocalized("stash_full")
 		return
 	end
 
 	local item = character:GetInventory():GetItems(true)[id]
+
 	if (!item) then
 		return
 	end
@@ -140,12 +163,12 @@ net.Receive("ixStashDepositItem", function(len, client)
 		end
 	end
 
-	local bAllItems = net.ReadBool()
-	local result, quantity = item:UseStackItem(isbool(bAllItems) and bAllItems or nil, function(new, old)
-		local diff = totalStash + (old - new)
-		local remainder = new - (maxStash - diff)
+	local allStack = net.ReadBool()
+	local result, newQuantity = item:UseStackItem(allStack, function(new, old)
+		local diff = totalWeight + (old - new)
+		local remainder = new - (maxWeight - diff)
 
-		if (diff > maxStash) then
+		if (diff > maxWeight) then
 			return remainder, (old - new) - remainder
 		end
 
@@ -165,27 +188,45 @@ net.Receive("ixStashDepositItem", function(len, client)
 	end
 
 	local stash = character:GetStash()
+	local stashItem
 	local copyData = table.Copy(item.data or {})
-	copyData.quantity = 1
 
-	for i = 1, quantity do
-		stash[#stash + 1] = {
-			uniqueID = item.uniqueID,
-			data = copyData
-		}
+	if (!item.isStackable) then -- оружием там и прочее
+		copyData.quantity = 1
+
+		for i = 1, newQuantity do
+			stash[#stash + 1] = {
+				uniqueID = item.uniqueID,
+				data = copyData
+			}
+		end
+	else
+		copyData.quantity = nil
+
+		local index = #stash + 1
+		for i, v in pairs(stash) do
+			if (v.uniqueID == item.uniqueID) then
+				index = i
+				break
+			end
+		end
+
+		stashItem = stash[index] or {data = {}}
+		stashItem.uniqueID = item.uniqueID
+		stashItem.data.quantity = (stashItem.data.quantity or 0) + newQuantity
+
+		for k, v in pairs(copyData) do
+			stashItem.data[k] = stashItem.data[k] or v
+		end
+
+		stash[index] = stashItem
 	end
 
-	-- calculate stash filled slots
-	local i = 0
-	for k, v in pairs(stash) do
-		if (k == 0 or v.data.noWeight) then continue end
-		i = i + 1
-	end
 	stash[0] = stash[0] or {}
-	stash[0].max = i
+	stash[0].weight = ix.stash.CalculateWeight(stash)
 
 	character:SetStash(stash)
-	stash, copyData, quantity = nil, nil, nil
+	stash, copyData = nil, nil
 end)
 
 function PLUGIN:LoadData()
@@ -210,48 +251,38 @@ function PLUGIN:SaveData()
 	self:SetData(data)
 end
 
-function PLUGIN:InitPostEntity()
-	local query = mysql:Delete("ix_items")
-		query:Where("inventory_id", 0)
-	query:Execute()
-end
-
 PLUGIN.CheckedCharacter = PLUGIN.CheckedCharacter or {}
 
 function PLUGIN:PlayerLoadedCharacter(_, character)
 	if (self.CheckedCharacter[character:GetID()]) then return end
 
 	timer.Simple(0.25, function()
-		local r = nil
+		local calculate
 		local stash = character:GetStash()
 
 		for k, v in pairs(stash) do
 			if (k != 0 and v.uniqueID and !ix.item.list[v.uniqueID]) then
 				table.remove(stash, k)
-				r = true
+				calculate = calculate or true
 			end
 		end
 
-		if (r) then
-			-- calculate stash filled slots
-			local i = 0
-			for k, v in pairs(stash) do
-				if (k == 0 or v.data.noWeight) then continue end
-				i = i + 1
-			end
+		if (calculate) then
+			local weight = ix.stash.CalculateWeight(stash)
 
-			if (i == 0) then
+			if (weight == 0) then
 				character:SetStash({})
 			else
 				stash[0] = stash[0] or {}
-				stash[0].max = i
+				stash[0].weight = weight
 
 				character:SetStash(stash)
 			end
 
-			r, i = nil, nil
+			weight, stash = nil, nil
 		end
 
+		calculate = nil
 		self.CheckedCharacter[character:GetID()] = true
 	end)
 end

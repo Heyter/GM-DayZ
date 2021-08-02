@@ -118,17 +118,12 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 	end
 end
 
-function PLUGIN:OnPlayerGraveCreate(client)
+function PLUGIN:PlayerDeath(client)
 	client.ixClothes = {}
 	client.disableSprint = nil
 
 	net.Start("ixClothesClear")
 	net.Send(client)
-end
-
-function PLUGIN.PostPlayerLoadout(client)
-	client.ixClothes = {}
-	client.disableSprint = nil
 end
 
 FindMetaTable("Player").SetClothesItem = function(self, category, item)

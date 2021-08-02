@@ -47,22 +47,34 @@ if (SERVER) then
 		}
 	end
 
-	function META:Sync(client, color)
-		local receivers = self:GetReceivers()
+	function META:Sync(client, bSetColor)
+		local receivers
 
-		if (IsValid(client) or #receivers > 0) then
-			if (color) then
-				for _, v in ipairs(receivers) do
-					if (v:Alive()) then
-						v:SetPlayerColor(Vector(color.r / 255, color.g / 255, color.b / 255))
-					end
+		if (IsValid(client)) then
+			receivers = {client}
+		else
+			receivers = self:GetReceivers()
+
+			if (#receivers == 0) then
+				receivers = nil
+			end
+		end
+
+		if (!receivers) then return end
+
+		if (bSetColor and (self.hasColor or ix.util.IsColor(self.color))) then
+			self.hasColor = true
+
+			for _, v in ipairs(receivers) do
+				if (v:Alive()) then
+					v:SetPlayerColor(Vector(self.color.r / 255, self.color.g / 255, self.color.b / 255))
 				end
 			end
-
-			net.Start("ixSquadSync")
-				net.WriteTable(self:CollectData())
-			net.Send(client or receivers)
 		end
+
+		net.Start("ixSquadSync")
+			net.WriteTable(self:CollectData())
+		net.Send(receivers)
 	end
 end
 

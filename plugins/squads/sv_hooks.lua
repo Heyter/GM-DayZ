@@ -13,8 +13,8 @@ function PLUGIN:PlayerLoadedCharacter(client, character)
 	timer.Simple(0.25, function()
 		ix.squad.Restore(character:GetSquadID(), client:SteamID64(), function(squad)
 			if (IsValid(client) and character) then
-				if (squad) then
-					squad:Sync(client)
+				if (squad and squad.Sync) then
+					squad:Sync(client, true)
 				else
 					character:SetSquadID("NULL")
 					character:SetSquadOfficer(0)
@@ -45,13 +45,10 @@ function PLUGIN:PreCharacterDeleted(client, character)
 end
 
 function PLUGIN:PostPlayerLoadout(client)
-	local character = client:GetCharacter()
+	local squad = ix.squad.list[client:GetCharacter():GetSquadID()] or {}
+	local color = squad.color
 
-	if (character) then
-		local squad = ix.squad.list[character:GetSquadID()]
-		if (!squad or !squad.color) then return end
-
-		local color = squad.color
+	if (color) then
 		client:SetPlayerColor(Vector(color.r / 255, color.g / 255, color.b / 255))
 	end
 end
@@ -125,11 +122,14 @@ net.Receive("ixSquadSettings", function(_, client)
 			end
 		end
 
-		if (isstring(data.logoID)) then
+		local isLogo = isstring(data.logoID)
+		if (isLogo) then
 			squad.logo = data.logoID
 		end
 
-		if (data.color) then
+		local isColor = ix.util.IsColor(data.color)
+		if (isColor) then
+			data.color.a = 255
 			squad.color = data.color
 		end
 
@@ -137,14 +137,18 @@ net.Receive("ixSquadSettings", function(_, client)
 			local query = mysql:Update("gmodz_squads")
 				if (data.name) then query:Update("name", squad.name) end
 				if (data.description) then query:Update("description", squad.description) end
-				if (data.logoID) then query:Update("logo", squad.logo) end
-				if (data.color) then query:Update("color", string.FromColor(squad.color)) end 
+				if (isLogo) then query:Update("logo", data.logoID) end
+				if (isColor) then query:Update("color", string.FromColor(data.color)) end 
 				query:Where("owner", squad.owner)
 			query:Execute()
 
-			squad:Sync(nil, data.color)
+			squad:Sync(nil, isColor)
 		end
+
+		isLogo, isColor = nil, nil
 	end
+
+	data = nil
 end)
 
 net.Receive("ixSquadInvite", function(_, client)

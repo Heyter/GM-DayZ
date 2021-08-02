@@ -247,6 +247,63 @@ PANEL.colors = {
 	tooltip = Color(125, 125, 125, 30)
 }
 
+function PANEL:OnMousePressed(code)
+	if (code == MOUSE_LEFT and self:IsDraggable()) then
+		if (!input.IsShiftDown()) then
+			self:MouseCapture(true)
+			self:DragMousePress(code)
+
+			self.clickX, self.clickY = input.GetCursorPos()
+		else
+			local itemTable = self.itemTable
+			local inventory = self.inventoryID
+
+			if (itemTable and inventory) then
+				hook.Run("ItemPressedLeftShift", self, itemTable, inventory)
+			end
+		end
+	elseif (code == MOUSE_RIGHT and self.DoRightClick) then
+		if (!input.IsShiftDown()) then
+			self:DoRightClick()
+		else
+			self:DoRightShiftClick() -- quick equip/unequip items
+		end
+	end
+end
+
+function PANEL:DoRightShiftClick()
+	if (self.nextClickTime or 0) > CurTime() then return end
+	self.nextClickTime = CurTime() + 0.5
+
+	local itemTable = self.itemTable
+	local inventory = self.inventoryID
+
+	if (itemTable and inventory) then
+		itemTable.player = LocalPlayer()
+
+		local info, action
+
+		if (itemTable:GetData("equip")) then
+			info = itemTable.functions.EquipUn
+			action = "EquipUn"
+		else
+			info = itemTable.functions.Equip
+			action = "Equip"
+		end
+
+		if (info and info.OnCanRun and info.OnCanRun(itemTable) != false) then
+			net.Start("ixInventoryAction")
+				net.WriteString(action)
+				net.WriteUInt(itemTable.id, 32)
+				net.WriteUInt(inventory, 32)
+				net.WriteTable({})
+			net.SendToServer()
+		end
+
+		itemTable.player = nil
+	end
+end
+
 function PANEL:Paint(width, height)
 	draw_tile(width, height)
 

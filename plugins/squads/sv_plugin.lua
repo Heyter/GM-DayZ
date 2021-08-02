@@ -28,15 +28,15 @@ function ix.squad.Restore(id, steamID64, callback)
 
 				local pack = {}
 				if (result.color and result.color != "NULL") then
-					pack["color"] = string.ToColor(result.color)
+					pack.color = string.ToColor(result.color)
 				end
 
 				if (result.logo and result.logo != "NULL") then
-					pack["logo"] = result.logo
+					pack.logo = result.logo
 				end
 
 				if (result.description and result.description != "NULL" and #result.description > 0) then
-					pack["description"] = result.description
+					pack.description = result.description
 				end
 
 				local squad = ix.squad.Register(result.owner, result.name, pack)
