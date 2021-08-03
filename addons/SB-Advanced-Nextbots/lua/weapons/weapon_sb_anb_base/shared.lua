@@ -83,13 +83,13 @@ function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
 
 	local owner = self:GetOwner()
-	local attach = self:GetAttachment(1)
+	local position = owner:GetAttachment(1).Pos
 	self.InternalSpread = self.InternalSpread or math.sin(math.rad(self:GetNPCBulletSpread(owner:GetCurrentWeaponProficiency())) / 2)
 
 	owner:FireBullets({
 		Num = self.BulletsPerShoot,
-		Src = owner:GetShootPos(),
-		Dir = attach.Ang:Forward(), -- owner:GetAimVector(),
+		Src = position,
+		Dir = owner:GetEyeAngles():Forward(),
 		Spread = VectorRand(-self.InternalSpread, self.InternalSpread),
 		AmmoType = self:GetPrimaryAmmoType(),
 		Damage = self.FullShootDamage/self.BulletsPerShoot,
@@ -104,7 +104,7 @@ function SWEP:PrimaryAttack()
 		net.SendPVS(self:GetPos())
 	end
 
-	sound.Play(self.ShotSound,owner:GetShootPos(),self.ShotSoundLevel,math.random(95,105),1)
+	sound.Play(self.ShotSound, position, self.ShotSoundLevel, math.random(95, 105), 1)
 
 	self:SetClip1(self:Clip1()-1)
 	self:SetNextPrimaryFire(CurTime()+self.NextShootTime)

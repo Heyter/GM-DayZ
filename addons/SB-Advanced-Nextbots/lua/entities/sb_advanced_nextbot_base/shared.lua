@@ -10,9 +10,6 @@ ENT.Spawnable = false
 
 ENT.SBAdvancedNextBot = true
 
--- Offset of view while controling bot
-ENT.ControlCameraOffset = Vector(-70,10,5)
-
 -- Bot's eye position relative bot position
 ENT.ViewOffset = Vector(0,0,64)
 
