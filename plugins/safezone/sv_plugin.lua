@@ -17,7 +17,7 @@ function PLUGIN:SaveData()
 end
 
 function PLUGIN:CanPlayerEnterSafeZone(entity, activator)
-	if (!activator:CanEnterSafe() or activator:GetPVPTime() > CurTime()) then
+	if (activator:GetPenaltyTime() > CurTime()) then
 		local dir = (entity:GetPos() - activator:GetPos()):GetNormalized()
 		activator:SetVelocity(dir * -100)
 

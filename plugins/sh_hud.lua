@@ -614,12 +614,12 @@ else
 		end
 
 		-- Safezone
-		if (!client:CanEnterSafe()) then
+		local penaltyTime = math.max(0, client:GetPenaltyTime() - CurTime())
+		if (penaltyTime != 0) then
 			perc.y = perc.y - perc.h - margin
 			perc.textColor = Color("red")
 
-			local time = math.max(0, 0 - (CurTime() - client:GetLocalVar("penalty", 0)))
-			hud:status(perc, L"cannot_enter_safezone" .. " " .. string.ToMinutesSeconds(time), "R")
+			hud:status(perc, L"cannot_enter_safezone" .. " " .. string.ToMinutesSeconds(penaltyTime), "R")
 		elseif (client:GetLocalVar("SH_SZ.Safe", SH_SZ.OUTSIDE) == SH_SZ.PROTECTED) then
 			perc.y = perc.y - perc.h - margin
 			perc.textColor = Color(50, 200, 50)
@@ -638,7 +638,7 @@ else
 		end
 
 		-- PVP
-		local pvpTime = math.max(0, 0 - (CurTime() - client:GetPVPTime()))
+		local pvpTime = math.max(0, client:GetPVPTime() - CurTime())
 		if (pvpTime != 0) then
 			perc.y = perc.y - perc.h - margin
 			perc.textColor = Color("red")

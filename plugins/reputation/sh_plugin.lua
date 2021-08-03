@@ -171,14 +171,8 @@ do
 
 	local playerMeta = FindMetaTable("Player")
 
-	function playerMeta:CanEnterSafe()
-		local penalty = self:GetLocalVar("penalty")
-
-		if (penalty and penalty > CurTime()) then
-			return false
-		end
-
-		return true
+	function playerMeta:GetPenaltyTime()
+		return self:GetLocalVar("penalty", 0)
 	end
 
 	function playerMeta:GetPVPTime()

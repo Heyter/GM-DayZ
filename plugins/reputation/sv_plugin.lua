@@ -75,7 +75,7 @@ function PLUGIN:CharacterPreSave(character)
 	local client = character:GetPlayer()
 
 	if (client:Alive()) then
-		local penalty = math.max(0, 0 - (CurTime() - client:GetLocalVar("penalty", 0)))
+		local penalty = math.max(0, client:GetLocalVar("penalty", 0) - CurTime())
 
 		if (penalty < 1) then
 			penalty = nil
