@@ -1,0 +1,1 @@
+ENT.Base = "sb_advanced_nextbot_base"
