@@ -6,7 +6,7 @@ ITEM.width = 2
 ITEM.height = 1
 
 ITEM.raiseDurability = 0.75
-ITEM.isWeaponKit = true
+ITEM.categoryKit = "weapons"
 ITEM.price = 500
 
 ITEM.useSound = "gmodz/items/repair_weapon.wav"
