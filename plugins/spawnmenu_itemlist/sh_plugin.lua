@@ -2,6 +2,11 @@ PLUGIN.name = "Item List"
 PLUGIN.author = "Schwarz Kruppzo"
 PLUGIN.description = "Adds a Q-menu tab for all items."
 
+CAMI.RegisterPrivilege({
+	Name = "Helix - Item SpawnMenu",
+	MinAccess = "superadmin"
+})
+
 cleanup.Register("ixItems")
 
 ix.util.Include("sv_plugin.lua")
@@ -36,71 +41,91 @@ if (CLIENT) then
 		["Weapons"] = "gun"
 	}
 
-	local function DrawBox( bordersize, x, y, w, h, bordercol )
-		surface.SetDrawColor( bordercol )
-		surface.DrawLine( x + bordersize, y, x + w - bordersize, y )
-		surface.DrawLine( x + bordersize, y + h - 1, x + w - bordersize, y + h - 1 )
-		surface.DrawLine( x, y + bordersize, x, y + h - bordersize )
-		surface.DrawLine( x + w - 1, y + bordersize, x + w - 1, y + h - bordersize )
-	end
+	spawnmenu.AddContentType("ixItem", function(container, item)
+		if (!item.name) then return end
 
-	spawnmenu.AddContentType("ixItem", function(container, data)
-		if (!data.name) then return end
+		local slot = vgui.Create("Panel", container)
+		slot:SetSize(100, 100)
+		slot.Paint = function(t, w, h)
+			surface.SetDrawColor(40, 40, 40, 255)
+			surface.DrawRect(0, 0, w, h)
 
-		local backGround = vgui.Create("Panel", container)
-		backGround:SetSize(100, 100)
-		backGround.Paint = function(s, w, h)
-			if (IsValid(backGround.icon)) then
-				DrawBox(0, 0, 0, w, h, backGround.icon:IsHovered() and Color("green") or color_black)
+			local hovered = Color(60, 60, 60, 255) // todo: вынести в SKIN
+
+			if (t:IsHovered() or t.icon and t.icon:IsHovered()) then
+				hovered = ix.config.Get("color")
 			end
+
+			surface.SetDrawColor(hovered)
+			surface.DrawOutlinedRect(0, 0, w, h, 1)
 		end
 
-		local icon = backGround:Add('SpawnIcon')
-		backGround.icon = icon
+		local icon = slot:Add('SpawnIcon')
+		slot.icon = icon
 
 		icon:SetSize(92, 92 * 1.4)
 		icon:SetZPos(1)
 		icon:Dock(FILL)
 		icon:DockMargin(5, 5, 5, 10)
 		icon:InvalidateLayout(true)
-		icon:SetModel(data:GetModel(), data:GetSkin())
+		icon:SetModel(item:GetModel(), item:GetSkin())
 
 		icon:SetHelixTooltip(function(tooltip)
-			ix.hud.PopulateItemTooltip(tooltip, data)
+			ix.hud.PopulateItemTooltip(tooltip, item)
 		end)
 
 		icon.OnMousePressed = function(this, code)
+			if !(CAMI.PlayerHasAccess(LocalPlayer(), "Helix - Item SpawnMenu", nil)) then return end
+
 			if (code == MOUSE_LEFT) then
 				net.Start("MenuItemSpawn")
-					net.WriteString(data.uniqueID)
+					net.WriteString(item.uniqueID)
 				net.SendToServer()
 
 				surface.PlaySound("ui/buttonclickrelease.wav")
 			elseif (code == MOUSE_RIGHT) then
 				local menu = DermaMenu()
 
-				menu:AddOption("Copy to Clipboard", function()
-					SetClipboardText(data.uniqueID)
+				local give_self = menu:AddSubMenu("Give self")
+
+				if (item.isStackable) then
+					give_self:AddOption("Stack x" .. (item.maxQuantity or 16), function()
+						net.Start("MenuItemGive")
+							net.WriteString(item.uniqueID)
+							net.WriteBool(true)
+						net.SendToServer()
+					end)
+				end
+
+				give_self:AddOption("One", function()
+					net.Start("MenuItemGive")
+						net.WriteString(item.uniqueID)
+						net.WriteBool(false)
+					net.SendToServer()
 				end)
 
-				menu:AddOption("Give to Self", function()
-					net.Start("MenuItemGive")
-						net.WriteString(data.uniqueID)
-					net.SendToServer()
+				menu:AddSpacer()
+				menu:AddOption("Copy to Clipboard", function()
+					SetClipboardText(item.uniqueID)
 				end)
 
 				menu:Open()			
 			end
 		end
 
+		icon.Paint = function(t, w, h) end
+		icon.PaintOver = function(t, w, h) end
+
 		if (IsValid(container)) then
-			container:Add(backGround)
+			container:Add(slot)
 		end
 
-		return backGround
+		return slot
 	end)
 
 	spawnmenu.AddCreationTab("Items", function()
+		if !(CAMI.PlayerHasAccess(LocalPlayer(), "Helix - Item SpawnMenu", nil)) then return end
+
 		local base = vgui.Create("SpawnmenuContentPanel")
 		local tree = base.ContentNavBar.Tree
 		local categories = {}

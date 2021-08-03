@@ -18,10 +18,11 @@ ITEM.ammo = nil -- type of the ammo
 ITEM.categoryKit = "weapons"
 
 function ITEM:GetSellPrice(base_price, scale)
-	local attach_modifier = scale * table.Count(self:GetData("mods", {}))
+--[[ 	local attach_modifier = scale * table.Count(self:GetData("mods", {}))
 	local liquid_price = scale * (base_price + (base_price * attach_modifier)) * (self:GetData("durability", 100) / 100)
 
-	return liquid_price
+	return liquid_price ]]
+	return scale * (base_price + base_price) * (self:GetData("durability", 100) / 100)
 end
 
 function ITEM:CanSell()

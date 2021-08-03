@@ -27,41 +27,55 @@ ix.config.Add("merchantInterval", 120, "Интервал обновлений а
 
 function PLUGIN:CalculatePrice(item, isSellingToVendor, client)
 	local stockItem = ix.item.list[item.uniqueID]
+	if (!stockItem) then return 999999 end
+
 	local price = stockItem.price or 0
-	local scale = ix.config.Get("merchantSellPerc", 0.7)
+	if (price > 0) then -- пропустить бесплатные предметы
+		local scale = ix.config.Get("merchantSellPerc", 0.7)
 
-	if (isSellingToVendor) then
-		if (item.GetSellPrice) then
-			price = item:GetSellPrice(price, scale)
-		else
-			price = price * scale
-		end
-	else
-		price = (item.price or price) / scale / scale
-	end
-
-	if (client) then
-		price = hook.Run("MerchantCalculatePrice", client, price, scale, isSellingToVendor) or price
-	end
-
-	if (CLIENT) then
-		if (input.IsShiftDown()) then
-			if (!self.nextRecalcPrice) then
-				local quantity = item.data.quantity or 1
-				local diff = quantity - (stockItem.maxQuantity or 16)
-
-				if (diff > 0) then
-					quantity = quantity - diff
-				end
-
-				price = price * quantity
+		if (isSellingToVendor) then
+			if (item.GetSellPrice) then
+				price = item:GetSellPrice(price, scale)
+			else
+				price = price * scale
 			end
 		else
-			self.nextRecalcPrice = nil
+			local newPrice = hook.Run("MerchantItemBuyPrice", item, stockItem, price)
+			local durability = (item.data or {}).durability
+
+			if (newPrice) then
+				price = price + (newPrice * scale)
+			else
+				price = price + (price / scale)
+			end
+		end
+
+		if (client) then
+			price = hook.Run("PlayerMerchantCalcPrice", client, price, scale, isSellingToVendor) or price
+		end
+
+		if (CLIENT) then
+			if (input.IsShiftDown()) then
+				if (!self.nextRecalcPrice) then
+					local quantity = item.data.quantity or 1
+
+					if (quantity > 1) then
+						local diff = quantity - (stockItem.maxQuantity or 16)
+
+						if (diff > 0) then
+							quantity = quantity - diff
+						end
+					end
+
+					price = price * quantity
+				end
+			elseif (self.nextRecalcPrice) then
+				self.nextRecalcPrice = nil
+			end
 		end
 	end
 
-	return math.max(0, math.floor(price))
+	return math.max(0, math.Round(price))
 end
 
 ix.util.Include("sv_plugin.lua")
@@ -99,12 +113,6 @@ if (CLIENT) then
 
 	-- Left mouse button + SHIFT
 	function PLUGIN:ItemPressedLeftShift(icon, item)
-		if ((LocalPlayer().next_merchant_click or 0) < CurTime()) then
-			LocalPlayer().next_merchant_click = CurTime() + 1.25
-		else
-			return
-		end
-
 		if (IsValid(ix.gui.merchant) and item) then
 			if (item.CanSell and item:CanSell() == false) then
 				return
@@ -136,7 +144,7 @@ if (CLIENT) then
 				net.Start("ixMerchantTrade")
 					net.WriteUInt(item:GetID(), 32)
 					net.WriteBool(true)
-					net.WriteBool(input.IsShiftDown())
+					net.WriteBool(false)
 				net.SendToServer()
 			end):SetImage("icon16/basket_put.png")
 		end
@@ -149,44 +157,50 @@ if (CLIENT) then
 			end
 
 			local price = PLUGIN:CalculatePrice(item, item.invID and true or false, LocalPlayer())
+			local text
 
 			if (!price or price < 1) then
-				price = L"free":utf8upper()
+				text = L"free":utf8upper()
 			else
-				price = ix.currency.Get(price)
+				text = ix.currency.Get(price)
 			end
+			if (!text) then return end
 
 			local panel = tooltip:AddRowAfter("name", "merchant_price")
 			panel:SetImportant()
-			panel:SetText(Format("%s: %s", L"price", price))
+			panel:SetText(Format("%s: %s", L"price", text))
 			panel.lastText = panel:GetText()
+			panel.lastPrice = price or 0
 			panel:SetBackgroundColor(color_white)
 			panel:SizeToContents()
-			panel.Think = function(t)
-				if (input.IsShiftDown()) then
-					if (!t.nextRecalcPrice) then
-						t.nextRecalcPrice = true
 
-						local price = PLUGIN:CalculatePrice(item, item.invID and true or false, LocalPlayer())
-						local text
+			if (panel.lastPrice > 0) then
+				panel.Think = function(t)
+					if (input.IsShiftDown()) then
+						if (!t.nextRecalcPrice) then
+							t.nextRecalcPrice = true
 
-						if (!price or price < 1) then
-							text = L"free":utf8upper()
-						else
-							text = ix.currency.Get(price)
+							local price = PLUGIN:CalculatePrice(item, item.invID and true or false, LocalPlayer())
+							local text
+
+							if (!price or price < 1) then
+								text = L"free":utf8upper()
+							else
+								text = ix.currency.Get(price)
+							end
+
+							if (text and t.lastPrice != price) then
+								t:SetText(Format("%s: %s", L"price", text))
+								t:SizeToContents()
+								tooltip:SizeToContents()
+							end
 						end
-
-						if (text) then
-							t:SetText(Format("%s: %s", L"price", text))
-							t:SizeToContents()
-							tooltip:SizeToContents()
-						end
+					elseif (t.nextRecalcPrice) then
+						t.nextRecalcPrice = nil
+						t:SetText(t.lastText)
+						t:SizeToContents()
+						tooltip:SizeToContents()
 					end
-				elseif (t.nextRecalcPrice) then
-					t.nextRecalcPrice = nil
-					t:SetText(t.lastText)
-					t:SizeToContents()
-					tooltip:SizeToContents()
 				end
 			end
 		end
@@ -228,4 +242,11 @@ if (CLIENT) then
 		-- Merchant
 		panel:SetupMerchant(items, entity)
 	end)
+end
+
+-- Предметы без мета-таблицы расчет цены по data.
+function PLUGIN:MerchantItemBuyPrice(item, stockItem, price)
+	if (item.data and item.data.durability) then
+		return (price + price) * (item.data.durability / (stockItem.defDurability or 100))
+	end
 end

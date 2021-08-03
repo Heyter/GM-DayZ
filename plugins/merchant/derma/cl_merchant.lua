@@ -123,18 +123,13 @@ function PANEL:SetItem(itemTable)
 		net.SendToServer()
 	end
 
-	self.icon.Paint = function(t, w, h)
-
-	end
-
+	self.icon.Paint = function(t, w, h) end
 	self.icon.PaintOver = function(t, w, h)
-		if (self.stack > 1) then
+		if (self.stack > 1 and !self.isStackable) then
 			draw.SimpleTextOutlined("x" .. self.stack, "DermaDefault", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
 		if (itemTable and itemTable.PaintOver) then
-			w, h = t:GetSize()
-
 			itemTable.PaintOver(t, itemTable, w, h)
 		end
 	end
@@ -160,7 +155,7 @@ function PANEL:Paint(w, h)
 
 	local hovered = Color(60, 60, 60, 255) // todo: вынести в SKIN
 
-	if (self:IsHovered() or self.icon:IsHovered()) then
+	if (self:IsHovered() or self.icon and self.icon:IsHovered()) then
 		hovered = ix.config.Get("color")
 	end
 
@@ -341,8 +336,7 @@ function PANEL:CanStackItem(item, default)
 		for idx, panel in pairs(self.items) do
 			if (!IsValid(panel) or panel.itemTable.uniqueID != item.uniqueID) then continue end
 
-			if (item.CanStack and item:CanStack(panel.itemTable, true) and (item.price or 0) == (panel.itemTable.price or 0)
-				or table.IsEmpty(item.data) and table.IsEmpty(panel.itemTable.data)) then
+			if (item.CanStack and item:CanStack(panel.itemTable, true) or table.IsEmpty(item.data) and table.IsEmpty(panel.itemTable.data)) then
 				index = idx
 				break
 			end
@@ -357,7 +351,6 @@ function PANEL:AddItem(key, itemTable)
 	if (!item) then return end
 
 	item.data = itemTable.data or {}
-	item.price = itemTable.price or nil
 
 	self:AddCategory(item)
 

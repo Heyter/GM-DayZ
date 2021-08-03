@@ -188,8 +188,6 @@ function PANEL:SetItem(itemTable)
 		end
 
 		if (itemTable and itemTable.PaintOver) then
-			w, h = t:GetSize()
-
 			itemTable.PaintOver(t, itemTable, w, h)
 		end
 	end

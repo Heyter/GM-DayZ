@@ -195,8 +195,8 @@ do
 end
 
 -- HOOKS
-function PLUGIN:MerchantCalculatePrice(client, price, scale, isSellingToVendor)
-	if (!isSellingToVendor) then
+function PLUGIN:PlayerMerchantCalcPrice(client, price, scale, isSellingToVendor)
+	if (!isSellingToVendor) then -- покупка товара у торговца
 		local rep = client:GetReputation()
 		local repPerc = math.abs(rep / ix.config.Get("maxReputation", 1500))
 

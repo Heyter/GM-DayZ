@@ -258,7 +258,7 @@ function PANEL:OnMousePressed(code)
 			local itemTable = self.itemTable
 			local inventory = ix.item.inventories[self.inventoryID]
 
-			if (itemTable and inventory and inventory:OnCheckAccess(LocalPlayer())) then
+			if (itemTable and inventory) then
 				hook.Run("ItemPressedLeftShift", self, itemTable, inventory)
 			end
 		end
@@ -279,7 +279,7 @@ function PANEL:DoRightShiftClick()
 	local invID = self.inventoryID
 	local inventory = ix.item.inventories[invID]
 
-	if (itemTable and inventory and inventory:OnCheckAccess(LocalPlayer())) then
+	if (itemTable and inventory) then
 		itemTable.player = LocalPlayer()
 
 		local info, action = hook.Run("ItemPressedRightShift", self, itemTable, inventory)

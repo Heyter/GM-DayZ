@@ -1,14 +1,10 @@
 ﻿util.AddNetworkString('MenuItemSpawn')
 util.AddNetworkString('MenuItemGive')
 
-local function check(client)
-	return client:IsSuperAdmin() or client:GetCharacter():HasFlags("c")
-end
-
 net.Receive('MenuItemSpawn', function(len, client)
-	local uniqueID = net.ReadString()
-	if !check(client) then return end
+	if !(CAMI.PlayerHasAccess(client, "Helix - Item SpawnMenu", nil)) then return end
 
+	local uniqueID = net.ReadString()
 	if (ix.item.list[uniqueID]) then
 		local vStart = client:GetShootPos()
 		local data = {}
@@ -40,13 +36,14 @@ net.Receive('MenuItemSpawn', function(len, client)
 end)
 
 net.Receive('MenuItemGive', function(len, client)
-	local uniqueID = net.ReadString()
-	if not isstring(uniqueID) or not check(client) then return end
+	if !(CAMI.PlayerHasAccess(client, "Helix - Item SpawnMenu", nil)) then return end
 
+	local uniqueID = net.ReadString()
 	local itemTable = ix.item.list[uniqueID]
 
 	if (itemTable) then
-		local result, message = client:GetCharacter():GetInventory():Add(uniqueID)
+		local quantity = net.ReadBool() and (itemTable.maxQuantity or 16) or 1
+		local result, message = client:GetCharacter():GetInventory():Add(uniqueID, 1, {quantity = quantity})
 
 		if (!result) then
 			client:NotifyLocalized(message)

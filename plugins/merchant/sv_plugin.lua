@@ -97,14 +97,13 @@ net.Receive("ixMerchantTrade", function(len, client)
 			copyData.quantity = 1
 			entity.items[index] = {
 				uniqueID = item.uniqueID,
-				price = price,
 				data = copyData
 			}
 		else
 			copyData.quantity = nil
 
 			for i, v in pairs(entity.items) do
-				if (v.uniqueID == item.uniqueID and v.price == price) then
+				if (v.uniqueID == item.uniqueID) then
 					index = i
 					break
 				end
@@ -112,7 +111,6 @@ net.Receive("ixMerchantTrade", function(len, client)
 
 			local merchItem = entity.items[index] or {data = {}}
 			merchItem.uniqueID = merchItem.uniqueID or item.uniqueID
-			merchItem.price = merchItem.price or price
 			merchItem.data.quantity = (merchItem.data.quantity or 0) + newQuantity
 
 			for k, v in pairs(copyData) do
@@ -226,14 +224,12 @@ function PLUGIN:SetRandomItems(maxItems, scale)
 				if (index and item.isStackable) then
 					local merchItem = items[index] or {data = {}}
 					merchItem.uniqueID = merchItem.uniqueID or item.uniqueID
-					merchItem.price = merchItem.price or price
 					merchItem.data.quantity = (merchItem.data.quantity or 0) + 1
 
 					items[index] = merchItem
 				else
 					table.insert(items, {
 						uniqueID = itemID,
-						price = math.max(0, math.ceil(PLUGIN:CalculatePrice(item, true) / ix.config.Get("merchantSellPerc", 0.7))),
 						data = itemData
 					})
 				end
