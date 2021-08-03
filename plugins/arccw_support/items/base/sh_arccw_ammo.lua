@@ -20,7 +20,7 @@ if (CLIENT) then
 		local rounds = item:GetData("rounds", item.ammoAmount)
 		local color = ix.color.LerpHSV(nil, nil, item.maxRounds, rounds, 0)
 
-		draw.SimpleTextOutlined(rounds, "DermaDefault", 1, 5, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+		draw.SimpleTextOutlined(rounds, "GmodZ.Numeric", 1, 5, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 	end
 
 	function ITEM:CanTooltip(targetItem)

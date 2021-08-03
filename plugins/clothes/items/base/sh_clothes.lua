@@ -73,7 +73,7 @@ if (CLIENT) then
 			local durabilityColor = Color(2.55 * (100 - durability), 2.55 * durability, 0, 255)
 
 			durability = (durability / itemObj.defDurability) * 100
-			draw.SimpleTextOutlined(math.Round(durability, 1) .. "%", "DermaDefault", 1, h - 10, durabilityColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined(math.Round(durability, 1) .. "%", "GmodZ.Numeric", 1, h - 10, durabilityColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 	end
 

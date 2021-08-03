@@ -184,7 +184,7 @@ function PANEL:SetItem(itemTable)
 	end
 	self.icon.PaintOver = function(t, w, h)
 		if (self.stack > 1 and !self.isStackable) then
-			draw.SimpleTextOutlined("x" .. self.stack, "DermaDefault", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
+			draw.SimpleTextOutlined("x" .. self.stack, "GmodZ.Numeric", w, h - 10, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, color_black)
 		end
 
 		if (itemTable and itemTable.PaintOver) then

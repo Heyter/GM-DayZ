@@ -74,4 +74,12 @@ if (CLIENT) then
 	ix.option.Add("minimalTooltips", ix.type.bool, true, {
 		category = "appearance"
 	})
+
+	function Schema:LoadFonts(font, genericFont)
+		surface.CreateFont("GmodZ.Numeric", {
+			font = font,
+			size = math.ScaleH(23),
+			weight = 500
+		})
+	end
 end

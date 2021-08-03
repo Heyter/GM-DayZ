@@ -105,9 +105,10 @@ if (CLIENT) then
 				end)
 
 				menu:AddSpacer()
-				menu:AddOption("Copy to Clipboard", function()
-					SetClipboardText(item.uniqueID)
-				end)
+
+				local copy = menu:AddSubMenu("Copy to Clipboard")
+				copy:AddOption("Model", function() SetClipboardText(item.model) end)
+				copy:AddOption("ItemID", function() SetClipboardText(item.uniqueID) end)
 
 				menu:Open()			
 			end
@@ -124,8 +125,6 @@ if (CLIENT) then
 	end)
 
 	spawnmenu.AddCreationTab("Items", function()
-		if !(CAMI.PlayerHasAccess(LocalPlayer(), "Helix - Item SpawnMenu", nil)) then return end
-
 		local base = vgui.Create("SpawnmenuContentPanel")
 		local tree = base.ContentNavBar.Tree
 		local categories = {}
