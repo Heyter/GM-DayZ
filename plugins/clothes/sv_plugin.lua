@@ -122,8 +122,9 @@ function PLUGIN:PlayerDeath(client)
 	client.disableSprint = nil
 	client.ixClothes = {}
 
-	net.Start("ixClothesClear")
-	net.Send(client)
+	-- hook LocalPlayerDeath
+--[[ 	net.Start("ixClothesClear")
+	net.Send(client) ]]
 end
 
 FindMetaTable("Player").SetClothesItem = function(self, category, item)

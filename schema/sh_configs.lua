@@ -30,6 +30,7 @@ local noLoad = {
 	doors = true,
 	spawnsaver = true,
 	thirdperson = true,
+	permakill = true,
 	ammosave = true
 }
 

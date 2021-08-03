@@ -122,3 +122,17 @@ function PANEL:Remove(valueChanged)
 end
 
 vgui.Register("ixRowNumberEntry", PANEL, "EditablePanel")
+
+-- Багфикс
+PANEL = vgui.GetControlTable("DMenu")
+function PANEL:SetFont(font)
+	for _, v in pairs(self:GetCanvas():GetChildren()) do
+		if (!v.SetFont) then continue end
+		v:SetFont(font or "DermaDefault")
+		v:SizeToContents()
+	end
+
+	-- reposition for the new font
+	self:InvalidateLayout(true)
+	self:Open(self.ixX, self.ixY, false, self.ixOwnerPanel)
+end

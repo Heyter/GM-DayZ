@@ -100,30 +100,37 @@ if (CLIENT) then
 		end
 	end)
 
-	concommand.Add("gmodz_reload_death_menu", function()
-		if (!IsValid(ix.gui.death_menu)) then
-			ix.gui.death_menu = vgui.Create("ixDeathScreenMenu")
+	local function DeathTimer()
+		local client = LocalPlayer and LocalPlayer() or nil
+		if (!client) then return end
+
+		if (client.GetCharacter and client:GetCharacter()) then
+			if (client:Alive()) then
+				if (IsValid(ix.gui.death_menu)) then
+					LocalPlayer().deathTime = nil
+					ix.gui.death_menu:SetMouseInputEnabled(false)
+					ix.gui.death_menu:Remove()
+				end
+			else
+				if (!IsValid(ix.gui.death_menu)) then
+					client.deathTime = client.deathTime or RealTime() + ix.config.Get("spawnTime", 5)
+					ix.gui.death_menu = vgui.Create("ixDeathScreenMenu")
+					ix.gui.death_menu:SetMouseInputEnabled(true)
+
+					hook.Run("LocalPlayerDeath")
+				end
+			end
 		end
+	end
 
-		ix.gui.death_menu:SetMouseInputEnabled(true)
-		LocalPlayer().deathTime = LocalPlayer().deathTime or RealTime() + ix.config.Get("spawnTime", 5)
-	end)
+	timer.Create("ixDeathScreenMenu", 0.25, 0, DeathTimer)
 
-	timer.Create("ixDeathScreenMenu", 0.25, 0, function()
-		if (!LocalPlayer():GetCharacter()) then return end
+	gameevent.Listen("entity_killed")
+	hook.Add("entity_killed", "ixDeathScreenMenu", function(data) 
+		local victim = data.entindex_killed
 
-		if (LocalPlayer():Alive()) then
-			if (IsValid(ix.gui.death_menu)) then
-				LocalPlayer().deathTime = nil
-				ix.gui.death_menu:SetMouseInputEnabled(false)
-				ix.gui.death_menu:Remove()
-			end
-		else
-			if (!IsValid(ix.gui.death_menu)) then
-				LocalPlayer().deathTime = RealTime() + ix.config.Get("spawnTime", 5)
-				ix.gui.death_menu = vgui.Create("ixDeathScreenMenu")
-				ix.gui.death_menu:SetMouseInputEnabled(true)
-			end
+		if (victim and victim == LocalPlayer():EntIndex()) then
+			DeathTimer()
 		end
 	end)
 end

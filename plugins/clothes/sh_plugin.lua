@@ -29,7 +29,7 @@ if (CLIENT) then
 		end
 	end)
 
-	net.Receive("ixClothesClear", function()
+	hook.Add("LocalPlayerDeath", "ixClothesClear", function()
 		LocalPlayer().ixClothes = {}
 	end)
 end

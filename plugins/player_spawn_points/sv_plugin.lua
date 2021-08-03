@@ -169,7 +169,7 @@ function PLUGIN:DoPlayerDeath(client)
 end
 
 function PLUGIN:CanPlayerDeathThink(client)
-	return client.deathSpawn
+	return client.deathSpawn or client:IsBot()
 end
 
 function PLUGIN:ResetPlayer(client)
