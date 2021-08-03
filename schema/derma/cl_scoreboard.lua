@@ -310,7 +310,7 @@ function PANEL:Paint(w, h)
 
 	ix.util.DrawText(GetHostName(), w * 0.01, 36 / 2, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, self.fTitle)
 	local tx = ix.util.DrawText(player.GetCount().."/"..game.MaxPlayers(), w * 0.99, 36 / 2, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, self.fTitle)
-	ix.util.DrawText("PLAYERS:", w - tx - ScreenScale(8), 36 / 2, self.cLabel, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, self.fLabel)
+	ix.util.DrawText(L"scoreboard_players", w - tx - ScreenScale(8), 36 / 2, self.cLabel, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, self.fLabel)
 end
 
 vgui.Register("ixScoreboard", PANEL, "EditablePanel")

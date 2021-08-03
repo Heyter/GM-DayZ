@@ -1,17 +1,3 @@
-local function ButtonPaint(panel, w, h)
-	surface.SetDrawColor(40, 40, 40, 255)
-	surface.DrawRect(0, 0, w, h)
-
-	local hovered = Color(60, 60, 60, 255)
-
-	if (panel:IsHovered()) then
-		hovered = ix.config.Get("color")
-	end
-
-	surface.SetDrawColor(hovered)
-	surface.DrawOutlinedRect(0, 0, w, h, 1)
-end
-
 local function VBarPaint(panel)
 	local vbar = panel:GetVBar()
     vbar.Paint = function() end
@@ -39,7 +25,9 @@ local function AddButonFooter(parent, text, addictive, callback)
 	btn:DockMargin(0, 0, 0, 5)
 	btn:SetText(text)
 	btn.DoClick = callback
-	btn.Paint = ButtonPaint
+	btn.Paint = function(t, w, h)
+		derma.SkinFunc("PaintButton2", t, w, h, t:IsHovered() and ix.config.Get("color"))
+	end
 
 	if (addictive) then
 		parent:SetTall(parent:GetTall() + btn:GetTall())
@@ -64,7 +52,7 @@ function PANEL:Init()
 	self:Center()
 	self:MakePopup()
 	self:SetDraggable(true)
-	self:SetSkin("Default")
+	-- self:SetSkin("Default")
 
 	self.netData = {}
 	self.categoryPanels = {}
@@ -450,7 +438,9 @@ function PANEL:AddCategory(title)
 		cat.Paint = function() end
 		cat.Header:SetFont("ixSmallFont")
 		cat.Header:SetContentAlignment(4)
-		cat.Header.Paint = ButtonPaint
+		cat.Header.Paint = function(t, w, h)
+			derma.SkinFunc("PaintButton2", t, w, h, t:IsHovered() and ix.config.Get("color"))
+		end
 		cat:SetLabel(L2("squad_menu_text_" .. title) or title)
 		cat:Dock(TOP)
 		cat.Think = function(t)
@@ -499,12 +489,7 @@ function PANEL:OnKeyCodeReleased(key_code)
 end
 
 function PANEL:Paint(w, h)
-	surface.SetDrawColor(24, 24, 24, 255)
-	surface.DrawRect(0, 0, w, h)
-
-	-- Title
-	surface.SetDrawColor(60, 60, 60, 255)
-	surface.DrawRect(0, 0, w, 24)
+	derma.SkinFunc("PaintFrame2", self, w, h)
 end
 
 vgui.Register("ixSquadView", PANEL, "DFrame")

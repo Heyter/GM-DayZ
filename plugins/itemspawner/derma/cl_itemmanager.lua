@@ -15,6 +15,11 @@ function PANEL:Init()
 	self.container = vgui.Create("DScrollPanel", self)
 	self.container:Dock(FILL)
 
+	self.colors = {
+		[1] = derma.GetColor("ButtonRect", self),
+		[2] = derma.GetColor("Outline", self),
+	}
+
 	PLUGIN.ISM_Panel = self
 end
 
@@ -26,10 +31,18 @@ function PANEL:Populate(items)
 		self.index:Dock(TOP)
 		self.index:SetHeight(64)
 		self.index:DockMargin(5, 5, 5, 0)
+		self.index.Paint = function(t, w, h)
+			surface.SetDrawColor(self.colors[1])
+			surface.DrawRect(0, 0, w, h)
+		end
 
 		self.index.leftPanel = self.index:Add("DPanel")
 		self.index.leftPanel:Dock(LEFT)
 		self.index.leftPanel:SetSize(300, 0)
+		self.index.Paint = function(t, w, h)
+			surface.SetDrawColor(self.colors[2])
+			surface.DrawRect(0, 0, w, h)
+		end
 
 		self.index.title = self.index.leftPanel:Add("DLabel")
 		self.index.title:SetText(item.title)
@@ -102,6 +115,10 @@ function PANEL:Populate(items)
 		end
 		self.index.spawn.Paint = function(self, w, h) end
 	end
+end
+
+function PANEL:Paint(w, h)
+	derma.SkinFunc("PaintFrame2", self, w, h)
 end
 
 vgui.Register("ixItemSpawnerManager", PANEL, "DFrame")

@@ -120,13 +120,10 @@ end
 
 function PLUGIN:PlayerDeath(client)
 	client.disableSprint = nil
+	client.ixClothes = {}
 
-	if (!table.IsEmpty(client.ixClothes)) then
-		client.ixClothes = {}
-
-		net.Start("ixClothesClear")
-		net.Send(client)
-	end
+	net.Start("ixClothesClear")
+	net.Send(client)
 end
 
 FindMetaTable("Player").SetClothesItem = function(self, category, item)

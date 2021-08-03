@@ -168,4 +168,7 @@ LANGUAGE = {
 
 	// clothes
 	clothes_text_slot = "Slot: %s",
+
+	// Scoreboard
+	scoreboard_players = "PLAYERS:"
 }

@@ -167,4 +167,7 @@ LANGUAGE = {
 
 	// clothes
 	clothes_text_slot = "Слот: %s",
+
+	// Scoreboard
+	scoreboard_players = "ОНЛАЙН:",
 }

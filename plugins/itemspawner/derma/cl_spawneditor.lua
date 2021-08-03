@@ -1,8 +1,5 @@
 local PANEL = {}
 
-PANEL.cCategoryRect = Color(38, 38, 38, 255)
-PANEL.cCategoryBorder = Color(204, 204, 204, 100)
-
 function PANEL:Init()
 	self:SetSize(ScrW() * 0.6, ScrH())
 	self:Center()
@@ -182,7 +179,9 @@ function PANEL:Setup(item, index)
 	self.save.button = self.save:Add("DButton")
 	self.save.button:SetText("Save Changes")
 	self.save.button:Dock(FILL)
-	self.save.button:SetSkin("Default")
+	self.save.button.Paint = function(t, w, h)
+		derma.SkinFunc("PaintButtonFilled", t, w, h)
+	end
 
 	self.save.button.DoClick = function()
 		local _, type = self.chance.box:GetSelected()
@@ -270,11 +269,7 @@ function PANEL:AddCategory(item)
 		cat.Header:SetFont("ixSmallFont")
 		cat.Header:SetContentAlignment(5)
 		cat.Header.Paint = function(t, w, h)
-			surface.SetDrawColor(self.cCategoryRect)
-			surface.DrawRect(0, 0, w, h)
-
-			surface.SetDrawColor(self.cCategoryBorder)
-			surface.DrawOutlinedRect(0, 0, w, h, 1)
+			derma.SkinFunc("PaintButton2", t, w, h, t:IsHovered() and ix.config.Get("color"))
 		end
 		cat:SetLabel(L(item.category))
 		cat:Dock(TOP)
@@ -296,6 +291,10 @@ function PANEL:AddCategory(item)
 
 		self.categoryPanels[item.category] = {slot, cat}
 	end
+end
+
+function PANEL:Paint(w, h)
+	derma.SkinFunc("PaintFrame2", self, w, h)
 end
 
 vgui.Register("ixItemSpawnerEditor", PANEL, "DFrame")
@@ -381,10 +380,6 @@ function PANEL:SetItem(itemTable, panel)
 	end
 
 	self.icon.PaintOver = function(t, w, h)
-		if ( t.OverlayFade > 0 ) then
-			boxHover( 0, 0, w, h, Color( 255, 255, 255, t.OverlayFade ) )
-		end
-
 		local type = select(2, panel.chance.box:GetSelected())
 
 		if (type != "linear" and self.chance) then
@@ -394,7 +389,7 @@ function PANEL:SetItem(itemTable, panel)
 
 	self.icon.Paint = function(_, w, h)
 		if (self.selected) then
-			surface.SetDrawColor(Color("green"):Alpha(15))
+			surface.SetDrawColor(ColorAlpha(Color("green"), 15))
 			surface.DrawRect( 0, 0, w, h )
 		end
 	end
@@ -412,6 +407,16 @@ function PANEL:SetItem(itemTable, panel)
 			iconCam
 		)
 	end
+end
+
+function PANEL:Paint(w, h)
+	local hovered
+
+	if (self:IsHovered() or self.icon and self.icon:IsHovered()) then
+		hovered = ix.config.Get("color")
+	end
+
+	derma.SkinFunc("PaintButton2", self, w, h, hovered)
 end
 
 vgui.Register("ixItemSpawnerItem", PANEL, "DPanel")

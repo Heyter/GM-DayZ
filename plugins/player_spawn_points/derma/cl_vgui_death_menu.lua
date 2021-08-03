@@ -1,4 +1,4 @@
-local gray = Color(51,51,51,250)
+local gray = Color(51, 51, 51, 250)
 local function paint_button(t, w, h)
 	local clr = gray
 
@@ -28,8 +28,6 @@ function PANEL:Init()
 	self:SetPos(0, ScrH() - 64)
 	self:ParentToHUD()
 
-	self.deathTime = nil
-	self.allow_button = nil
 	self.space = 128
 
 	self.disconnect = self:Add("DButton")
@@ -73,8 +71,12 @@ function PANEL:AddButton(text, isRight)
 		t:SetTextColor(color_white)
 	end
 	btn.Paint = paint_button
+	btn.Think = function(t)
+		if (LocalPlayer().deathTime or 0) > RealTime() then return end
+		t:ResetState()
+	end
 	btn.DoClick = function(t)
-		if (!self.allow_button) then return end
+		if (LocalPlayer().deathTime or 0) > RealTime() then return end
 
 		if ((LocalPlayer().ixPlayerDeathMenu or 0) < CurTime()) then
 			LocalPlayer().ixPlayerDeathMenu = CurTime() + 1
@@ -95,68 +97,25 @@ function PANEL:Paint(w, h)
 	surface.DrawRect(0, 0, w, h)
 end
 
-function PANEL:SetupButtons()
-	if (self.deathTime) then
-		local time = math.max(0, self.deathTime - RealTime())
-		local text1 = Format("%s (%s)", self.spawn1.Text, string.ToMinutesSeconds(time))
-		local text2 = Format("%s (%s)", self.spawn2.Text, string.ToMinutesSeconds(time))
-
-		self.spawn1:SetText(text1)
-		self.spawn2:SetText(text2)
-
-		surface.SetFont(self.ButtonFont)
-		local textW = surface.GetTextSize(text1)
-		self.spawn1:SetWide(self.space + textW * 0.5)
-
-		textW = surface.GetTextSize(text2)
-		self.spawn2:SetWide(self.space + textW * 0.5)
-
-		if (time == 0) then
-			self.spawn1:ResetState()
-			self.spawn2:ResetState()
-			self.allow_button = true
-		else
-			self.spawn1:SetTextColor(Color("red"))
-			self.spawn2:SetTextColor(Color("red"))
-		end
-	end
-end
-
 function PANEL:Think()
-	if (!LocalPlayer():GetCharacter()) then
-		self:SetAlpha(0)
-		return
-	end
+	local time = math.max(0, (LocalPlayer().deathTime or 0) - RealTime())
+	if (time == 0) then return end
 
-	local menu = (IsValid(ix.gui.characterMenu) and !ix.gui.characterMenu:IsClosing()) and ix.gui.characterMenu
-		or IsValid(ix.gui.menu) and ix.gui.menu
-	local fraction = menu and 1 - menu.currentAlpha / 255 or 1
+	local text1 = Format("%s (%s)", self.spawn1.Text, string.ToMinutesSeconds(time))
+	local text2 = Format("%s (%s)", self.spawn2.Text, string.ToMinutesSeconds(time))
 
-	if (LocalPlayer():Alive()) then
-		fraction = 0
+	self.spawn1:SetText(text1)
+	self.spawn2:SetText(text2)
 
-		if (self.allow_button) then
-			self.deathTime = nil
-			self.allow_button = nil
-			self:SetMouseInputEnabled(false)
-		end
-	else
-		if (!self.allow_button) then
-			self.deathTime = self.deathTime or RealTime() + ix.config.Get("spawnTime", 5)
-			self:SetMouseInputEnabled(true)
-			self:SetupButtons()
-		end
-	end
+	surface.SetFont(self.ButtonFont)
+	local textW = surface.GetTextSize(text1)
+	self.spawn1:SetWide(self.space + textW * 0.5)
 
-	self:SetAlpha(255 * fraction)
+	textW = surface.GetTextSize(text2)
+	self.spawn2:SetWide(self.space + textW * 0.5)
+
+	self.spawn1:SetTextColor(Color("red"))
+	self.spawn2:SetTextColor(Color("red"))
 end
 
 vgui.Register("ixDeathScreenMenu", PANEL, "DPanel")
-
-concommand.Add("gmodz_reload_death_menu", function()
-	if (IsValid(ix.gui.death_menu)) then
-		ix.gui.death_menu:Remove()
-	end
-
-	ix.gui.death_menu = vgui.Create("ixDeathScreenMenu") 
-end)

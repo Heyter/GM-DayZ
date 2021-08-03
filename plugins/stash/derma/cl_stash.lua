@@ -15,25 +15,8 @@ function PANEL:Init()
 	self.moneyBtn:SetIcon("icon16/money_dollar.png")
 	self.moneyBtn:SetTextInset(2, 0)
 	self.moneyBtn:SizeToContents()
-	self.moneyBtn.Paint = function(panel, width, height)
-		panel.set_color = ix.config.Get("color")
-
-		if (!panel:IsEnabled()) then
-			panel.set_color = ix.config.Get("color")
-		elseif (panel.Depressed) then
-			panel.set_color = ix.color.Darken(panel.set_color, 35)
-		elseif (panel.Hovered) then
-			panel.set_color = ix.color.Darken(panel.set_color, 25)
-		end
-
-		surface.SetDrawColor(panel.set_color)
-		surface.DrawRect(0, 0, width, height)
-
-		surface.SetDrawColor(0, 0, 0, 180)
-		surface.DrawOutlinedRect(0, 0, width, height)
-
-		surface.SetDrawColor(180, 180, 180, 2)
-		surface.DrawOutlinedRect(1, 1, width - 2, height - 2)
+	self.moneyBtn.Paint = function(t, w, h)
+		derma.SkinFunc("PaintButtonFilled", t, w, h)
 	end
 
 	self.moneyBtn.OnMousePressed = function(t, code)
@@ -208,28 +191,7 @@ function PANEL:SetItem(itemTable)
 end
 
 function PANEL:Paint(w, h)
-	surface.SetDrawColor(40, 40, 40, 255)
-	surface.DrawRect(0, 0, w, h)
-
-	local hovered = Color(60, 60, 60, 255) // todo: вынести в SKIN
-
-	if (self:IsHovered() or self.icon:IsHovered()) then
-		hovered = ix.config.Get("color")
-	end
-
-	if (GLOBAL_TOOLTIP and IsValid(GLOBAL_TOOLTIP[1]) 
-		and self.itemTable and GLOBAL_TOOLTIP[2].uniqueID != self.itemTable.uniqueID 
-		and GLOBAL_TOOLTIP[2].CanTooltip 
-		and GLOBAL_TOOLTIP[2]:CanTooltip(self.itemTable)) then
-
-		surface.SetDrawColor(Color(125, 125, 125, 30))
-		surface.DrawRect(2, 2, w - 4, h - 4)
-
-		hovered = ix.config.Get("color")
-	end
-
-	surface.SetDrawColor(hovered)
-	surface.DrawOutlinedRect(0, 0, w, h, 1)
+	derma.SkinFunc("PaintMerchantSlot", self, w, h)
 end
 
 vgui.Register("ixStashItem", PANEL, "DPanel")
@@ -306,13 +268,8 @@ function PANEL:Init()
 	self.invStash:SetDraggable(true)
 	self.invStash:SetSizable(false)
 	self.invStash.bNoBackgroundBlur = true
-	self.invStash.Paint = function(_, w, h)
-		surface.SetDrawColor(24, 24, 24, 255)
-		surface.DrawRect(0, 0, w, h)
-
-		-- Title
-		surface.SetDrawColor(60, 60, 60, 255)
-		surface.DrawRect(0, 0, w, 24)
+	self.invStash.Paint = function(t, w, h)
+		derma.SkinFunc("PaintFrame2", t, w, h)
 	end
 	self.invStash.Close = function(t)
 		self:Remove()
@@ -467,17 +424,7 @@ function PANEL:AddCategory(item)
 		cat.Header:SetFont("ixSmallFont")
 		cat.Header:SetContentAlignment(5)
 		cat.Header.Paint = function(t, w, h)
-			surface.SetDrawColor(40, 40, 40, 255)
-			surface.DrawRect(0, 0, w, h)
-
-			local hovered = Color(60, 60, 60, 255)
-
-			if (t:IsHovered()) then
-				hovered = ix.config.Get("color")
-			end
-
-			surface.SetDrawColor(hovered)
-			surface.DrawOutlinedRect(0, 0, w, h, 1)
+			derma.SkinFunc("PaintButton2", t, w, h, t:IsHovered() and ix.config.Get("color"))
 		end
 		cat:SetLabel(L(item.category))
 		cat:Dock(TOP)

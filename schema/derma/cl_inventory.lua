@@ -1,12 +1,3 @@
-local matTile = ix.util.GetMaterial('gmodz/gui/concrete/tile.png')
---local matSelected = ix.util.GetMaterial('gmodz/gui/concrete/borderselected.png')
-
-local function draw_tile(w, h)
-	surface.SetDrawColor(200, 200, 200, 255)
-	surface.SetMaterial(matTile)
-	surface.DrawTexturedRect(0, 0, w, h)
-end
-
 local function draw_selected(w, h, color)
 	-- surface.SetDrawColor(51, 204, 51, 155)
 	-- surface.SetMaterial(matSelected)
@@ -205,46 +196,13 @@ function PANEL:PaintDragPreview(width, height, mouseX, mouseY, itemPanel)
 	end
 end
 
-function PANEL:BuildSlots()
-	local iconSize = self.iconSize
-
-	self.slots = self.slots or {}
-
-	for _, v in ipairs(self.slots) do
-		for _, v2 in ipairs(v) do
-			v2:Remove()
-		end
-	end
-
-	self.slots = {}
-
-	for x = 1, self.gridW do
-		self.slots[x] = {}
-
-		for y = 1, self.gridH do
-			local slot = self:Add("DPanel")
-			slot:SetZPos(-999)
-			slot.gridX = x
-			slot.gridY = y
-			slot:SetPos((x - 1) * iconSize + 4, (y - 1) * iconSize + self:GetPadding(2))
-			slot:SetSize(iconSize, iconSize)
-			slot.Paint = function(panel, width, height)
-				draw_tile(width, height)
-			end
-
-			self.slots[x][y] = slot
-		end
-	end
-end
-
 derma.DefineControl("ixInventory", "", PANEL, "DFrame")
 
 -- IX_ITEM_ICON
 PANEL = vgui.GetControlTable("ixItemIcon")
 
 PANEL.colors = {
-	tile = Color(0, 0, 0, 85),
-	tooltip = Color(125, 125, 125, 30)
+	tile = Color(0, 0, 0, 85)
 }
 
 function PANEL:OnMousePressed(code)
@@ -308,7 +266,7 @@ function PANEL:DoRightShiftClick()
 end
 
 function PANEL:Paint(width, height)
-	draw_tile(width, height)
+	derma.SkinFunc("PaintInventorySlot", self, width, height)
 
 	self.hovered_color = self.colors.tile
 
@@ -317,7 +275,7 @@ function PANEL:Paint(width, height)
 		and GLOBAL_TOOLTIP[2].CanTooltip 
 		and GLOBAL_TOOLTIP[2]:CanTooltip(self.itemTable)) then
 
-		self.hovered_color = self.colors.tooltip
+		self.hovered_color = derma.GetColor("GlobalTooltip", self, Color(125, 125, 125, 30))
 	elseif (self:IsHovered()) then
 		draw_selected(width, height, ColorAlpha(derma.GetColor("Success", self, Color(200, 0, 0)), 35))
 	end

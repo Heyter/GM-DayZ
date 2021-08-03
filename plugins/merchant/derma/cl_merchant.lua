@@ -150,28 +150,7 @@ function PANEL:SetItem(itemTable)
 end
 
 function PANEL:Paint(w, h)
-	surface.SetDrawColor(40, 40, 40, 255)
-	surface.DrawRect(0, 0, w, h)
-
-	local hovered = Color(60, 60, 60, 255) // todo: вынести в SKIN
-
-	if (self:IsHovered() or self.icon and self.icon:IsHovered()) then
-		hovered = ix.config.Get("color")
-	end
-
-	if (GLOBAL_TOOLTIP and IsValid(GLOBAL_TOOLTIP[1]) 
-		and self.itemTable and GLOBAL_TOOLTIP[2].uniqueID != self.itemTable.uniqueID 
-		and GLOBAL_TOOLTIP[2].CanTooltip 
-		and GLOBAL_TOOLTIP[2]:CanTooltip(self.itemTable)) then
-
-		surface.SetDrawColor(Color(125, 125, 125, 30))
-		surface.DrawRect(2, 2, w - 4, h - 4)
-
-		hovered = ix.config.Get("color")
-	end
-
-	surface.SetDrawColor(hovered)
-	surface.DrawOutlinedRect(0, 0, w, h, 1)
+	derma.SkinFunc("PaintMerchantSlot", self, w, h)
 end
 
 function PANEL:Think()
@@ -233,13 +212,8 @@ function PANEL:Init()
 	self.invMerchant:SetDraggable(true)
 	self.invMerchant:SetSizable(false)
 	self.invMerchant.bNoBackgroundBlur = true
-	self.invMerchant.Paint = function(_, w, h)
-		surface.SetDrawColor(24, 24, 24, 255)
-		surface.DrawRect(0, 0, w, h)
-
-		-- Title
-		surface.SetDrawColor(60, 60, 60, 255)
-		surface.DrawRect(0, 0, w, 24)
+	self.invMerchant.Paint = function(t, w, h)
+		derma.SkinFunc("PaintFrame2", t, w, h)
 	end
 	self.invMerchant.Close = function(t)
 		self:Remove()
@@ -385,17 +359,7 @@ function PANEL:AddCategory(item)
 		cat.Header:SetFont("ixSmallFont")
 		cat.Header:SetContentAlignment(5)
 		cat.Header.Paint = function(t, w, h)
-			surface.SetDrawColor(40, 40, 40, 255)
-			surface.DrawRect(0, 0, w, h)
-
-			local hovered = Color(60, 60, 60, 255)
-
-			if (t:IsHovered()) then
-				hovered = ix.config.Get("color")
-			end
-
-			surface.SetDrawColor(hovered)
-			surface.DrawOutlinedRect(0, 0, w, h, 1)
+			derma.SkinFunc("PaintButton2", t, w, h, t:IsHovered() and ix.config.Get("color"))
 		end
 		cat:SetLabel(L(item.category))
 		cat:Dock(TOP)
@@ -414,7 +378,6 @@ function PANEL:AddCategory(item)
 		slot:InvalidateLayout(true)
 
 		cat:SetContents(slot)
-
 		self.categoryPanels[item.category] = {slot, cat}
 	end
 end

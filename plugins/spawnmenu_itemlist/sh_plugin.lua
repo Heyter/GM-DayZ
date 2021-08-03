@@ -47,17 +47,13 @@ if (CLIENT) then
 		local slot = vgui.Create("Panel", container)
 		slot:SetSize(100, 100)
 		slot.Paint = function(t, w, h)
-			surface.SetDrawColor(40, 40, 40, 255)
-			surface.DrawRect(0, 0, w, h)
-
-			local hovered = Color(60, 60, 60, 255) // todo: вынести в SKIN
+			local hovered
 
 			if (t:IsHovered() or t.icon and t.icon:IsHovered()) then
 				hovered = ix.config.Get("color")
 			end
 
-			surface.SetDrawColor(hovered)
-			surface.DrawOutlinedRect(0, 0, w, h, 1)
+			derma.SkinFunc("PaintButton2", t, w, h, hovered)
 		end
 
 		local icon = slot:Add('SpawnIcon')

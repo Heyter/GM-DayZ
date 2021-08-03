@@ -85,25 +85,8 @@ function PANEL:Init()
 	self.moneyBtn:SetIcon("icon16/money_dollar.png")
 	self.moneyBtn:SetTextInset(2, 0)
 	self.moneyBtn:SizeToContents()
-	self.moneyBtn.Paint = function(panel, width, height)
-		panel.set_color = ix.config.Get("color")
-
-		if (panel:GetDisabled()) then
-			panel.set_color = ix.color.Darken(panel.set_color, 50)
-		elseif (panel.Depressed) then
-			panel.set_color = ix.color.Darken(panel.set_color, 35)
-		elseif (panel.Hovered) then
-			panel.set_color = ix.color.Darken(panel.set_color, 25)
-		end
-
-		surface.SetDrawColor(panel.set_color)
-		surface.DrawRect(0, 0, width, height)
-
-		surface.SetDrawColor(0, 0, 0, 180)
-		surface.DrawOutlinedRect(0, 0, width, height)
-
-		surface.SetDrawColor(180, 180, 180, 2)
-		surface.DrawOutlinedRect(1, 1, width - 2, height - 2)
+	self.moneyBtn.Paint = function(t, w, h)
+		derma.SkinFunc("PaintButtonFilled", t, w, h)
 	end
 
 	self.moneyBtn.OnMousePressed = function(_, code)

@@ -51,15 +51,6 @@ if (CLIENT) then
 		end)
 	end)
 
-	function PLUGIN:InitPostEntity()
-		ix.gui.death_menu = vgui.Create("ixDeathScreenMenu")
-	end
-
-	if (IsValid(ix.gui.death_menu)) then
-		ix.gui.death_menu:Remove()
-		ix.gui.death_menu = vgui.Create("ixDeathScreenMenu")
-	end
-
 	local owner, w, h, ft, clmp
 	clmp = math.Clamp
 	local aprg, aprg2 = 0, 0
@@ -106,6 +97,33 @@ if (CLIENT) then
 	hook.Add( "HUDShouldDraw", "Hide_CHudDamageIndicator", function( name )
 		if (name == "CHudDamageIndicator" and LocalPlayer():Health() <= 0) then
 			return false
+		end
+	end)
+
+	concommand.Add("gmodz_reload_death_menu", function()
+		if (!IsValid(ix.gui.death_menu)) then
+			ix.gui.death_menu = vgui.Create("ixDeathScreenMenu")
+		end
+
+		ix.gui.death_menu:SetMouseInputEnabled(true)
+		LocalPlayer().deathTime = LocalPlayer().deathTime or RealTime() + ix.config.Get("spawnTime", 5)
+	end)
+
+	timer.Create("ixDeathScreenMenu", 0.25, 0, function()
+		if (!LocalPlayer():GetCharacter()) then return end
+
+		if (LocalPlayer():Alive()) then
+			if (IsValid(ix.gui.death_menu)) then
+				LocalPlayer().deathTime = nil
+				ix.gui.death_menu:SetMouseInputEnabled(false)
+				ix.gui.death_menu:Remove()
+			end
+		else
+			if (!IsValid(ix.gui.death_menu)) then
+				LocalPlayer().deathTime = RealTime() + ix.config.Get("spawnTime", 5)
+				ix.gui.death_menu = vgui.Create("ixDeathScreenMenu")
+				ix.gui.death_menu:SetMouseInputEnabled(true)
+			end
 		end
 	end)
 end
