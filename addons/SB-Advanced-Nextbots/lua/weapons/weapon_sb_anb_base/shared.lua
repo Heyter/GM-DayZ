@@ -13,7 +13,7 @@ SWEP.Author = "Shadow Bonnie (RUS)"
 SWEP.Purpose = "Should only be used internally by advanced nextbots!"
 
 SWEP.WorldModel = nil
-SWEP.HoldType = ""
+SWEP.HoldType = "normal"
 SWEP.Weight = 0
 
 SWEP.PrimaryAmmo = ""
@@ -23,6 +23,7 @@ SWEP.PrimaryAuto = false
 SWEP.BulletsPerShoot = 1
 SWEP.FullShootDamage = 0
 SWEP.MuzzleEffect = false
+SWEP.MuzzleFlag = 2
 
 SWEP.ShotSound = Sound("")
 SWEP.ShotSoundLevel = 0
@@ -34,6 +35,9 @@ SWEP.NPCBurstMax = 0
 SWEP.NPCBurstDelay = 0
 SWEP.NPCRestMin = 0
 SWEP.NPCRestMax = 0
+
+-- Приоритет только голова
+SWEP.TrueScope = false
 
 SWEP.Tracer = 1
 SWEP.TracerType = "Tracer" -- https://wiki.facepunch.com/gmod/Enums/TRACER
@@ -83,14 +87,43 @@ function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
 
 	local owner = self:GetOwner()
-	local position = owner:GetAttachment(1).Pos
 	self.InternalSpread = self.InternalSpread or math.sin(math.rad(self:GetNPCBulletSpread(owner:GetCurrentWeaponProficiency())) / 2)
+	self.InternalLevel = self.InternalLevel or owner:GetCurrentWeaponProficiency()
+
+	local enemy = owner:GetEnemy()
+
+	local targetPos
+	local muzzlePos = self:GetAttachment(1).Pos
+
+	if (enemy != NULL) then
+		if (!self.TrueScope) then
+			local head = enemy:LookupBone("ValveBiped.Bip01_Head1")
+
+			if (head != 0) then
+				targetPos = enemy:GetBonePosition(head)
+			else
+				targetPos = enemy:EyePos()
+			end
+		end
+
+		targetPos = (targetPos or enemy:WorldSpaceCenter()) + (enemy:GetVelocity() * 0.25 * math.Rand(0, self.InternalLevel or WEAPON_PROFICIENCY_GOOD))
+	end
+
+	targetPos = targetPos or owner:WorldSpaceCenter()
+	targetPos = (targetPos - muzzlePos):GetNormalized()
+
+--[[ 	local aim
+	local position = owner:WorldSpaceCenter() -- Src
+	if (owner:GetEnemy() != NULL) then
+		aim = (owner:GetEnemy():WorldSpaceCenter() - position):GetNormalized()
+		aim:Add(VectorRand(-self.InternalSpread or 5, self.InternalSpread or 5))  -- Dir
+	end ]]
 
 	owner:FireBullets({
 		Num = self.BulletsPerShoot,
-		Src = position,
-		Dir = owner:GetEyeAngles():Forward(),
-		Spread = VectorRand(-self.InternalSpread, self.InternalSpread),
+		Src = muzzlePos,
+		Dir = targetPos,
+		Spread = self.SpreadCone or VectorRand(-self.InternalSpread, self.InternalSpread),
 		AmmoType = self:GetPrimaryAmmoType(),
 		Damage = self.FullShootDamage/self.BulletsPerShoot,
 		Attacker = owner,
@@ -104,9 +137,9 @@ function SWEP:PrimaryAttack()
 		net.SendPVS(self:GetPos())
 	end
 
-	sound.Play(self.ShotSound, position, self.ShotSoundLevel, math.random(95, 105), 1)
+	sound.Play(self.ShotSound, muzzlePos, self.ShotSoundLevel, math.random(95, 105), 1)
 
-	self:SetClip1(self:Clip1()-1)
+	self:SetClip1(self:Clip1() - 1)
 	self:SetNextPrimaryFire(CurTime()+self.NextShootTime)
 	self:SetLastShootTime()
 end
@@ -137,6 +170,10 @@ function SWEP:GetNPCRestTimes()
 	return self.NPCRestMin,self.NPCRestMax
 end
 
+function SWEP:CanBePickedUpByNPCs()
+	return true
+end
+
 if (SERVER) then
 	function SWEP:GetCapabilities()
 		return CAP_WEAPON_RANGE_ATTACK1
@@ -156,7 +193,7 @@ if CLIENT then
 		ef:SetEntity(wep)
 		ef:SetAttachment(1)
 		ef:SetScale(1)
-		ef:SetFlags(2)
+		ef:SetFlags(wep.MuzzleFlag or 2)
 		util.Effect("MuzzleFlash", ef, false)
 
 		if IsValid(wep:GetOwner()) then

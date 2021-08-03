@@ -164,7 +164,7 @@ ENT.TaskList = {
 						self:WeaponReload()
 					end
 
-					if (wep:GetHoldType() != wep.HoldType) then
+					if (wep.HoldType and wep:GetHoldType() != wep.HoldType) then
 						wep:SetHoldType(wep.HoldType)
 					end
 				end
@@ -190,7 +190,7 @@ ENT.TaskList = {
 					self:WeaponReload()
 				end
 
-				if ((self.LastEnemyAlert or 0) < CurTime() and wep:GetHoldType() != "passive") then
+				if (wep.HoldType and (self.LastEnemyAlert or 0) < CurTime() and wep:GetHoldType() != "passive") then
 					wep:SetHoldType("passive")
 				end
 			end
@@ -428,7 +428,11 @@ function ENT:Initialize()
 	else
 		self.ThrowedGrenadeDelay = CurTime() + 30
 	end
+
+	self:PostInitialize()
 end
+
+function ENT:PostInitialize() end
 
 -- если есть трение и IsStuck то можно тут проверять
 --[[ function ENT:OnTouch(ent,trace)
