@@ -24,6 +24,8 @@ ENT.GrenadeMaxDistance = math.pow(890, 2)
 ENT.DefaultWeapon = "weapon_minimi_sb_anb"
 ENT.CanMeleeAttack = false
 
+ENT.InformRadius = math.pow(512, 2)
+
 if (SERVER) then
 	function ENT:ChooseSound(key, delay, force)
 		if (!force and self:Health() <= 0) then return end

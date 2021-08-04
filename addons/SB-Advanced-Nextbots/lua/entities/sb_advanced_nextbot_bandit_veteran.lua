@@ -22,7 +22,9 @@ ENT.RagdollModel = "models/gmodz/npc/bandit_veteran.mdl"
 ENT.GrenadeMinDistance = math.pow(400, 2)
 ENT.GrenadeMaxDistance = math.pow(890, 2)
 ENT.DefaultWeapon = "weapon_ak47_sb_anb"
-ENT.CanMeleeAttack = true
+ENT.CanMeleeAttack = false
+
+ENT.InformRadius = math.pow(512, 2)
 
 util.PrecacheModel(ENT.Model)
 util.PrecacheModel(ENT.RagdollModel)
