@@ -56,11 +56,11 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 
 					local totalQuantity = targetQuantity + remainingQuantity
 					if (totalQuantity > maxQuantity) then
-						targetItem:SetData("quantity", maxQuantity)
-						copyItem:SetData("quantity", totalQuantity - maxQuantity)
+						targetItem:SetData("quantity", maxQuantity, true)
+						copyItem:SetData("quantity", totalQuantity - maxQuantity, true)
 						break
 					else
-						targetItem:SetData("quantity", remainingQuantity + targetQuantity)
+						targetItem:SetData("quantity", remainingQuantity + targetQuantity, true)
 						remainingQuantity = 0
 						break
 					end

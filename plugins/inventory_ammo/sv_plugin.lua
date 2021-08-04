@@ -53,9 +53,7 @@ function playerMeta:TakeInventoryAmmo(ammoID, amount)
 
 			if (rounds - clip1 <= 0) then
 				clip1 = math.max(0, clip1 - rounds)
-				v:Remove()
-
-				-- TODO: проверять удалился ли предмет.
+				v:Remove() -- TODO: проверять удалился ли предмет.
 			else
 				v:SetData("rounds", rounds - clip1)
 				clip1 = 0

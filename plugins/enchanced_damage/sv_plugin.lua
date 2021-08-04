@@ -113,12 +113,10 @@ function playerMeta:BreakLeg(duration, bForce)
 	if (!bForce and hook.Run("PlayerShouldTakeDamage", self, self) == false) then return end
 
 	self:SetLocalVar("legBroken", CurTime() + (duration or 300))
-	self:DisableStamina(true)
 end
 
 function playerMeta:HealLeg()
 	self:SetLocalVar("legBroken", nil)
-	self:DisableStamina(false)
 end
 
 function ix.bleeding.Timer(client, level, isRise)

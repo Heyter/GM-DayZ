@@ -23,6 +23,10 @@ function ITEM:SetData(key, value, receivers, noSave, noCheckEntity)
 			end
 		end
 
+		if (receivers and receivers == true and self.invID != 0) then
+			receivers = ix.item.inventories[self.invID]:GetReceivers()
+		end
+
 		if (receivers != false and (receivers or self:GetOwner())) then
 			net.Start("ixInventoryData")
 				net.WriteUInt(self:GetID(), 32)
@@ -60,7 +64,7 @@ function ITEM:UseStackItem(bMaxQuantity, callback)
 		return true, quantity
 	end
 
-	self:SetData("quantity", newQuantity)
+	self:SetData("quantity", newQuantity, true)
 
 	return false, quantity
 end

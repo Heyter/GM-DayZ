@@ -228,16 +228,19 @@ function Schema:CreateItemInteractionMenu(iconPanel, _, item)
 			if (!inventory or !item) then return end
 
 			if (!inventory:CanItemFitStack(item, true)) then
-				local panel = ix.gui["inv" .. inventory:GetID()]
+				local invPanel = ix.gui["inv" .. inventory:GetID()]
 				local invW, invH = inventory:GetSize()
+				local w, h = item.width, item.height
 				local x2, y2
 
 				for x = 1, invW do
+					if (!IsValid(invPanel) or x2 and y2) then break end
 					for y = 1, invH do
-						if (!IsValid(panel)) then break end
-						if (panel:IsAllEmpty(x, y, item.width, item.height)) then
-							x2 = x
-							y2 = y
+						if (!IsValid(invPanel)) then break end
+						if (invPanel:IsAllEmpty(x, y, w, h)) then
+							x2 = x2 or x
+							y2 = y2 or y
+							break
 						end
 					end
 				end
@@ -330,3 +333,46 @@ hook.Add("CreateMenuButtons", "ixInventory", function(tabs)
 		end
 	}
 end)
+
+-- Left mouse button + SHIFT
+function Schema:ItemPressedLeftShift(icon, item, inventory)
+	local localInventory = LocalPlayer():GetCharacter():GetInventory()
+
+	if (localInventory:GetID() != inventory:GetID()) then
+		local targetInvPanel = ix.gui["inv" .. inventory:GetID()]
+		local localInvPanel = ix.gui.inv1
+
+		if (IsValid(targetInvPanel) and IsValid(localInvPanel)) then
+			local w, h = item.width, item.height
+			local invW, invH = localInventory:GetSize()
+			local stackItem = localInventory:CanItemFitStack(item, true)
+			local x2, y2
+
+			for x = 1, invW do
+				for y = 1, invH do
+					if (stackItem) then
+						local slot = (localInventory.slots[x] or {})[y]
+
+						if (slot and slot.isStackable and slot.uniqueID == stackItem.uniqueID and slot:GetData("quantity", slot.maxQuantity or 16) < (slot.maxQuantity or 16)) then
+							x2 = x2 or x
+							y2 = y2 or y
+
+							break
+						end
+					else
+						if (localInvPanel:IsAllEmpty(x, y, w, h)) then
+							x2 = x2 or x
+							y2 = y2 or y
+
+							break
+						end
+					end
+				end
+			end
+
+			if (x2 and y2) then
+				icon:Move(x2, y2, localInvPanel)
+			end
+		end
+	end
+end

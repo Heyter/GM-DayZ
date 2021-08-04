@@ -1,7 +1,5 @@
 local timer, IsValid = timer, IsValid
 
-util.AddNetworkString("ixArcCWAmmoSplit")
-
 function ix.arccw_support.Attach(itemWeapon, attID)
 	if (!itemWeapon or !attID or !itemWeapon.isWeapon or !itemWeapon.attachments) then
 		return false
@@ -13,7 +11,7 @@ function ix.arccw_support.Attach(itemWeapon, attID)
 
 	local client = itemWeapon.player or itemWeapon:GetOwner()
 
-	if (IsValid(client) and client:GetCharacter() and (client.StopArcAttach or 0) < CurTime()) then
+	if (IsValid(client) and (client.StopArcAttach or 0) < CurTime()) then
 		local slot = itemWeapon.attachments[attID]
 		if (!slot) then return false end
 
@@ -43,7 +41,7 @@ function ix.arccw_support.Attach(itemWeapon, attID)
 			return false
 		else
 			mods[slot] = attID
-			itemWeapon:SetData("mods", mods)
+			itemWeapon:SetData("mods", mods, true)
 			mods = nil
 
 			client:EmitSound("weapons/crossbow/reload1.wav")
@@ -56,7 +54,7 @@ function ix.arccw_support.Attach(itemWeapon, attID)
 end
 
 function ix.arccw_support.Detach(itemWeapon, attID)
-	if (!itemWeapon or !attID or !itemWeapon.isWeapon or !itemWeapon.attachments) then
+	if (!itemWeapon or itemWeapon.invID == 0 or !attID or !itemWeapon.isWeapon or !itemWeapon.attachments) then
 		return false
 	end
 
@@ -64,9 +62,12 @@ function ix.arccw_support.Detach(itemWeapon, attID)
 		return false
 	end
 
+	local inventory = ix.item.inventories[itemWeapon.invID]
+	if (!inventory) then return end
+
 	local client = itemWeapon.player or itemWeapon:GetOwner()
 
-	if (IsValid(client) and client:GetCharacter() and (client.StopArcAttach or 0) < CurTime()) then
+	if (IsValid(client) and (client.StopArcAttach or 0) < CurTime()) then
 		local slot = itemWeapon.attachments[attID]
 		local mods = itemWeapon:GetData("mods", {})
 
@@ -100,7 +101,7 @@ function ix.arccw_support.Detach(itemWeapon, attID)
 		if (IsValid(weapon) and weapon.ixItem and weapon.ixItem == itemWeapon) then
 			local attItem = ix.item.list[attID]
 
-			if (!attItem or !client:GetCharacter():GetInventory():FindEmptySlot(attItem.width, attItem.height, true)) then
+			if (!attItem or !inventory:FindEmptySlot(attItem.width, attItem.height, true)) then
 				client:NotifyLocalized("noFit")
 				return false
 			end
@@ -110,7 +111,7 @@ function ix.arccw_support.Detach(itemWeapon, attID)
 
 			return true
 		else
-			if (!client:GetCharacter():GetInventory():Add(attID)) then
+			if (!inventory:Add(attID)) then
 				client:NotifyLocalized("noFit")
 				return false
 			end
@@ -118,9 +119,9 @@ function ix.arccw_support.Detach(itemWeapon, attID)
 			mods[slot] = nil
 
 			if (table.IsEmpty(mods)) then
-				itemWeapon:SetData("mods", nil)
+				itemWeapon:SetData("mods", nil, true)
 			else
-				itemWeapon:SetData("mods", mods)
+				itemWeapon:SetData("mods", mods, true)
 			end
 
 			mods = nil
@@ -179,64 +180,60 @@ function ix.arccw_support.StackAmmo(itemSelf, combineItem)
 	local totalRounds = combineRounds + rounds
 
 	if (totalRounds > maxRounds) then
-		itemSelf:SetData("rounds", maxRounds)
-		combineItem:SetData("rounds", totalRounds - maxRounds)
+		itemSelf:SetData("rounds", maxRounds, true)
+		combineItem:SetData("rounds", totalRounds - maxRounds, true)
 	else
 		combineItem:Remove()
-		itemSelf:SetData("rounds", rounds + combineRounds)
+		itemSelf:SetData("rounds", rounds + combineRounds, true)
 	end
 
 	rounds, combineRounds, totalRounds, maxRounds = nil, nil, nil, nil
 end
 
-function ix.arccw_support.EmptyClip(itemSelf)
-	local ammoID = itemSelf.ammo
-	if (!ammoID) then return end
+-- item = itemWeapon
+function ix.arccw_support.EmptyClip(item)
+	if (!item.ammoID or item.invID == 0) then return end
+	local inventory = ix.item.inventories[item.invID]
+	if (!inventory) then return end
 
-	local client = itemSelf.player
-	local weapon = client.carryWeapons and client.carryWeapons[itemSelf.weaponCategory]
+	local client = item.player
+	local weapon = client.carryWeapons and client.carryWeapons[item.weaponCategory]
 	local ammo = 0
 
 	if (!IsValid(weapon)) then
-		weapon = client:GetWeapon(itemSelf.class)
+		weapon = client:GetWeapon(item.class)
 	end
 
-	if (IsValid(weapon) and weapon:Clip1() > 0) then
+	if (IsValid(weapon)) then
 		ammo = weapon:Clip1()
 
 		if (ammo > 0) then
-			local data = { rounds = ammo }
-			ammoID = weapon.Primary.Ammo
-
-			if (!client:GetCharacter():GetInventory():Add(ammoID, 1, data)) then
-				weapon:SetClip1(0)
-				ix.item.Spawn(ammoID, client, nil, nil, data)
+			if (!inventory:Add(item.ammoID, 1, { rounds = ammo })) then
+				client:NotifyLocalized("noFit")
 				return
 			end
 
-			client:UpdateInventoryAmmo(ammoID)
 			weapon:SetClip1(0)
-
-			return
+			client:UpdateInventoryAmmo(item.ammoID)
 		end
-	else
-		ammo = itemSelf:GetData("ammo", 0)
 
-		if (ammo > 0) then
-			itemSelf:SetData("ammo", nil)
-		end
+		return
 	end
 
-	if (ammo > 0) then
-		local data = { rounds = ammo }
+	ammo = item:GetData("ammo", 0)
 
-		if (!client:GetCharacter():GetInventory():Add(ammoID, 1, data)) then
-			ix.item.Spawn(ammoID, client, nil, nil, data)
+	if (ammo > 0) then
+		if (!inventory:Add(item.ammoID, 1, { rounds = ammo })) then
+			client:NotifyLocalized("noFit")
+			return
 		end
 
+		item:SetData("ammo", nil, true)
 		client:EmitSound("weapons/clipempty_rifle.wav")
 	end
 end
+
+util.AddNetworkString("ixArcCWAmmoSplit")
 
 net.Receive("ixArcCWAmmoSplit", function(_, client)
 	if ((client.ixAmmoSplitTry or 0) < CurTime()) then
@@ -245,27 +242,28 @@ net.Receive("ixArcCWAmmoSplit", function(_, client)
 		return
 	end
 
-	local character = client:GetCharacter()
-	if (!character or !client:Alive()) then return end
+	if (!client:GetCharacter() or !client:Alive()) then return end
 
 	local item = ix.item.instances[net.ReadUInt(32)]
-	if (!item or (item.base or "") != "base_arccw_ammo") then return end
+	if (!item or item.invID == 0 or (item.base or "") != "base_arccw_ammo") then return end
+
+	local inventory = ix.item.inventories[item.invID]
+	if (!inventory) then return end
 
 	local rounds = item:GetData("rounds", item.ammoAmount)
 	if (rounds <= 1) then return end
 
 	local amount = net.ReadUInt(32)
-
 	amount = math.Clamp(math.Round(tonumber(amount) or 0), 0, rounds)
 	if (amount == 0 or amount == rounds) then return end
 
-	if (character:GetInventory():Add(item.uniqueID, 1, {rounds = amount}, nil, nil, nil, true)) then
+	if (inventory:Add(item.uniqueID, 1, {rounds = amount}, nil, nil, nil, true)) then
 		amount = rounds - amount
 
 		if (amount <= 0) then
 			item:Remove()
 		else
-			item:SetData("rounds", amount)
+			item:SetData("rounds", amount, true)
 		end
 	else
 		client:NotifyLocalized("noFit")

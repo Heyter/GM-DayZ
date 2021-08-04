@@ -1,4 +1,5 @@
 -- luacheck: pop
+local velocitySqr = 45 * 45
 local function CalcStaminaChange(client)
 	if (!client:GetCharacter() or !client:Alive() or client:GetMoveType() == MOVETYPE_NOCLIP) then
 		return
@@ -7,17 +8,24 @@ local function CalcStaminaChange(client)
 	local runSpeed = ix.config.Get("runSpeed")
 	local walkSpeed = ix.config.Get("walkSpeed")
 	local brth = client:GetNetVar("brth", false)
-	local disableSprint = hook.Run("PlayerDisableSprint", client) or client.disableSprint or brth
+	local disableSprint = hook.Run("PlayerDisableSprint", client, walkSpeed) or brth
 
 	if (disableSprint) then
-		runSpeed = walkSpeed
-	elseif (client:WaterLevel() > 1) then
-		runSpeed = runSpeed * 0.775
+		if (isnumber(disableSprint)) then
+			runSpeed = math.min(runSpeed, disableSprint)
+			disableSprint = nil
+		else
+			runSpeed = walkSpeed
+		end
+	end
+
+	if (client:GetRunSpeed() != runSpeed) then
+		client:SetRunSpeed(runSpeed)
 	end
 
 	local offset
 
-	if (client:KeyDown(IN_SPEED) and disableSprint and client:GetVelocity():LengthSqr() >= (walkSpeed * walkSpeed)) then
+	if (client:KeyDown(IN_SPEED) and !disableSprint and client:GetVelocity():LengthSqr() >= velocitySqr) then
 		offset = -ix.config.Get("staminaDrain", 1)
 	else
 		offset = client:Crouching() and ix.config.Get("staminaCrouchRegeneration", 2) or ix.config.Get("staminaRegeneration", 1.75)
@@ -32,20 +40,14 @@ local function CalcStaminaChange(client)
 		client:SetLocalVar("stm", value)
 
 		if (value == 0 and !brth) then
-			client:SetRunSpeed(walkSpeed)
 			client:SetNetVar("brth", true)
-
-			-- hook.Run("PlayerStaminaLost", client)
 		elseif (value >= 25 and brth) then
-			client:SetRunSpeed(runSpeed)
-			client:SetJumpPower(ix.config.Get("jumpPower", 200))
 			client:SetNetVar("brth", nil)
-
-			-- hook.Run("PlayerStaminaGained", client)
 		end
 	end
 end
 
+-- lua_run ix.plugin.Get("gmodz_stamina"):PostPlayerLoadout(Entity(1))
 function PLUGIN:PostPlayerLoadout(client)
 	local uniqueID = "ixStam" .. client:SteamID()
 
@@ -74,24 +76,37 @@ function PLUGIN:PlayerLoadedCharacter(client, character)
 end
 
 function PLUGIN:KeyPress(client, key)
-	if (key == IN_JUMP and client:OnGround() and client:GetMoveType() == MOVETYPE_WALK) then
+	if (key == IN_JUMP and client:OnGround() and client:GetMoveType() == MOVETYPE_WALK and !client:GetNetVar("brth", false)) then
 		local staminaUse = ix.config.Get("jumpStamina", 0)
 
 		if (staminaUse > 0) then
-			local value = client:GetLocalVar("stm", 0) - staminaUse
-
-			if (!client:GetNetVar("brth", false)) then
-				if (value < 0) then
-					client:SetNetVar("brth", true)
-					client:SetLocalVar("stm", 0)
-					client:SetRunSpeed(ix.config.Get("walkSpeed"))
-				else
-					client:ConsumeStamina(staminaUse)
-				end
+			if (client:GetLocalVar("stm", 0) - staminaUse < 0) then
+				client:SetNetVar("brth", true)
+				client:SetLocalVar("stm", 0)
+			else
+				client:ConsumeStamina(staminaUse)
 			end
 		end
 	end
 end
+
+-- Здесь, потому что не хочу сто хуков делать.
+hook.Add("PlayerDisableSprint", "Stamina.PlayerDisableSprint", function(client, walkSpeed)
+	local sprint, enableSprint
+
+	for _, v in pairs(client:GetClothesItem()) do
+		if (v.disableSprint) then
+			sprint = true
+			break
+		end
+	end
+
+	if (!sprint and client:IsBrokenLeg()) then
+		sprint = walkSpeed * 1.5
+	end
+
+	return sprint
+end)
 
 local playerMeta = FindMetaTable("Player")
 
@@ -107,12 +122,4 @@ function playerMeta:ConsumeStamina(amount)
 	local value = math.Clamp(current - amount, 0, 100)
 
 	self:SetLocalVar("stm", value)
-end
-
-function playerMeta:DisableStamina(bDisable)
-	if (!bDisable and !self:GetNetVar("brth", false)) then
-		self:SetRunSpeed(ix.config.Get("runSpeed"))
-	else
-		self:SetRunSpeed(ix.config.Get("walkSpeed"))
-	end
 end

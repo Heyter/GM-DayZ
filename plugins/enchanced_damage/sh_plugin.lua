@@ -71,7 +71,7 @@ function PLUGIN:Move(client, mv)
 
 	client.playerSpeedModifier = 0
 	hook.Run("PlayerSpeedModifier", client, brth)
-	walkSpeed = math.max(1, walkSpeed + client.playerSpeedModifier)
+	walkSpeed = math.max(45, walkSpeed + client.playerSpeedModifier)
 
 	mv:SetMaxSpeed(walkSpeed)
 	mv:SetMaxClientSpeed(walkSpeed)
@@ -93,14 +93,6 @@ end
 function PLUGIN:PlayerSpeedModifier(client, brth)
 	if (client:IsBrokenLeg()) then
 		client.playerSpeedModifier = client.playerSpeedModifier - 100
-	end
-end
-
-if (SERVER) then
-	function PLUGIN:PlayerDisableSprint(client)
-		if (client:IsBrokenLeg()) then
-			return true
-		end
 	end
 end
 

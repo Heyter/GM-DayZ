@@ -12,11 +12,11 @@ function ITEM:CombineStack(combineItem)
 	local totalQuantity = combineQuantity + quantity
 
 	if (totalQuantity > maxQuantity) then
-		self:SetData("quantity", maxQuantity)
-		combineItem:SetData("quantity", totalQuantity - maxQuantity)
+		self:SetData("quantity", maxQuantity, true)
+		combineItem:SetData("quantity", totalQuantity - maxQuantity, true)
 	else
 		combineItem:Remove()
-		self:SetData("quantity", totalQuantity)
+		self:SetData("quantity", totalQuantity, true)
 	end
 
 	maxQuantity, quantity, combineQuantity, totalQuantity = nil, nil, nil, nil

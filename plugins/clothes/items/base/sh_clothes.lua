@@ -209,15 +209,10 @@ function ITEM:OnRemoved()
 end
 
 function ITEM:OnEquipped(client)
-	if (self.disableSprint) then
-		client.disableSprint = true
-	end
-
 	client:SetClothesItem(self.outfitCategory, self)
 end
 
 function ITEM:OnUnequipped(client)
-	client.disableSprint = nil
 	client:SetClothesItem(self.outfitCategory, nil)
 end
 

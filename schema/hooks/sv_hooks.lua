@@ -247,11 +247,13 @@ net.Receive("ixItemSplit", function(_, client)
 		return
 	end
 
-	local character = client:GetCharacter()
-	if (!character or !client:Alive()) then return end
+	if (!client:GetCharacter() or !client:Alive()) then return end
 
 	local item = ix.item.instances[net.ReadUInt(32)]
-	if (!item or !item.isStackable or IsValid(item.entity)) then return end
+	if (!item or item.invID == 0 or !item.isStackable) then return end
+
+	local inventory = ix.item.inventories[item.invID]
+	if (!inventory) then return end
 
 	local quantity = item:GetData("quantity", 1)
 	if (quantity <= 1) then return end
@@ -260,13 +262,13 @@ net.Receive("ixItemSplit", function(_, client)
 	amount = math.Clamp(math.Round(tonumber(amount) or 0), 0, quantity)
 	if (amount == 0 or amount == quantity) then return end
 
-	if (character:GetInventory():Add(item.uniqueID, 1, {quantity = amount}, nil, nil, nil, true)) then
+	if (inventory:Add(item.uniqueID, 1, {quantity = amount}, nil, nil, nil, true)) then
 		amount = quantity - amount
 
 		if (amount < 1) then
 			item:Remove()
 		else
-			item:SetData("quantity", amount)
+			item:SetData("quantity", amount, true)
 		end
 	else
 		client:NotifyLocalized("noFit")

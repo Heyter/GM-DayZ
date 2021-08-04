@@ -13,14 +13,8 @@ local function paint_button(t, w, h)
 	surface.DrawRect(0, 0, w, 2)
 end
 
-surface.CreateFont("DeathMenuBtn", {
-	font = "Jura",
-	size = 18, --math.max(18, ScrH() / 480 * 10),
-	weight = 550,
-})
-
 local PANEL = {}
-PANEL.ButtonFont = "DeathMenuBtn"
+PANEL.ButtonFont = "GmodZ.NormalText"
 PANEL.BackgroundColor = Color(34, 34, 34, 250)
 
 function PANEL:Init()

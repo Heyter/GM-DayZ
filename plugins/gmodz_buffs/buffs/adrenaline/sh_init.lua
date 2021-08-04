@@ -1,15 +1,5 @@
 --- plugins/enchanced_damage/sh_plugin.lua
 
--- function BUFF:Move(client, mv)
-	-- if (client:GetMoveType() != MOVETYPE_WALK) then return end
-
-	-- if (client:HasBuff(self.uniqueID) and !client:IsBrokenLeg()) then
-		-- local speed = mv:GetMaxSpeed() * 1.5
-		-- mv:SetMaxSpeed(speed)
-		-- mv:SetMaxClientSpeed(speed)
-	-- end
--- end
-
 BUFF.time = 60
 BUFF.time_max = 360
 BUFF.stamina_offset = 1.8

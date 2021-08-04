@@ -119,7 +119,6 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 end
 
 function PLUGIN:PlayerDeath(client)
-	client.disableSprint = nil
 	client.ixClothes = {}
 
 	-- hook LocalPlayerDeath

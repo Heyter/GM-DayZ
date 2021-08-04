@@ -284,6 +284,7 @@ function PLUGIN:InitPostEntity()
 						for _, itemAmmo in pairs(ix.item.list) do
 							if ((itemAmmo.base == "base_ammo" or itemAmmo.base == "base_arccw_ammo") and itemAmmo.ammo == SWEP.Primary.Ammo) then
 								item.ammo = itemAmmo.ammo
+								item.ammoID = itemAmmo.uniqueID
 								-- ix.item.list[item.ammo].maxRounds = SWEP.Primary.ForceDefaultClip or SWEP.Primary.ClipSize
 								break
 							end

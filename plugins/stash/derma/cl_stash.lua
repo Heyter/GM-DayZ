@@ -120,20 +120,23 @@ function PANEL:SetItem(itemTable)
 			return
 		end
 
-		if (!IsValid(ix.gui.inv1)) then return end
+		local invPanel = ix.gui.inv1
+		if (!IsValid(invPanel)) then return end
 
 		local inventory = LocalPlayer():GetCharacter():GetInventory()
 
 		if (!inventory:CanItemFitStack(self.itemTable, true)) then
 			local w, h = self.itemTable.width, self.itemTable.height
-			local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
+			local invW, invH = inventory:GetSize()
 			local x2, y2
 
 			for x = 1, invW do
 				for y = 1, invH do
-					if (ix.gui.inv1:IsAllEmpty(x, y, w, h)) then
-						x2 = x
-						y2 = y
+					if (!IsValid(invPanel)) then break end
+					if (invPanel:IsAllEmpty(x, y, w, h)) then
+						x2 = x2 or x
+						y2 = y2 or y
+						break
 					end
 				end
 			end

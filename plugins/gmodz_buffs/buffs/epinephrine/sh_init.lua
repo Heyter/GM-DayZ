@@ -1,15 +1,5 @@
 --- plugins/enchanced_damage/sh_plugin.lua
 
--- function BUFF:Move(client, mv)
-	-- if (client:GetMoveType() != MOVETYPE_WALK) then return end
-
-	-- if (client:HasBuff(self.uniqueID) and !client:IsBrokenLeg()) then
-		-- local speed = mv:GetMaxSpeed() * 1.5
-		-- mv:SetMaxSpeed(speed)
-		-- mv:SetMaxClientSpeed(speed)
-	-- end
--- end
-
 BUFF.time = 15
 BUFF.time_max = 90
 BUFF.damageReduction = 0.1 -- 10% защита от урона.

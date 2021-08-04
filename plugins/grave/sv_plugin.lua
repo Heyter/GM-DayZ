@@ -1,49 +1,37 @@
 local PLUGIN = PLUGIN
 
 function PLUGIN:DoPlayerDeath(client)
-	local replication
-
-	-- create inventory
 	local character = client:GetCharacter()
-	local charInventory = character:GetInventory()
-	local width, height = charInventory:GetSize()
+	if (!character) then return end
 
-	local inventory = ix.inventory.Create(width, height, os.time() + client:EntIndex())
+	local replication
+	local charInventory = character:GetInventory()
+
+	-- loot inventory
+	local inventory = ix.inventory.Create(charInventory.w, charInventory.h, os.time() + client:EntIndex())
 	inventory.noSave = true
 	inventory.isGrave = true
 
 	for _, slot in pairs(charInventory.slots) do
 		for _, item in pairs(slot) do
+			item.bAllowMultiCharacterInteraction = true
+			replication = replication or true
+
 			if (item:GetData("equip")) then
 				client:RemoveEquippableItem(item)
 
 				if (item:GetData("equip")) then
-					item:SetData("equip", nil, true)
+					item:SetData("equip", nil, false)
 				end
 			end
 
-			if (item.OnTransferred and item.isBag) then
-				item:OnTransferred(charInventory, inventory)
-			end
-
-			item.invID = inventory:GetID()
---[[ 			item.characterID = ...
-			item.playerID = ... ]]
+			item:Transfer(inventory:GetID(), item.gridX, item.gridY)
 		end
 	end
 
-	inventory.slots = table.Copy(charInventory.slots)
-
-	if (!table.IsEmpty(inventory:GetItems(true))) then
-		replication = true
-
-		local query = mysql:Update("ix_items")
-			query:Update("inventory_id", 0)
-			query:Where("inventory_id", charInventory:GetID())
-		query:Execute()
-
+	if (replication) then
 		charInventory.slots = {}
-		charInventory:Sync(client)
+		charInventory:HalfSync(client) // TODO: вынести в мету HalfSync
 	end
 
 	local money = character:GetMoney()

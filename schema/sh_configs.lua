@@ -79,8 +79,15 @@ if (CLIENT) then
 	function Schema:LoadFonts(font, genericFont)
 		surface.CreateFont("GmodZ.Numeric", {
 			font = font,
-			size = math.ScaleH(23),
+			size = 16,
 			weight = 500
+		})
+
+		surface.CreateFont("GmodZ.NormalText", {
+			font = font,
+			size = 18,
+			weight = 550,
+			extended = true
 		})
 	end
 end

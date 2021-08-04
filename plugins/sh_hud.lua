@@ -81,11 +81,18 @@ else
 		}
 	end
 
-	function PLUGIN:LoadFonts()
+	function PLUGIN:LoadFonts(font)
 		surface.CreateFont("ixDHUDNum", {
-			font = "Jura",
-			extended = true,
+			font = font,
 			size = ix.util.ScreenScaleH(13),
+			extended = true,
+			weight = 100,
+		})
+
+		surface.CreateFont("ixDHUDNum2", {
+			font = font,
+			size = ScreenScale(10), -- ScrH() / 480 * 10
+			extended = true,
 			weight = 100,
 		})
 
@@ -111,14 +118,14 @@ else
 		})
 
 		surface.CreateFont("nutDHUDFont", {
-			font = "Jura",
+			font = font,
 			extended = true, 
 			size = sscale(8), 
 			weight = 400, 
 		})
 
 		surface.CreateFont("nutDHUDFont2", {
-			font = "Jura",
+			font = font,
 			extended = true, 
 			size = sscale(11), 
 			weight = 400, 
@@ -190,10 +197,10 @@ else
 		surface.DrawRect(x + sscale(8) + tx, y + sscale(3), totallen * math.min(maxHP, self.awto) / maxHP, h - sscale(5))
 
 		HP = math.Clamp(math.Round(self.awto), 0, maxHP)
-		local xHP = ix.util.DrawText(HP .. "%", x + sscale(8) + tx, y + h * 0.5 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
+		local xHP = ix.util.DrawText(HP .. "%", x + sscale(4) + tx + 10, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum2")
 
 		if (LocalPlayer():ExtraHealth() > 0) then
-			ix.util.DrawText(Format("(+%d)", LocalPlayer():ExtraHealth()), x + sscale(8) + tx + (xHP + sscale(4)), y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum")
+			ix.util.DrawText(Format("(+%d)", LocalPlayer():ExtraHealth()), x + sscale(4) + tx + 15 + xHP, y + h/2 - sscale(1), color_white, 3, TEXT_ALIGN_CENTER, "ixDHUDNum2")
 		end
 	end
 

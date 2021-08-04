@@ -1,5 +1,31 @@
 local GM = GM or GAMEMODE
 
+do
+	local ply, plys
+	local next_think = 0
+
+	function GM:Tick()
+		local client = CLIENT and LocalPlayer()
+		if client and !IsValid(client) then return end
+
+		local cur_time = CurTime()
+
+		if cur_time >= next_think then
+			plys = client and {client} or player.GetAll()
+
+			for i = 1, #plys do
+				ply = plys[i]
+
+				if (ply:GetCharacter()) then
+					hook.Call('PlayerThinkSecond', self, ply)
+				end
+			end
+
+			next_think = cur_time + 1
+		end
+	end
+end
+
 -- Disable entity driving.
 function Schema:CanDrive(client, entity)
 	return false
