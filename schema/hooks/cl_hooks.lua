@@ -228,7 +228,7 @@ function Schema:CreateItemInteractionMenu(iconPanel, _, item)
 			if (!inventory or !item) then return end
 
 			if (!inventory:CanItemFitStack(item, true)) then
-				local invPanel = ix.gui["inv" .. inventory:GetID()]
+				local invPanel = ix.gui["inv" .. inventory:GetID()] or ix.gui.inv1
 				local invW, invH = inventory:GetSize()
 				local w, h = item.width, item.height
 				local x2, y2
@@ -336,43 +336,54 @@ end)
 
 -- Left mouse button + SHIFT
 function Schema:ItemPressedLeftShift(icon, item, inventory)
-	local localInventory = LocalPlayer():GetCharacter():GetInventory()
+	local currentInvPanel = ix.gui["inv" .. item.invID]
+	local targetInvPanel
 
-	if (localInventory:GetID() != inventory:GetID()) then
-		local targetInvPanel = ix.gui["inv" .. inventory:GetID()]
-		local localInvPanel = ix.gui.inv1
+	if (IsValid(ix.gui.openedStorage)) then
+		targetInvPanel = ix.gui.openedStorage.storageInventory
 
-		if (IsValid(targetInvPanel) and IsValid(localInvPanel)) then
-			local w, h = item.width, item.height
-			local invW, invH = localInventory:GetSize()
-			local stackItem = localInventory:CanItemFitStack(item, true)
-			local x2, y2
+		if (targetInvPanel == currentInvPanel) then
+			targetInvPanel = ix.gui.inv1
+		end
+	else
+		targetInvPanel = ix.gui.inv1
+	end
 
-			for x = 1, invW do
-				for y = 1, invH do
-					if (stackItem) then
-						local slot = (localInventory.slots[x] or {})[y]
+	if (IsValid(currentInvPanel) and IsValid(targetInvPanel) and currentInvPanel != targetInvPanel) then
+		local targetInventory = ix.item.inventories[targetInvPanel.invID]
+		if (!targetInventory) then return end
 
-						if (slot and slot.isStackable and slot.uniqueID == stackItem.uniqueID and slot:GetData("quantity", slot.maxQuantity or 16) < (slot.maxQuantity or 16)) then
-							x2 = x2 or x
-							y2 = y2 or y
+		local w, h = item.width, item.height
+		local invW, invH = targetInventory:GetSize()
+		local stackItem = targetInventory:CanItemFitStack(item, true)
+		local x2, y2
 
-							break
-						end
-					else
-						if (localInvPanel:IsAllEmpty(x, y, w, h)) then
-							x2 = x2 or x
-							y2 = y2 or y
+		for x = 1, invW do
+			for y = 1, invH do
+				if (stackItem) then
+					local slot = (targetInventory.slots[x] or {})[y]
 
-							break
-						end
+					if (slot and slot.isStackable and slot.uniqueID == stackItem.uniqueID and slot:GetData("quantity", slot.maxQuantity or 16) < (slot.maxQuantity or 16)) then
+						x2 = x2 or x
+						y2 = y2 or y
+
+						break
+					end
+				else
+					if (targetInvPanel:IsAllEmpty(x, y, w, h)) then
+						x2 = x2 or x
+						y2 = y2 or y
+
+						break
 					end
 				end
 			end
 
-			if (x2 and y2) then
-				icon:Move(x2, y2, localInvPanel)
-			end
+			if (x2 and y2) then break end
+		end
+
+		if (x2 and y2) then
+			icon:Move(x2, y2, targetInvPanel)
 		end
 	end
 end

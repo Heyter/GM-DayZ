@@ -29,28 +29,31 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 	end
 
 	if (!split and item.isStackable) then
-		local resetData
 		local copyItem = item
 
-		if (!isnumber(uniqueID)) then
-			copyItem = setmetatable({id = uniqueID, data = (data or {})}, {
+		if (!isnumber(uniqueID) and data) then
+			copyItem = setmetatable({id = uniqueID, data = data}, {
 				__index = item,
 				__eq = item.__eq,
 				__tostring = item.__tostring
 			})
 
-			resetData = true
+			copyItem.resetData = true
 		end
 
-		local remainingQuantity = ((copyItem.data or {}).quantity or quantity)
-		local maxQuantity = copyItem.maxQuantity
+		local remainingQuantity = copyItem:GetData('quantity', 1)
+		local maxQuantity = copyItem.maxQuantity or 16
 
 		if (remainingQuantity < maxQuantity) then
 			local items = targetInv:GetItemsByUniqueID(copyItem.uniqueID, true)
 
 			if (items) then
 				for _, targetItem in pairs(items) do
-					local targetQuantity = ((targetItem.data or {}).quantity or 1)
+					if (remainingQuantity == 0) then
+						break 
+					end
+
+					local targetQuantity = targetItem:GetData('quantity', 1)
 					if (targetQuantity >= maxQuantity) then continue end
 					if (copyItem.CanStack and copyItem:CanStack(targetItem) == false) then continue end
 
@@ -67,20 +70,7 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 				end
 
 				if (remainingQuantity == 0) then
-					if (isnumber(uniqueID)) then
-						if (copyItem.OnRemoved) then
-							copyItem:OnRemoved()
-						end
-
-						local query = mysql:Delete("ix_items")
-							query:Where("item_id", copyItem.id)
-						query:Execute()
-
-						ix.item.instances[copyItem.id] = nil
-						copyItem = nil
-					end
-
-					if (resetData) then
+					if (copyItem.resetData) then
 						copyItem = nil
 					end
 
@@ -89,7 +79,7 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 			end
 		end
 
-		if (resetData) then
+		if (copyItem.resetData) then
 			copyItem = nil
 		end
 	end

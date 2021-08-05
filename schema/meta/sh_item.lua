@@ -1,5 +1,7 @@
 local ITEM = ix.meta.item
 
+ITEM.bAllowMultiCharacterInteraction = true
+
 --- Sets a key within the item's data.
 -- @realm shared
 -- @string key The key to store the value within

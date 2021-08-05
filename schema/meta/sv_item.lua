@@ -100,18 +100,20 @@ function ITEM:Transfer(invID, x, y, client, noReplication, isLogical)
 
 			if (status) then
 				if (self.invID > 0 and prevID != 0) then
-					-- we are transferring this item from one inventory to another
-					curInv:Remove(self.id, false, true, true)
+					if (isstring(result) and result == "stack") then
+						curInv:Remove(self.id)
+						targetInv:Remove(self.id, nil, true, true) -- клиент не знает, что вещь была стакнута.
+					else
+						-- we are transferring this item from one inventory to another
+						curInv:Remove(self.id, false, true, true)
 
-					if (result == "stack") then
-						targetInv:Remove(self.id, false, true, true)
+						if (self.OnTransferred) then
+							self:OnTransferred(curInv, inventory)
+						end
+
+						hook.Run("OnItemTransferred", self, curInv, inventory)
 					end
 
-					if (self.OnTransferred) then
-						self:OnTransferred(curInv, inventory)
-					end
-
-					hook.Run("OnItemTransferred", self, curInv, inventory)
 					return true
 				elseif ((isTakeItem or self.invID > 0) and prevID == 0) then
 					-- we are transferring this item from the world to an inventory
