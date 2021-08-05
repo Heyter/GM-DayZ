@@ -28,7 +28,9 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 		return false, "invalidItem"
 	end
 
-	if (!split and item.isStackable) then
+	local isStackable = !split and item.isStackable
+
+	if (isStackable) then
 		local copyItem = item
 
 		if (!isnumber(uniqueID) and data) then
@@ -41,10 +43,10 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 			copyItem.resetData = true
 		end
 
-		local remainingQuantity = copyItem:GetData('quantity', 1)
-		local maxQuantity = copyItem.maxQuantity or 16
+		local remainingQuantity = copyItem:GetData('quantity', quantity)
+		local targetAssignments = {}
 
-		if (remainingQuantity < maxQuantity) then
+		if (remainingQuantity < (copyItem.maxQuantity or 16)) then
 			local items = targetInv:GetItemsByUniqueID(copyItem.uniqueID, true)
 
 			if (items) then
@@ -53,23 +55,27 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 						break 
 					end
 
-					local targetQuantity = targetItem:GetData('quantity', 1)
-					if (targetQuantity >= maxQuantity) then continue end
 					if (copyItem.CanStack and copyItem:CanStack(targetItem) == false) then continue end
+					local freeSpace = targetItem.maxQuantity - targetItem:GetData('quantity', 1)
 
-					local totalQuantity = targetQuantity + remainingQuantity
-					if (totalQuantity > maxQuantity) then
-						targetItem:SetData("quantity", maxQuantity, true)
-						copyItem:SetData("quantity", totalQuantity - maxQuantity, true)
-						break
-					else
-						targetItem:SetData("quantity", remainingQuantity + targetQuantity, true)
-						remainingQuantity = 0
-						break
+					if (freeSpace > 0) then
+						local filler = freeSpace - remainingQuantity
+
+						if (filler > 0) then
+							targetAssignments[targetItem] = remainingQuantity	
+							remainingQuantity = 0
+						else
+							targetAssignments[targetItem] = freeSpace		
+							remainingQuantity = math.abs(filler)
+						end
 					end
 				end
 
 				if (remainingQuantity == 0) then
+					for targetItem, assignedQuantity in pairs(targetAssignments) do
+						targetItem:SetData("quantity", targetItem:GetData('quantity', 1) + assignedQuantity, true)
+					end
+
 					if (copyItem.resetData) then
 						copyItem = nil
 					end
@@ -81,6 +87,19 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 
 		if (copyItem.resetData) then
 			copyItem = nil
+		end
+
+		if (!x and !y) then
+			x, y = self:FindEmptySlot(item.width, item.height, true)
+		else
+			if (self:GetItemAt(x, y)) then
+				x, y = nil, nil
+				x, y = self:FindEmptySlot(item.width, item.height, true)
+			end
+		end
+
+		if (!x and !y or self:GetItemAt(x, y)) then
+			return false, 'noFit'
 		end
 	end
 

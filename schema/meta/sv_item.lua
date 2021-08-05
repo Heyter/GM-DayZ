@@ -79,7 +79,7 @@ function ITEM:Transfer(invID, x, y, client, noReplication, isLogical)
 			local targetInv = inventory
 			local isTakeItem = (self.invID or 0) == 0 and self.isStackable -- при поднятие вещи с земли
 
-			if ((self.invID or 0) == 0 and !self.isStackable) then
+			if (!self.isStackable) then
 				local bagInv
 
 				if (!x and !y) then
@@ -100,9 +100,10 @@ function ITEM:Transfer(invID, x, y, client, noReplication, isLogical)
 
 			if (status) then
 				if (self.invID > 0 and prevID != 0) then
-					if (isstring(result) and result == "stack") then
+					if (result == "stack") then
 						curInv:Remove(self.id)
-						targetInv:Remove(self.id, nil, true, true) -- клиент не знает, что вещь была стакнута.
+						--targetInv:Remove(self.id, nil, true, true) -- клиент не знает, что вещь была стакнута.
+						-- сделал удаление вещи на клиенте :Move и :OnTransfer методы в инвентаре.
 					else
 						-- we are transferring this item from one inventory to another
 						curInv:Remove(self.id, false, true, true)

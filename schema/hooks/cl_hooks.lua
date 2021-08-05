@@ -227,28 +227,27 @@ function Schema:CreateItemInteractionMenu(iconPanel, _, item)
 			if (value == 0 or quantity <= 1 or value == quantity) then return end
 			if (!inventory or !item) then return end
 
-			if (!inventory:CanItemFitStack(item, true)) then
-				local invPanel = ix.gui["inv" .. inventory:GetID()] or ix.gui.inv1
-				local invW, invH = inventory:GetSize()
-				local w, h = item.width, item.height
-				local x2, y2
+			local invPanel = ix.gui["inv" .. inventory:GetID()] or ix.gui.inv1
+			if (!IsValid(invPanel)) then return end
+			local x2, y2
 
-				for x = 1, invW do
-					if (!IsValid(invPanel) or x2 and y2) then break end
-					for y = 1, invH do
-						if (!IsValid(invPanel)) then break end
-						if (invPanel:IsAllEmpty(x, y, w, h)) then
-							x2 = x2 or x
-							y2 = y2 or y
-							break
-						end
+			-- split не требует проверки на стак.
+			for x = 1, inventory.w do
+				if (x2 and y2) then break end
+
+				for y = 1, inventory.h do
+					if (invPanel:IsAllEmpty(x, y, item.width, item.height)) then
+						x2 = x2 or x
+						y2 = y2 or y
+
+						break
 					end
 				end
+			end
 
-				if !(x2 and y2) then
-					LocalPlayer():NotifyLocalized("noFit")
-					return
-				end
+			if (!x2 and !y2) then
+				LocalPlayer():NotifyLocalized("noFit")
+				return
 			end
 
 			net.Start(item.ammoAmount and "ixArcCWAmmoSplit" or "ixItemSplit")
@@ -335,9 +334,9 @@ hook.Add("CreateMenuButtons", "ixInventory", function(tabs)
 end)
 
 -- Left mouse button + SHIFT
-function Schema:ItemPressedLeftShift(icon, item, inventory)
-	local currentInvPanel = ix.gui["inv" .. item.invID]
-	local targetInvPanel
+function Schema:ItemPressedLeftShift(icon, item)
+	local currentInvPanel = ix.gui["inv" .. icon.inventoryID] or ix.gui.inv1
+	local targetInvPanel = ix.gui.inv1
 
 	if (IsValid(ix.gui.openedStorage)) then
 		targetInvPanel = ix.gui.openedStorage.storageInventory
@@ -345,8 +344,6 @@ function Schema:ItemPressedLeftShift(icon, item, inventory)
 		if (targetInvPanel == currentInvPanel) then
 			targetInvPanel = ix.gui.inv1
 		end
-	else
-		targetInvPanel = ix.gui.inv1
 	end
 
 	if (IsValid(currentInvPanel) and IsValid(targetInvPanel) and currentInvPanel != targetInvPanel) then
@@ -354,12 +351,13 @@ function Schema:ItemPressedLeftShift(icon, item, inventory)
 		if (!targetInventory) then return end
 
 		local w, h = item.width, item.height
-		local invW, invH = targetInventory:GetSize()
-		local stackItem = targetInventory:CanItemFitStack(item, true)
+		local stackItem = targetInventory:CanItemFitStack(item, true, true)
 		local x2, y2
 
-		for x = 1, invW do
-			for y = 1, invH do
+		for x = 1, targetInventory.w do
+			if (x2 and y2) then break end
+
+			for y = 1, targetInventory.h do
 				if (stackItem) then
 					local slot = (targetInventory.slots[x] or {})[y]
 
@@ -378,12 +376,12 @@ function Schema:ItemPressedLeftShift(icon, item, inventory)
 					end
 				end
 			end
-
-			if (x2 and y2) then break end
 		end
 
 		if (x2 and y2) then
 			icon:Move(x2, y2, targetInvPanel)
+		else
+			LocalPlayer():NotifyLocalized("noFit")
 		end
 	end
 end

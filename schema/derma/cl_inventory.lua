@@ -196,6 +196,102 @@ function PANEL:PaintDragPreview(width, height, mouseX, mouseY, itemPanel)
 	end
 end
 
+function PANEL:OnTransfer(oldX, oldY, x, y, oldInventory, noSend)
+	local inventories = ix.item.inventories
+	local inventory = inventories[oldInventory.invID]
+	local inventory2 = inventories[self.invID]
+	local item, stack
+
+	if (inventory) then
+		item = inventory:GetItemAt(oldX, oldY)
+
+		if (!item) then
+			return false
+		end
+
+		if (hook.Run("CanTransferItem", item, inventories[oldInventory.invID], inventories[self.invID]) == false) then
+			return false, "notAllowed"
+		end
+
+		if (item.CanTransfer and
+			item:CanTransfer(inventory, inventory != inventory2 and inventory2 or nil) == false) then
+			return false
+		end
+
+		if (item.isStackable and inventory != inventory2 and inventory2) then
+			local remainingQuantity = item:GetData('quantity', 1)
+			local targetAssignments = {}
+
+			if (remainingQuantity < (item.maxQuantity or 16)) then
+				local items = inventory2:GetItemsByUniqueID(item.uniqueID, true)
+
+				if (items) then
+					for _, targetItem in pairs(items) do
+						if (remainingQuantity == 0) then
+							break 
+						end
+
+						if (item.CanStack and item:CanStack(targetItem) == false) then continue end
+						local freeSpace = targetItem.maxQuantity - targetItem:GetData('quantity', 1)
+
+						if (freeSpace > 0) then
+							local filler = freeSpace - remainingQuantity
+
+							if (filler > 0) then
+								targetAssignments[targetItem] = remainingQuantity	
+								remainingQuantity = 0
+							else
+								targetAssignments[targetItem] = freeSpace		
+								remainingQuantity = math.abs(filler)
+							end
+						end
+					end
+				end
+
+				if (remainingQuantity == 0) then
+					for targetItem, assignedQuantity in pairs(targetAssignments) do
+						targetItem:SetData("quantity", targetItem:GetData('quantity', 1) + assignedQuantity, true)
+					end
+
+					stack = "stack"
+				end
+			end
+
+			if (!stack and inventory2:GetItemAt(x, y)) then
+				x, y = nil, nil
+				x, y = inventory2:FindEmptySlot(item.width, item.height, true) -- Если предмет больше 1x1, то он ошибается.
+				-- self:IsAllEmpty -- тоже ошибается
+
+				if (!x and !y or inventory2:GetItemAt(x, y)) then
+					return false, "noFit"
+				end
+			end
+		end
+	end
+
+	if (!noSend) then
+		net.Start("ixInventoryMove")
+			net.WriteUInt(oldX, 6)
+			net.WriteUInt(oldY, 6)
+			net.WriteUInt(x, 6)
+			net.WriteUInt(y, 6)
+			net.WriteUInt(oldInventory.invID, 32)
+			net.WriteUInt(self != oldInventory and self.invID or oldInventory.invID, 32)
+		net.SendToServer()
+	end
+
+	if (inventory) then
+		inventory.slots[oldX][oldY] = nil
+	end
+
+	if (!stack and item and inventory2) then
+		inventory2.slots[x] = inventory2.slots[x] or {}
+		inventory2.slots[x][y] = item
+	end
+
+	return stack
+end
+
 derma.DefineControl("ixInventory", "", PANEL, "DFrame")
 
 -- IX_ITEM_ICON
@@ -262,6 +358,56 @@ function PANEL:DoRightShiftClick()
 		end
 
 		itemTable.player = nil
+	end
+end
+
+function PANEL:Move(newX, newY, givenInventory, bNoSend)
+	local iconSize = givenInventory.iconSize
+	local oldX, oldY = self.gridX, self.gridY
+	local oldParent = self:GetParent()
+	local result = givenInventory:OnTransfer(oldX, oldY, newX, newY, oldParent, bNoSend)
+
+	if (result == "stack") then
+		if (self.slots) then
+			for _, v in ipairs(self.slots) do
+				if (IsValid(v) and v.item == self) then
+					v.item = nil
+				end
+			end
+		end
+
+		self:Remove()
+		return
+	elseif (result == false) then
+		return
+	end
+
+	local x = (newX - 1) * iconSize + 4
+	local y = (newY - 1) * iconSize + givenInventory:GetPadding(2)
+
+	self.gridX = newX
+	self.gridY = newY
+
+	self:SetParent(givenInventory)
+	self:SetPos(x, y)
+
+	if (self.slots) then
+		for _, v in ipairs(self.slots) do
+			if (IsValid(v) and v.item == self) then
+				v.item = nil
+			end
+		end
+	end
+
+	self.slots = {}
+
+	for currentX = 1, self.gridW do
+		for currentY = 1, self.gridH do
+			local slot = givenInventory.slots[self.gridX + currentX - 1][self.gridY + currentY - 1]
+
+			slot.item = self
+			self.slots[#self.slots + 1] = slot
+		end
 	end
 end
 

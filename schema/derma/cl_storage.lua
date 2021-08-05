@@ -117,46 +117,26 @@ function PANEL:Init()
 	self.takeBtn.DoClick = function()
 		local storage = ix.gui.openedStorage
 
-		if (IsValid(storage) and IsValid(ix.gui.inv1) and isnumber(storage.storageID)) then
+		if (IsValid(storage) and IsValid(ix.gui.inv1)) then
 			local inventory = ix.item.inventories[storage.storageInventory.invID]
-			local items = inventory:GetItems(true)
-			local noMoney = storage.storageMoney:GetMoney() == 0
-			if (table.IsEmpty(items) and noMoney) then
-				return
+			local noItems
+
+			if (table.IsEmpty(inventory:GetItems(true))) then
+				noItems = true
 			end
 
-			local can_fit = false
-			inventory = LocalPlayer():GetCharacter():GetInventory()
-			local invW, invH = ix.gui.inv1.gridW, ix.gui.inv1.gridH
-
-			for _, v in pairs(items) do
-				if (!inventory:CanItemFitStack(v, true)) then
-					local w, h = v.width, v.height
-
-					for x = 1, invW do
-						for y = 1, invH do
-							if (ix.gui.inv1:IsAllEmpty(x, y, w, h)) then
-								can_fit = true
-								break
-							end
-						end
-						if can_fit then break end
-					end
-					if can_fit then break end
-				else
-					can_fit = true
-					break
-				end
+			local charInventory = LocalPlayer():GetCharacter():GetInventory()
+			if (charInventory:GetFilledSlotCount() >= charInventory.w * charInventory.h) then
+				noItems = true
 			end
 
-			if !can_fit and noMoney then
-				LocalPlayer():NotifyLocalized("noFit")
+			if (noItems and storage.storageMoney:GetMoney() == 0) then
 				return
 			end
 
 			net.Start("ixStorageTakeAll")
 				net.WriteUInt(storage.storageID, 32)
-				net.WriteBool(can_fit)
+				net.WriteBool(!noItems)
 			net.SendToServer()
 		end
 	end

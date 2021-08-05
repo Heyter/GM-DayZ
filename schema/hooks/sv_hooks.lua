@@ -365,16 +365,17 @@ net.Receive("ixStorageTakeAll", function(_, client)
 	end
 
 	if (net.ReadBool()) then
-		local items = inventory:GetItems(true)
-		local charInvID = character:GetInventory():GetID()
+		local charInventory = character:GetInventory()
 
-		if (charInvID > 0) then
-			for _, v in pairs(items) do
-				if (!IsValid(client) or !client:Alive() or !client.ixOpenStorage or !client:GetCharacter()) then break end
-				v:Transfer(charInvID, nil, nil, client)
+		if (charInventory and charInventory:GetFilledSlotCount() < charInventory.w * charInventory.h) then
+			local charInvID = charInventory:GetID()
+
+			if (charInvID > 0) then
+				for _, v in pairs(inventory:GetItems(true)) do
+					if (!IsValid(client) or !client:Alive() or !client.ixOpenStorage or !client:GetCharacter()) then break end
+					v:Transfer(charInvID, nil, nil, client)
+				end
 			end
 		end
 	end
-
-	items, charInvID = nil, nil
 end)

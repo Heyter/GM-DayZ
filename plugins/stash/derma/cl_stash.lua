@@ -123,31 +123,41 @@ function PANEL:SetItem(itemTable)
 		local invPanel = ix.gui.inv1
 		if (!IsValid(invPanel)) then return end
 
+		local allStack = input.IsShiftDown()
 		local inventory = LocalPlayer():GetCharacter():GetInventory()
+		local w, h = self.itemTable.width, self.itemTable.height
+		local stackItem = inventory:CanItemFitStack(self.itemTable, true)
+		local x2, y2
 
-		if (!inventory:CanItemFitStack(self.itemTable, true)) then
-			local w, h = self.itemTable.width, self.itemTable.height
-			local invW, invH = inventory:GetSize()
-			local x2, y2
+		for x = 1, inventory.w do
+			if (x2 and y2) then break end
 
-			for x = 1, invW do
-				for y = 1, invH do
-					if (!IsValid(invPanel)) then break end
+			for y = 1, inventory.h do
+				if (stackItem) then
+					local slot = (inventory.slots[x] or {})[y]
+
+					if (slot and slot.isStackable and slot.uniqueID == stackItem.uniqueID and slot:GetData("quantity", slot.maxQuantity or 16) < (slot.maxQuantity or 16)) then
+						x2 = x2 or x
+						y2 = y2 or y
+
+						break
+					end
+				else
 					if (invPanel:IsAllEmpty(x, y, w, h)) then
 						x2 = x2 or x
 						y2 = y2 or y
+
 						break
 					end
 				end
 			end
-
-			if !(x2 and y2) then
-				LocalPlayer():NotifyLocalized("noFit")
-				return
-			end
 		end
 
-		local allStack = input.IsShiftDown()
+		if !(x2 and y2) then
+			LocalPlayer():NotifyLocalized("noFit")
+			return
+		end
+
 		net.Start("ixStashWithdrawItem")
 			net.WriteUInt(self.key, 32)
 			net.WriteBool(allStack)
