@@ -96,7 +96,7 @@ function SWEP:PrimaryAttack()
 	local muzzlePos = self:GetAttachment(1).Pos
 
 	if (enemy != NULL) then
-		if (!self.TrueScope) then
+		if (self.TrueScope) then
 			local head = enemy:LookupBone("ValveBiped.Bip01_Head1")
 
 			if (head != 0) then
