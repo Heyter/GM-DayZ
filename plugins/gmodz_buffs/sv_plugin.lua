@@ -1,6 +1,7 @@
 util.AddNetworkString("ixBuffAdd")
 util.AddNetworkString("ixBuffRemove")
 util.AddNetworkString("ixBuffClears")
+util.AddNetworkString("ixBuffDataSet")
 
 function PLUGIN:OnCharacterDisconnect(client)
 	client:ClearBuffs(true)
@@ -15,7 +16,10 @@ function PLUGIN:PlayerDeath(client)
 end
 
 function PLUGIN:PlayerTakeDamageClothes(client, info)
-	if ((client:HasBuff("epinephrine") or 0) > CurTime() and ix.buff.list["epinephrine"]) then
+	--local buff = client:HasBuff("epinephrine")
+
+	--if (buff and buff.time > CurTime()) then
+	if (client:HasBuff("epinephrine")) then
 		info:SetDamage(info:GetDamage() * (1 - ix.buff.list["epinephrine"].damageReduction))
 	end
 end

@@ -1,5 +1,6 @@
 function BUFF:OnRunOnce(client)
-	client:SetExtraHealth(CurTime() + math.min(200, client:ExtraHealth() + 25))
+	client:SetBuffData(self.uniqueID, "overdose", client:GetBuffData(self.uniqueID, "overdose", 0) + 1, true)
+	client:SetExtraHealth(CurTime() + 25)
 
 	local maxHP = client:GetMaxHealth()
 	if (client:Health() >= maxHP) then return end
@@ -23,4 +24,11 @@ function BUFF:OnRunOnce(client)
 			end
 		end
 	end)
+end
+
+function BUFF:CanAdd(client)
+	if (client:GetBuffData(self.uniqueID, "overdose", 0) >= 2) then
+		client:KillFeed("overdose")
+		return false
+	end
 end

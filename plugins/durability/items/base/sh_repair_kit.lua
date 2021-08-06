@@ -21,7 +21,6 @@ if (SERVER) then
 	function ITEM:UseRepair(combineItem, client, useSound)
 		if (self.raiseDurability == 0) then return end
 
-		client.nextUseItem = CurTime() + 1
 		useSound = useSound or self.useSound
 
 		local d = combineItem.defDurability or 100

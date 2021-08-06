@@ -1,3 +1,5 @@
+-- Не используется в ресурсах предмета.
+
 BUFF.permanently = true
 BUFF.isOnlyServer = true
 

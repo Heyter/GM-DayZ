@@ -170,5 +170,11 @@ LANGUAGE = {
 	clothes_text_slot = "Slot: %s",
 
 	// Scoreboard
-	scoreboard_players = "PLAYERS:"
+	scoreboard_players = "PLAYERS:",
+
+	// killfeed
+	["killfeed.death.bledout"] = "bled out",
+	["killfeed.death.radiation"] = "radiation sickness",
+	["killfeed.death.drowned"] = "drowned",
+	["killfeed.death.overdose"] = "overdose",
 }

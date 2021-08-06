@@ -170,4 +170,10 @@ LANGUAGE = {
 
 	// Scoreboard
 	scoreboard_players = "ОНЛАЙН:",
+
+	// killfeed
+	["killfeed.death.bledout"] = "истек кровью",
+	["killfeed.death.radiation"] = "лучевая болезнь",
+	["killfeed.death.drowned"] = "утонул",
+	["killfeed.death.overdose"] = "передозировка",
 }

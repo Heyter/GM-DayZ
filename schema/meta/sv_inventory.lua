@@ -89,6 +89,7 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 			copyItem = nil
 		end
 
+		-- Если вещь стакнулась, но remainingQuantity != 0, то нужно найти позицию для предмета, иначе будет баг со склеиванием вещи в одном слоте
 		if (!x and !y) then
 			x, y = self:FindEmptySlot(item.width, item.height, true)
 		else
@@ -98,7 +99,7 @@ function INVENTORY:Add(uniqueID, quantity, data, x, y, noReplication, split)
 			end
 		end
 
-		if (!x and !y or self:GetItemAt(x, y)) then
+		if (!x and !y or self:GetItemAt(x, y)) then -- TODO: GetItemAt по сути лишняя проверка
 			return false, 'noFit'
 		end
 	end

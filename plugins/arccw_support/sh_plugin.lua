@@ -224,30 +224,23 @@ function PLUGIN:InitPostEntity()
 	self:InitHooks()
 
 	do
-		local item, class, oldItem
+		local item, class
 		local attachments = {}
 
 		-- Оружие
 		for _, SWEP in ipairs(weapons.GetList()) do
 			class = SWEP.ClassName
 
-			if (weapons.IsBasedOn(class, "arccw_base") and !class:find("base")) then
-				item = ix.item.list[class]
+			if (weapons.IsBasedOn(class, "arccw_base")) then
+				if (class:find("base") or class:find("nade") or class:find("melee")) then continue end
+
+				item = ix.item.list[class] or ix.item.Register(class, "base_arccw_weapons", nil, nil, true)
 
 				if (item and item.isArcCW and item.isWeapon) then
 					item.class = class
-
-					if (#item.description == 0) then
-						item.description = SWEP.Trivia_Desc or ""
-					end
-
-					if (#item.model == 0) then
-						item.model = SWEP.WorldModel or "models/weapons/w_pistol.mdl"
-					end
-
-					if (#item.name == 0) then
-						item.name = SWEP.PrintName or SWEP.TrueName
-					end
+					item.description = SWEP.Trivia_Desc or ""
+					item.model = SWEP.WorldModel or "models/weapons/w_pistol.mdl"
+					item.name = SWEP.PrintName or SWEP.TrueName
 
 					ix.arccw_support.atts_slots[item.uniqueID] = ix.arccw_support.atts_slots[item.uniqueID] or {}
 
@@ -303,6 +296,12 @@ function PLUGIN:InitPostEntity()
 						function SWEP:CreatePresetMenu() end
 						function SWEP:ClosePresetMenu() end
 					end
+
+					if (SWEP.ItemData) then
+						for key, value in pairs(SWEP.ItemData) do
+							item[key] = value
+						end
+					end
 				end
 			end
 		end
@@ -312,29 +311,22 @@ function PLUGIN:InitPostEntity()
 			if (v.Free) then
 				ix.arccw_support.free_atts[attID] = 1
 			else
-				oldItem = ix.item.list[attID]
-
-				item = oldItem or ix.item.Register(attID, "base_arccw_attachments", nil, nil, true)
-				item.name = oldItem and item.name or v.PrintName or v.ShortName
-
-				if (oldItem) then
-					if (#item.description == 0) then
-						item.description = v.Description
-					end
-
-					if (#item.model == 0) then
-						item.model = v.Model or "models/Items/BoxMRounds.mdl"
-					end
-				else
-					item.description = v.Description
-					item.model = v.Model or "models/Items/BoxMRounds.mdl"
-				end
+				item = ix.item.list[attID] or ix.item.Register(attID, "base_arccw_attachments", nil, nil, true)
+				item.name = v.PrintName or v.ShortName
+				item.description = v.Description
+				item.model = v.Model or "models/Items/BoxMRounds.mdl"
 
 				-- item.slot = oldItem and item.slot or v.Slot
 
 				if (v.DroppedModel and v.DroppedModel != item.model) then
 					function item:OnGetDropModel(entity)
 						return v.DroppedModel
+					end
+				end
+
+				if (v.ItemData) then
+					for key, value in pairs(v.ItemData) do
+						item[key] = value
 					end
 				end
 			end

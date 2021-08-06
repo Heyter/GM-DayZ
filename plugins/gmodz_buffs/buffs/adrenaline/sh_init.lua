@@ -9,7 +9,7 @@ ix.util.Include("sv_init.lua", "server")
 if (CLIENT) then
 	function BUFF:RenderScreenspaceEffects()
 		if (LocalPlayer():HasBuff(self.uniqueID)) then
-			local value = math.max(0, (LocalPlayer():HasBuff(self.uniqueID) - CurTime()) / (ix.buff.list[self.uniqueID].time / 2))
+			local value = math.max(0, (LocalPlayer():HasBuff(self.uniqueID).time - CurTime()) / (ix.buff.list[self.uniqueID].time / 2))
 
 			if (value > 0) then
 				DrawSharpen(math.min(1.5, value * 3), 1.1)
@@ -19,7 +19,7 @@ if (CLIENT) then
 
 	function BUFF:HUDExtraPaint(client, perc, hud, margin)
 		if (LocalPlayer():HasBuff(self.uniqueID)) then
-			local time = math.max(0, LocalPlayer():HasBuff(self.uniqueID) - CurTime())
+			local time = math.max(0, LocalPlayer():HasBuff(self.uniqueID).time - CurTime())
 
 			perc.textColor = color_white
 			perc.y = perc.y - perc.h - margin

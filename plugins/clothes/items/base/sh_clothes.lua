@@ -152,29 +152,33 @@ ITEM.functions.Equip = {
 	tip = "equipTip",
 	icon = "icon16/tick.png",
 	OnRun = function(item)
-		local char = item.player:GetCharacter()
-		local items = char:GetInventory():GetItems()
+		local items = item.player:GetCharacter():GetInventory():GetItems(true)
+		local equippedItem
 
 		for _, v in pairs(items) do
-			if (v.id != item.id) then
-				local itemTable = ix.item.instances[v.id]
+			if (v.id != item.id and v.pacData and v.outfitCategory == item.outfitCategory and v:GetData("equip")) then
+				equippedItem = v
+				break
+			end
+		end
 
-				if (itemTable.pacData and v.outfitCategory == item.outfitCategory and itemTable:GetData("equip")) then
-					item.player:NotifyLocalized(item.equippedNotify or "outfitAlreadyEquipped")
+		if (equippedItem) then
+			equippedItem:RemovePart(item.player)
 
-					return false
-				end
+			if (equippedItem:GetData("equip")) then
+				item.player:NotifyLocalized(item.equippedNotify or "outfitAlreadyEquipped")
+				return false
 			end
 		end
 
 		item:SetData("equip", true)
 		item.player:AddPart(item.uniqueID, item)
-
+--[[ 
 		if (item.attribBoosts) then
 			for k, v in pairs(item.attribBoosts) do
 				char:AddBoost(item.uniqueID, k, v)
 			end
-		end
+		end ]]
 
 		item:OnEquipped(item.player)
 		return false
@@ -196,14 +200,15 @@ function ITEM:CanTransfer(oldInventory, newInventory)
 end
 
 function ITEM:OnRemoved()
-	local inventory = ix.item.inventories[self.invID]
-	local owner = inventory.GetOwner and inventory:GetOwner()
+	if (self.invID != 0) then
+		local owner = self:GetOwner()
 
-	if (IsValid(owner) and owner:IsPlayer()) then
-		if (self:GetData("equip")) then
-			self:RemovePart(owner)
-		elseif (owner:GetClothesItem()[self.outfitCategory]) then -- bugfix
-			owner:SetClothesItem(self.outfitCategory, nil)
+		if (IsValid(owner)) then
+			if (self:GetData("equip")) then
+				self:RemovePart(owner)
+			elseif (owner:GetClothesItem()[self.outfitCategory]) then -- bugfix
+				owner:SetClothesItem(self.outfitCategory, nil)
+			end
 		end
 	end
 end
@@ -217,9 +222,9 @@ function ITEM:OnUnequipped(client)
 end
 
 function ITEM:CanEquipOutfit()
-	if (SERVER) then
+--[[ 	if (SERVER) then
 		return self:GetData("durability", self.defDurability or 100) > 0 and !self.player:GetClothesItem()[self.outfitCategory]
-	end
+	end ]]
 
 	return self:GetData("durability", self.defDurability or 100) > 0
 end
@@ -234,7 +239,7 @@ end
 
 ITEM.functions.combine = {
 	OnCanRun = function(item, data)
-		if (!data or !data[1] or item.player and (item.player.nextUseItem or 0) > CurTime()) then
+		if (!data or !data[1]) then
 			return false
 		end
 
@@ -288,7 +293,7 @@ ITEM.functions.Repair = {
 	end,
 
 	OnCanRun = function(item)
-		if (item.player and (item.player.nextUseItem or 0) > CurTime() or item:GetData("durability", 100) >= 100) then
+		if (item:GetData("durability", 100) >= 100) then
 			return false
 		end
 

@@ -127,7 +127,6 @@ ITEM.functions.use = {
 	end,
 
 	OnCanRun = function(item)
-		if item.player and (item.player.nextUseItem or 0) > CurTime() then return false end
 		if (item.OnCanUse and item:OnCanUse() == false) then return false end
 
 		return true

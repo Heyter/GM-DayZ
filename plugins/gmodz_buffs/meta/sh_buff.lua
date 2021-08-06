@@ -44,4 +44,7 @@ end
 -- @realm shared
 -- BUFF:OnRunOnce(client) // Вызывается 1 раз
 
+-- @realm server
+-- BUFF:CanAdd(client) return true end // вызывается перед тем как добавить бафф игроку
+
 ix.buff.meta = BUFF

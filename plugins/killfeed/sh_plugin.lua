@@ -12,18 +12,9 @@ if (CLIENT) then
 	PLUGIN.DeathMsg = {
 		["bledout"] = "bled out", -- истек кровью
 		["radiation"] = "radiation sickness", -- лучевая болезнь. Можно оставить просто radiation - радиация
-		["drowned"] = "drowned"
+		["drowned"] = "drowned",
+		["overdose"] = "overdose"
 	}
-
-	for k in pairs(PLUGIN.DeathMsg) do
-		local phrase = L2("killfeed.death." .. k)
-
-		if (phrase) then
-			PLUGIN.DeathMsg[k] = phrase
-		end
-
-		phrase = nil
-	end
 
 	function PLUGIN:InitPostEntity()
 		self.WeaponsList = list.Get("Weapon")
@@ -39,6 +30,10 @@ if (CLIENT) then
 		panel:ParentToHUD()
 
 		self.DeathNotify = panel
+
+		for k, v in pairs(self.DeathMsg) do
+			self.DeathMsg[k] = L2("killfeed.death." .. k) or v
+		end
 	end
 
 	function PLUGIN:ScreenResolutionChanged()

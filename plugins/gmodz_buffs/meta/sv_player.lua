@@ -5,6 +5,10 @@ function playerMeta:AddBuff(uniqueID)
 	local buff = ix.buff.list[uniqueID]
 
 	if (buff) then
+		if (buff.CanAdd and buff:CanAdd(self) == false) then
+			return
+		end
+
 		self.buffs = self.buffs or {}
 		local value
 
@@ -13,7 +17,7 @@ function playerMeta:AddBuff(uniqueID)
 		else
 			if (buff.isAdditive) then
 				if (self.buffs[uniqueID]) then
-					value = math.Clamp((self.buffs[uniqueID] - CurTime()) + buff.time, 0, buff.time_max)
+					value = math.Clamp((self.buffs[uniqueID].time - CurTime()) + buff.time, 0, buff.time_max)
 				end
 
 				value = CurTime() + (value or buff.time)
@@ -22,7 +26,8 @@ function playerMeta:AddBuff(uniqueID)
 			end
 		end
 
-		self.buffs[uniqueID] = value
+		self.buffs[uniqueID] = self.buffs[uniqueID] or {}
+		self.buffs[uniqueID].time = value
 
 		if (!buff.isOnlyServer) then
 			net.Start("ixBuffAdd")
@@ -46,13 +51,14 @@ function playerMeta:AddBuff(uniqueID)
 				return
 			end
 
-			if (!self:Alive()) then
+			if (!self:GetCharacter() or !self:Alive()) then
 				self:ClearBuffs()
+				return
 			end
 
 			for id, v in pairs(self.buffs) do
-				if (isnumber(v)) then
-					if (v < CurTime()) then
+				if (isnumber(v.time)) then
+					if (v.time < CurTime()) then
 						self:RemoveBuff(id, true)
 						ix.buff.list[id]:OnRemove(self)
 					else
@@ -93,12 +99,28 @@ function playerMeta:ClearBuffs(bOnlyTimer)
 		net.Send(self)
 	end
 
-	self.timer_buffs = self.timer_buffs or {}
-
-	for timerID in pairs(self.timer_buffs) do
+	for timerID in pairs(self.timer_buffs or {}) do
 		timer.Remove(timerID)
 		self.timer_buffs[timerID] = nil
 	end
 
 	self.timer_buffs = {}
+end
+
+function playerMeta:SetBuffData(uniqueID, key, value, bNotSend)
+	if (self.buffs[uniqueID]) then
+		self.buffs[uniqueID][key] = value
+
+		if (!bNotSend) then
+			local buff = ix.buff.list[uniqueID]
+
+			if (buff and !buff.isOnlyServer) then
+				net.Start("ixBuffDataSet")
+					net.WriteString(uniqueID)
+					net.WriteString(key)
+					net.WriteType(key)
+				net.Send(self)
+			end
+		end
+	end
 end

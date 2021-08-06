@@ -1,5 +1,50 @@
 local GM = GM or GAMEMODE
 
+local interactActions = {
+	["drop"] = true,
+	["take"] = true,
+	["combine"] = true
+}
+
+function GM:CanPlayerInteractItem(client, action, item)--, data)
+	if (!interactActions[action] and (client.lastInteractTime or 0) > CurTime()) then
+		return false
+	end
+
+	if (client:IsRestricted()) then
+		return false
+	end
+
+	if (IsValid(client.ixRagdoll)) then
+		client:NotifyLocalized("notNow")
+		return false
+	end
+
+	-- if (action == "combine" and (!data or !data[1])) then
+		-- return false
+	-- end
+
+	if (action == "drop" and hook.Run("CanPlayerDropItem", client, item) == false) then
+		return false
+	end
+
+	if (action == "take" and hook.Run("CanPlayerTakeItem", client, item) == false) then
+		return false
+	end
+
+	if (!item:GetItemTable().bAllowMultiCharacterInteraction and isentity(item) and item.ixSteamID and item.ixCharID
+	and item.ixSteamID == client:SteamID() and item.ixCharID != client:GetCharacter():GetID()) then
+		client:NotifyLocalized("itemOwned")
+		return false
+	end
+
+	return client:Alive()
+end
+
+function GM:PlayerInteractItem(client)
+	client.lastInteractTime = CurTime() + 0.33
+end
+
 -- Restrict character name
 function Schema:AdjustCreationPayload(client, payload, newPayload)
 	newPayload.name = client:Name()

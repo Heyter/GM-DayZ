@@ -74,6 +74,12 @@ FindMetaTable("Player").HasBuff = function(self, uniqueID)
 	return (self.buffs or {})[uniqueID]
 end
 
+FindMetaTable("Player").GetBuffData = function(self, uniqueID, key, default)
+	local buff = self:HasBuff(uniqueID)
+
+	return buff and buff[key] or default
+end
+
 if (CLIENT) then
 	net.Receive("ixBuffAdd", function()
 		local client = LocalPlayer()
@@ -82,7 +88,8 @@ if (CLIENT) then
 		local value = net.ReadType()
 
 		client.buffs = client.buffs or {}
-		client.buffs[uniqueID] = value
+		client.buffs[uniqueID] = client.buffs[uniqueID] or {}
+		client.buffs[uniqueID].time = value
 
 		local buff = ix.buff.list[uniqueID]
 
@@ -101,8 +108,8 @@ if (CLIENT) then
 			end
 
 			for id, v in pairs(client.buffs) do
-				if (isnumber(v)) then
-					if (v < CurTime()) then
+				if (isnumber(v.time)) then
+					if (v.time < CurTime()) then
 						client.buffs[id] = nil
 						ix.buff.list[id]:OnRemove(self)
 					else
@@ -132,5 +139,13 @@ if (CLIENT) then
 	net.Receive("ixBuffClears", function()
 		LocalPlayer().buffs = {}
 		timer.Remove("ixBuff")
+	end)
+
+	net.Receive("ixBuffDataSet", function()
+		local client = LocalPlayer()
+		local uniqueID = net.ReadString()
+		client.buffs = client.buffs or {}
+		client.buffs[uniqueID] = client.buffs[uniqueID] or {}
+		client.buffs[uniqueID][net.ReadString()] = net.ReadType()
 	end)
 end

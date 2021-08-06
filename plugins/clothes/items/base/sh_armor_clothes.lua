@@ -287,9 +287,9 @@ function ITEM:OnUnequipped(client)
 end
 
 function ITEM:CanEquipOutfit()
-	if (SERVER) then
+--[[ 	if (SERVER) then
 		return self:GetData("durability", self.defDurability or 100) > 0 and !self.player:GetClothesItem()[self.outfitCategory]
-	end
+	end ]]
 
 	return self:GetData("durability", self.defDurability or 100) > 0
 end
@@ -302,9 +302,46 @@ if (SERVER) then
 	end
 end
 
+ITEM.functions.Equip = {
+	name = "Equip",
+	tip = "equipTip",
+	icon = "icon16/tick.png",
+	OnRun = function(item)
+		local client = item.player
+		local char = client:GetCharacter()
+		local items = char:GetInventory():GetItems()
+
+		local equippedItem
+		for _, v in pairs(items) do
+			if (v.id != item.id and v.pacData and v.outfitCategory == item.outfitCategory and v:GetData("equip")) then
+				equippedItem = v
+				break
+			end
+		end
+
+		if (equippedItem) then
+			equippedItem:RemoveOutfit(client)
+
+			if (equippedItem:GetData("equip")) then
+				client:NotifyLocalized(item.equippedNotify or "outfitAlreadyEquipped")
+				return false
+			end
+		end
+
+		item:AddOutfit(item.player)
+		return false
+	end,
+	OnCanRun = function(item)
+		local client = item.player
+
+		return !IsValid(item.entity) and IsValid(client) and item:GetData("equip") != true and item:CanEquipOutfit() and
+			hook.Run("CanPlayerEquipItem", client, item) != false
+	end
+}
+
 ITEM.functions.combine = {
 	OnCanRun = function(item, data)
-		if (!data or !data[1] or item.player and (item.player.nextUseItem or 0) > CurTime()) then
+		if (!data or !data[1]) then
 			return false
 		end
 
@@ -362,9 +399,7 @@ ITEM.functions.Repair = {
 	end,
 
 	OnCanRun = function(item)
-		local d = item.defDurability or 100
-
-		if (item.player and (item.player.nextUseItem or 0) > CurTime() or item:GetData("durability", d) >= d) then
+		if (item:GetData("durability", item.defDurability or 100) >= (item.defDurability or 100)) then
 			return false
 		end
 
