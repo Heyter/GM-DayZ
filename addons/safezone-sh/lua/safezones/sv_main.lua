@@ -33,7 +33,7 @@ function SH_SZ:CreateSafeZone(sz, shape)
 end
 
 function SH_SZ:New(ply, shape, points, size, opts)
-	if (!self.Usergroups[ply:GetUserGroup()]) then
+	if (!CAMI.PlayerHasAccess(ply, "Safezone - edit", nil)) then
 		self:Notify(ply, "not_allowed", false)
 		return
 	end
@@ -195,7 +195,7 @@ function SH_SZ:OnEntityCreated(ent)
 end
 
 function SH_SZ:PlayerSpawnedProp(ply, mdl, ent)
-	if (self.Usergroups[ply:GetUserGroup()]) then
+	if (CAMI.PlayerHasAccess(ply, "Safezone - edit", nil)) then
 		return end
 
 	local zone = self:IsWithinSafeZone(ent:LocalToWorld(ent:OBBCenter()))
@@ -336,7 +336,7 @@ hook.Add("PlayerInitialSpawn", "SH_SZ.PlayerInitialSpawn", function(client)
 end)
 
 net.Receive("SH_SZ.New", function(_, ply)
-	if (!SH_SZ.Usergroups[ply:GetUserGroup()]) then
+	if (!CAMI.PlayerHasAccess(ply, "Safezone - edit", nil)) then
 		SH_SZ:Notify(ply, "not_allowed", false)
 		return
 	end
@@ -363,7 +363,7 @@ net.Receive("SH_SZ.New", function(_, ply)
 end)
 
 net.Receive("SH_SZ.Edit", function(_, ply)
-	if (!SH_SZ.Usergroups[ply:GetUserGroup()]) then
+	if (!CAMI.PlayerHasAccess(ply, "Safezone - edit", nil)) then
 		SH_SZ:Notify(ply, "not_allowed", false)
 		return
 	end
@@ -397,7 +397,7 @@ net.Receive("SH_SZ.Edit", function(_, ply)
 end)
 
 net.Receive("SH_SZ.Delete", function(_, ply)
-	if (!SH_SZ.Usergroups[ply:GetUserGroup()]) then
+	if (!CAMI.PlayerHasAccess(ply, "Safezone - edit", nil)) then
 		SH_SZ:Notify(ply, "not_allowed", false)
 		return
 	end
@@ -413,7 +413,7 @@ net.Receive("SH_SZ.Delete", function(_, ply)
 end)
 
 net.Receive("SH_SZ.Teleport", function(_, ply)
-	if (!SH_SZ.Usergroups[ply:GetUserGroup()]) then
+	if (!CAMI.PlayerHasAccess(ply, "Safezone - edit", nil)) then
 		SH_SZ:Notify(ply, "not_allowed", false)
 		return
 	end

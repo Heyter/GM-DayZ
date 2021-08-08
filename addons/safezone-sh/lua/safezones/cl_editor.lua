@@ -519,8 +519,7 @@ function SH_SZ:ShowEditor()
 	if (IsValid(_SZ_EDITOR)) then _SZ_EDITOR:Close() end
 	if (IsValid(_SZ_EDITOR_SIZE)) then _SZ_EDITOR_SIZE:Close() end
 
-	if (!self.Usergroups[LocalPlayer():GetUserGroup()]) then
-		return end
+	if !(CAMI.PlayerHasAccess(LocalPlayer(), "Safezone - edit", nil)) then return end
 
 	UpdateEditor = false
 

@@ -81,7 +81,7 @@ function ENT:OnZoneEntered(ent)
 		SafeRemoveEntity(ent)
 	elseif (ent:IsVehicle()) then
 		local driver = ent:GetDriver()
-		if (!IsValid(driver) or !SH_SZ.Usergroups[driver:GetUserGroup()]) then
+		if (!IsValid(driver) or !CAMI.PlayerHasAccess(driver, "Safezone - edit", nil)) then
 			if (IsValid(driver)) then
 				driver:ExitVehicle()
 			end
@@ -90,7 +90,7 @@ function ENT:OnZoneEntered(ent)
 		end
 	elseif (ent.SH_SpawnedBy) then
 		local owner = ent.SH_SpawnedBy
-		if (self.m_Options.noprop and not (IsValid(owner) and SH_SZ.Usergroups[owner:GetUserGroup()])) then
+		if (self.m_Options.noprop and not (IsValid(owner) and CAMI.PlayerHasAccess(owner, "Safezone - edit", nil))) then
 			SafeRemoveEntity(ent)
 		end
 	end

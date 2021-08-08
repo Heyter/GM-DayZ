@@ -2,10 +2,12 @@
 * General configuration
 **/
 
--- Usergroups allowed to add/modify Safe Zones
-SH_SZ.Usergroups = {
-	["superadmin"] = true
-}
+hook.Add("InitPostEntity", "SH_SZ.InitPostEntity", function()
+	CAMI.RegisterPrivilege({
+		Name = "Safezone - edit",
+		MinAccess = "superadmin"
+	})
+end)
 
 -- Use Steam Workshop for the content instead of FastDL?
 SH_SZ.UseWorkshop = true
