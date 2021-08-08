@@ -41,6 +41,8 @@ function PLUGIN:PreCharacterDeleted(client, character)
 				net.WriteBool(false)
 			net.Send(client)
 		end
+	else
+		ix.squad.Disband(steamID64)
 	end
 end
 
@@ -72,14 +74,28 @@ net.Receive("ixSquadCreate", function(_, client)
 		return
 	end
 
-	ix.squad.New(name, client:SteamID64(), function(squad)
-		if (IsValid(client) and squad) then
-			character:SetSquadOfficer(0)
-			character:SetSquadID(squad.owner)
-			squad:Sync(client)
+	ix.squad.New(name, client:SteamID64(), function(squad) -- insert
+		if (IsValid(client)) then
+			if (squad) then
+				character:SetSquadOfficer(0)
+				character:SetSquadID(squad.owner)
+				squad:Sync(client)
 
-			client:NotifyLocalized("squad_successfully_created", squad.name)
+				client:NotifyLocalized("squad_successfully_created", squad.name)
+			end
+
 			client.ixSquadCreateTry = nil
+		end
+	end, function(squad) -- restore
+		if (IsValid(client)) then
+			if (squad and squad.Sync) then
+				print("SQUAD - RESTORED", squad.name, client:Name())
+				squad:Sync(client, true)
+			else
+				print("SQUAD - DON'T RESTORED", client:Name())
+				character:SetSquadID("NULL")
+				character:SetSquadOfficer(0)
+			end
 		end
 	end)
 end)

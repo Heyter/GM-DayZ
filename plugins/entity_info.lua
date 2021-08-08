@@ -80,9 +80,9 @@ if (CLIENT) then
 
 					local maxD = itemTable.defDurability or 100
 					local durability = math.max(0, entity:GetData("durability", maxD))
+					durability = (durability / maxD) * 100
 					local durabilityColor = Color(2.55 * (100 - durability), 2.55 * durability, 0, 255)
 
-					durability = (durability / maxD) * 100
 					draw.SimpleTextOutlined(math.Round(durability, 1) .. "%", "ixNoticeFont", x, y+(noticeHeight*index)-(noticeHeight/2), durabilityColor, 1, 1, 1, color_black)
 				end
 			elseif (IsValid(entity) and (entity:GetClass() == "ix_money" or entity:GetClass() == "gmodz_npc_loot")) then

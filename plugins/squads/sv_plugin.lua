@@ -66,18 +66,33 @@ function ix.squad.Restore(id, steamID64, callback)
 	query:Execute()
 end
 
-function ix.squad.New(name, steamID64, callback)
-	local query = mysql:Insert("gmodz_squads")
-		query:Insert("name", name)
-		query:Insert("owner", steamID64)
-		query:Insert("description", "NULL")
-		query:Insert("logo", "NULL")
-		query:Insert("color", "NULL")
-		query:Callback(function()
-			local squad = ix.squad.Register(steamID64, name)
+function ix.squad.New(name, steamID64, insert_callback, restore_callback)
+	if (!name or !steamID64) then
+		if (insert_callback) then insert_callback() end
+		return
+	end
 
-			if (callback) then
-				callback(squad)
+	local query = mysql:Select("gmodz_squads")
+		query:Where("owner", steamID64)
+		query:Limit(1)
+		query:Callback(function(result)
+			if (istable(result) and #result > 0) then
+				ix.squad.Restore(result[1].owner, steamID64, restore_callback)
+			else
+				local queryInsert = mysql:Insert("gmodz_squads")
+					queryInsert:Insert("name", name)
+					queryInsert:Insert("owner", steamID64)
+					queryInsert:Insert("description", "NULL")
+					queryInsert:Insert("logo", "NULL")
+					queryInsert:Insert("color", "NULL")
+					queryInsert:Callback(function()
+						local squad = ix.squad.Register(steamID64, name)
+
+						if (insert_callback) then
+							insert_callback(squad)
+						end
+					end)
+				queryInsert:Execute()
 			end
 		end)
 	query:Execute()
@@ -162,7 +177,9 @@ function ix.squad.Disband(id, receivers)
 		net.Send(receivers)
 	end
 
-	ix.squad.list[id] = nil
+	if (ix.squad.list[id]) then
+		ix.squad.list[id] = nil
+	end
 end
 
 function ix.squad.KickMember(target, client)

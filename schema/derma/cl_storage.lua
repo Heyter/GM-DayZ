@@ -121,7 +121,7 @@ function PANEL:Init()
 			local inventory = ix.item.inventories[storage.storageInventory.invID]
 			local noItems
 
-			if (table.IsEmpty(inventory:GetItems(true))) then
+			if (!inventory or table.IsEmpty(inventory:GetItems(true))) then
 				noItems = true
 			end
 

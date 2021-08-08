@@ -77,10 +77,20 @@ if (CLIENT) then
 	})
 
 	function Schema:LoadFonts(font, genericFont)
+		local function get_scale()
+			local sc = math.Clamp(ScrH() / 1080, 0.7, 1)
+			if (!th) then
+				th = 48 * sc
+				m = th * 0.25
+			end
+
+			return sc
+		end
+
 		surface.CreateFont("GmodZ.Numeric", {
 			font = font,
-			size = 16,
-			weight = 500
+			size = math.min(18, 20 * get_scale()),
+			weight = 200
 		})
 
 		surface.CreateFont("GmodZ.NormalText", {
@@ -89,5 +99,7 @@ if (CLIENT) then
 			weight = 550,
 			extended = true
 		})
+
+		get_scale = nil
 	end
 end

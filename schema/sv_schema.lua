@@ -35,7 +35,7 @@ function ixItemENT:SetItem(itemID)
 
 	if (itemTable) then
 		local material = itemTable:GetMaterial(self)
-		local model = itemTable.OnGetDropModel and itemTable:OnGetDropModel(self) or itemTable:GetModel()
+		local model = itemTable.worldModel or itemTable.OnGetDropModel and itemTable:OnGetDropModel(self) or itemTable:GetModel()
 
 		self:SetSkin(itemTable:GetSkin())
 		self:SetModel(model)

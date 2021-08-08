@@ -6,11 +6,6 @@ PLUGIN.description = "Adds a merchant of things."
 
 -- Go away, asshole.
 
-ix.config.Add("merchantSellPerc", 0.7, "Множитель процента продажи/покупки предмета", nil, {
-	data = {min = 0, max = 1, decimals = 1},
-	category = PLUGIN.name
-})
-
 ix.config.Add("merchantInterval", 120, "Интервал обновлений ассортимента торговца (в минутах)", 
 	function(_, newValue)
 		if (SERVER) then
@@ -31,27 +26,16 @@ function PLUGIN:CalculatePrice(item, isSellingToVendor, client)
 
 	local price = stockItem.price or 0
 	if (price > 0) then -- пропустить бесплатные предметы
-		local scale = ix.config.Get("merchantSellPerc", 0.7)
-
-		if (isSellingToVendor) then
+		if (isSellingToVendor) then -- продажа товара торговцу
 			if (item.GetSellPrice) then
-				price = item:GetSellPrice(price, scale)
-			else
-				price = price * scale
+				price = item:GetSellPrice(price)
 			end
-		else
-			local newPrice = hook.Run("MerchantItemBuyPrice", item, stockItem, price)
-			local durability = (item.data or {}).durability
-
-			if (newPrice) then
-				price = price + (newPrice * scale)
-			else
-				price = price + (price / scale)
-			end
+		else -- покупка товара у торговца
+			price = hook.Run("MerchantItemBuyPrice", item, stockItem, price) or price
 		end
 
 		if (client) then
-			price = hook.Run("PlayerMerchantCalcPrice", client, price, scale, isSellingToVendor) or price
+			price = hook.Run("PlayerMerchantCalcPrice", client, price, isSellingToVendor) or price
 		end
 
 		if (CLIENT) then
@@ -246,7 +230,8 @@ end
 
 -- Предметы без мета-таблицы расчет цены по data.
 function PLUGIN:MerchantItemBuyPrice(item, stockItem, price)
-	if (item.data and item.data.durability) then
-		return (price + price) * (item.data.durability / (stockItem.defDurability or 100))
+	if (stockItem.useDurability) then
+		local durability = item.data and item.data.durability or (stockItem.defDurability or 100)
+		return price * (durability / (stockItem.defDurability or 100))
 	end
 end

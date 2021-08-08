@@ -17,12 +17,12 @@ ITEM.ammo = nil -- type of the ammo
 -- Категория для рем.комплекта, должно совпадать и в ремнаборе и здесь.
 ITEM.categoryKit = "weapons"
 
-function ITEM:GetSellPrice(base_price, scale)
---[[ 	local attach_modifier = scale * table.Count(self:GetData("mods", {}))
-	local liquid_price = scale * (base_price + (base_price * attach_modifier)) * (self:GetData("durability", 100) / 100)
+function ITEM:GetSellPrice(base_price)
+--[[ 	local attach_modifier = table.Count(self:GetData("mods", {}))
+	local liquid_price = (base_price + (base_price * attach_modifier)) * (self:GetData("durability", 100) / 100)
 
 	return liquid_price ]]
-	return scale * (base_price + base_price) * (self:GetData("durability", 100) / 100)
+	return base_price * (self:GetData("durability", 100) / 100)
 end
 
 function ITEM:CanSell()

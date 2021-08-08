@@ -2,6 +2,9 @@ LANGUAGE = {
 	optDrawSafezones = "Отключить отрисовку безопасных зон",
 	optdDrawSafezones = "Отключает отрисовку безопасных зон, например зеленых кругов.",
 
+	optEntityShadows = "Отрисовка тени объекта",
+	optdEntityShadows = "Следует ли рисовать тень объекта.",
+
 	optDrawOutlineSZ = "Отключить отрисовку игроков в безопасных зонах.",
 
 	optColorSafezones = "Цвет безопасной зоны.",

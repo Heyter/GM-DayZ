@@ -2,6 +2,9 @@ LANGUAGE = {
 	optDrawSafezones = "Disable rendering of safezones.",
 	optdDrawSafezones = "Disables the drawing of safe zones, such green circles.",
 
+	optEntityShadows = "Entity shadow drawing",
+	optdEntityShadows = "Sets whether an entity's shadow should be drawn.",
+
 	optDrawOutlineSZ = "Disable drawing of players in safe zones.",
 
 	optColorSafezones = "The color of the safe zone.",

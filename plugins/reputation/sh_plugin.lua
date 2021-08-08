@@ -151,11 +151,6 @@ ix.config.Add("tagPVP", 120, "Штрафное время за попытку у
 	category = PLUGIN.name,
 })
 
-ix.config.Add("repMerchantPerc", 0.5, "Скидка/Наценка при покупке товара.", nil, {
-	data = {min = 0, max = 1, decimals = 1},
-	category = PLUGIN.name
-})
-
 ix.util.Include("sv_player.lua")
 ix.util.Include("sv_plugin.lua")
 
@@ -189,19 +184,19 @@ do
 end
 
 -- HOOKS
-function PLUGIN:PlayerMerchantCalcPrice(client, price, scale, isSellingToVendor)
+function PLUGIN:PlayerMerchantCalcPrice(client, price, isSellingToVendor)
 	if (!isSellingToVendor) then -- покупка товара у торговца
-		local rep = client:GetReputation()
-		local repPerc = math.abs(rep / ix.config.Get("maxReputation", 1500))
+		--local rep = client:GetReputation() / ix.config.Get("maxReputation", 1500)
+		local rate = client:GetReputation() / ix.config.Get("maxReputation", 1500) * -0.333
 
-		if (repPerc >= 0.6) then
-			if (rep < 0) then -- bandit
-				price = price / ix.config.Get("repMerchantPerc", 0.5)
-			else
-				price = price * ix.config.Get("repMerchantPerc", 0.5)
-			end
+--[[ 		if (rep > 0) then -- hero
+			price = price * 1
+		elseif (rep < 0) then -- bandit
+			price = price * 2
+		else -- survivor
+			price = price * 1.5
+		end ]]
 
-			return price
-		end
+		return math.max(price, 1.5 * (price + price * rate))
 	end
 end

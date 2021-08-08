@@ -25,7 +25,7 @@ if (CLIENT) then
 		category = "colors"
 	})
 
-	ix.option.Add("colorSafezonePlayers", ix.type.color, ix.config.Get("color"), {
+	ix.option.Add("colorSafezonePlayers", ix.type.color, ix.config.Get("color", Color(75, 119, 190, 255)), {
 		category = "colors"
 	})
 
@@ -82,13 +82,9 @@ if (CLIENT) then
 			end
 
 			if (#players > 0) then
-				color = ix.option.Get("colorSafezonePlayers", ix.config.Get("color"))
+				color = ix.option.Get("colorSafezonePlayers", ix.config.Get("color", Color(75, 119, 190, 255)))
 
-				if (color.a != 255) then
-					color.a = 255
-				end
-
-				outline.Add(players, color, OUTLINE_MODE_VISIBLE)
+				outline.Add(players, color or Color(75, 119, 190, 255), OUTLINE_MODE_VISIBLE)
 			end
 		end
 	end

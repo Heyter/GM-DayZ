@@ -45,27 +45,13 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 
 	if (IsValid(attacker) and (attacker:IsPlayer() or attacker:IsNPC() or attacker:IsNextBot())) then
 		local hit_group = client:LastHitGroup()
-		local item = client:GetClothesItem()
-		local isHead = hit_group == HITGROUP_HEAD
-
-		if (isHead and item["hat"]) then
-			item = item["hat"]
-		else
-			item = item["suit"]
-			isHead = nil
-		end
+		local is_head = hit_group == HITGROUP_HEAD
 
 		hook.Run("PlayerTakeDamageClothes", client, damageInfo, attacker)
 		local damage = damageInfo:GetDamage()
 
-		if (item) then
-			if (istable(item.damageReduction)) then
-				damage = damage - ((item.damageReduction[hit_group] or 0) * damage)
-			else
-				damage = damage - ((item.damageReduction or 0) * damage)
-			end
-
-			if (isHead) then
+		for k, v in pairs(client:GetClothesItem()) do
+			if (is_head and k == "hat") then
 				client:EmitSound("physics/metal/metal_solid_impact_bullet1.wav")
 
 				local eyePos = client:EyePos()
@@ -80,38 +66,47 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 				eyePos, effect = nil, nil
 			end
 
-			if (damage == 0) then
-				damageInfo:SetDamage(0)
-				return
-			else
-				damageInfo:SetDamage(damage)
-			end
-
-			if (item.useDurability) then
-				local durability = math.max(0, item:GetData("durability", item.defDurability or 100) - damage)
-
-				if (client:GetHealth() - damage <= 0) then
-					item:SetData("durability", durability, false)
-					return
+			if (damage > 0) then
+				if (istable(v.damageReduction)) then
+					damage = math.max(0, damage - ((v.damageReduction[hit_group] or 0) * damage))
+				else
+					damage = math.max(0, damage - ((v.damageReduction or 0) * damage))
 				end
 
-				if (durability <= 0) then
-					if (item.dropHat) then
-						item:SetData("durability", durability, false)
+				-- TODO: переделать (установку durability) как на оружие
+				if (v.useDurability) then
+					local durability = math.max(0, v:GetData("durability", v.defDurability or 100) - damage)
 
-						local success = item:RemovePart(client, true)
+					if (client:GetHealth() - damage <= 0) then
+						v:SetData("durability", durability, false)
+						return
+					end
 
-						if (success and ix.item.instances[item.id]) then
-							DropHat(client, item.model, item.id, attacker:GetAimVector())
+					if (durability <= 0) then
+						if (v.dropHat) then
+							v:SetData("durability", durability, false)
+
+							local success = v:RemovePart(client, true)
+
+							if (success and ix.item.instances[v.id]) then
+								DropHat(client, v.model, v.id, attacker:GetAimVector())
+							end
+						else
+							v:SetData("durability", durability)
+							v:RemovePart(client)
 						end
 					else
-						item:SetData("durability", durability)
-						item:RemovePart(client)
+						v:SetData("durability", durability)
 					end
-				else
-					item:SetData("durability", durability)
 				end
+			else
+				break
 			end
+		end
+
+		if (damage == 0) then
+			damageInfo:SetDamage(0)
+			return
 		else
 			damageInfo:SetDamage(damage)
 		end

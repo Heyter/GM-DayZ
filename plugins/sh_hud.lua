@@ -85,15 +85,13 @@ else
 		surface.CreateFont("ixDHUDNum", {
 			font = font,
 			size = ix.util.ScreenScaleH(13),
-			extended = true,
-			weight = 100,
+			weight = 400, -- 100
 		})
 
 		surface.CreateFont("ixDHUDNum2", {
 			font = font,
-			size = ScreenScale(10), -- ScrH() / 480 * 10
-			extended = true,
-			weight = 100,
+			size = math.min(22.5, sscale(10)), -- ScrH() / 480 * 10
+			weight = 400, -- 100
 		})
 
 		surface.CreateFont("nutDHUDIcon", {

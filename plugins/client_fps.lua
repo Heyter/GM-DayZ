@@ -48,6 +48,10 @@ do
 end
 
 if (CLIENT) then
+	ix.option.Add("entityShadows", ix.type.bool, false, {
+		category = "performance"
+	})
+
 	do
 		local bad_ents = {['class C_PhysPropClientside'] = true, ['class C_ClientRagdoll'] = true}
 		timer.Create("CleanupGarbage", 60, 0, function()
@@ -59,6 +63,20 @@ if (CLIENT) then
 			end
 		end)
 	end
+
+	hook.Add("OnEntityCreated", "GmodZ.DisableShadows", function(entity)
+		if (ix.option.Get("entityShadows", false)) then
+			entity:DrawShadow(false)
+		end
+	end)
+
+	hook.Add("InitPostEntity", "GmodZ.DisableShadows", function()
+		if (ix.option.Get("entityShadows", false)) then
+			for _, entity in ipairs(ents.GetAll()) do
+				entity:DrawShadow(false)
+			end
+		end
+	end)
 end
 
 if (SERVER) then
