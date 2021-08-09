@@ -7,7 +7,7 @@ ITEM.damageReduction = 0.15
 ITEM.replacement = nil
 ITEM.noCollisionGroup = true
 
-ITEM.price = 15000
+ITEM.price = 50000
 
 ITEM.speedModify = -10
 

@@ -2,11 +2,11 @@ ITEM.name = "Army medkit"
 ITEM.model = "models/gmodz/medical/medkit_army.mdl"
 ITEM.description = "Includes medicine for faster blood coagulation, as well as painkillers, antibiotics, immunity stimulators, and more."
 
-ITEM.healthAmount = 40
-ITEM.price = 5500
+ITEM.healthAmount = 50
+ITEM.price = 10000
 ITEM.useSound = "gmodz/items/medkit.wav"
 
-ITEM.rarity = { weight = 30 }
+ITEM.rarity = { weight = 35 }
 
 function ITEM:OnCanUse()
 	if (self.player:Health() >= self.player:GetMaxHealth()) then

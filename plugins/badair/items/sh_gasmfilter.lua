@@ -1,7 +1,7 @@
 ITEM.name = "Filter"
 ITEM.description = "A Gas Mask filter"
 ITEM.model = "models/gmodz/equipments/gasmask_filter.mdl"
-ITEM.price = 80
+ITEM.price = 2000
 ITEM.isFilter = true
 ITEM.filterHealth = ix.config.Get("gasmask_filter", 600)
 

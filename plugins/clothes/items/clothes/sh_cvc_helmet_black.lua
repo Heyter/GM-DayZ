@@ -10,15 +10,15 @@ ITEM.dropHat = true
 ITEM.categoryKit = "helmets"
 ITEM.skin = 2
 
-ITEM.rarity = { weight = 20 }
+ITEM.rarity = { weight = 15 }
 
-ITEM.price = 8000
+ITEM.price = 30000
 
 ITEM.width = 1
 ITEM.height = 1
 ITEM.iconCam = {
 	pos = Vector(-111.63, -117.18, 68.13),
-	ang = Angle(21.24, 406.54, 0),
+	ang = Angle(21.24, 404.54, 0),
 	fov = 4.46
 }
 

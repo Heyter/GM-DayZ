@@ -6,6 +6,13 @@ att.Desc_Pros = {
     "The ability to switch from the telescopic sight to the side (Double E)"
 }
 
+att.ItemData = {
+    width = 1,
+    height = 1,
+    price = 8000,
+    rarity = { weight = 35 },
+}
+
 att.Slot = "fas2_cantedsight"
 
 att.Model = "models/weapons/fas2/attachments/canted_ironsight.mdl"

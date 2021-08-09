@@ -4,7 +4,7 @@ ITEM.description = "Single-use syringe full of morphine - powerful drug, used pr
 
 ITEM.useSound = "gmodz/items/syringe.wav"
 
-ITEM.price = 6000
+ITEM.price = 4000
 
 function ITEM:OnCanUse()
 	return self.player:IsBrokenLeg()
@@ -21,4 +21,4 @@ else
 	end
 end
 
-ITEM.rarity = { weight = 30 }
+ITEM.rarity = { weight = 38 }

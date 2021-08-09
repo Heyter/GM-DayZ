@@ -2,12 +2,11 @@ ITEM.name = "Bandage"
 ITEM.model = "models/gmodz/medical/bandage.mdl"
 ITEM.description = "Small roll of gauze cloth."
 
-ITEM.price = 2000
+ITEM.price = 200
 
-ITEM.healthAmount = 5
 ITEM.useSound = "gmodz/items/bandage.wav"
 
-ITEM.rarity = { weight = 38 }
+ITEM.rarity = { weight = 45 }
 
 if (SERVER) then
 	function ITEM:OnUse()

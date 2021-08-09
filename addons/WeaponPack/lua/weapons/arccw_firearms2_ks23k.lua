@@ -5,7 +5,7 @@ SWEP.AdminOnly = false
 SWEP.Slot = 4
 
 SWEP.ItemData = {
-    width = 2,
+    width = 1,
     height = 1,
     JamCapacity = 200,
     DegradeRate = 0.02,
@@ -36,8 +36,8 @@ SWEP.DefaultBodygroups = "00000000"
 SWEP.DefaultSkin = 0
 
 SWEP.Damage = 100
-SWEP.DamageMin = 100 -- damage done at maximum range
-SWEP.Range = 100 -- in METRES
+SWEP.DamageMin = 50 -- damage done at maximum range
+SWEP.Range = 5 -- in METRES
 SWEP.Penetration = 15
 SWEP.DamageType = DMG_BULLET
 SWEP.MuzzleVelocity = 800 -- projectile or phys bullet muzzle velocity

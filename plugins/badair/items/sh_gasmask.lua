@@ -2,11 +2,11 @@ ITEM.name = "Gasmask"
 ITEM.model = "models/gmodz/equipments/gasmask.mdl"
 ITEM.width = 1
 ITEM.height = 1
-ITEM.price = 5000
+ITEM.price = 10000
 ITEM.category = "Clothes"
 ITEM.isGasMask = true
 
-ITEM.rarity = { weight = 35 }
+ITEM.rarity = { weight = 30 }
 
 ITEM.width = 1
 ITEM.height = 1

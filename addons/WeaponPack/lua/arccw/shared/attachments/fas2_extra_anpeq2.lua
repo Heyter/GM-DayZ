@@ -11,6 +11,13 @@ att.Desc_Cons = {
 
 att.Slot = "fas2_tactical"
 
+att.ItemData = {
+    width = 1,
+    height = 1,
+    price = 3000,
+    rarity = { weight = 35 },
+}
+
 att.Model = "models/weapons/fas2/attachments/anpeq2.mdl"
 
 att.Laser = true

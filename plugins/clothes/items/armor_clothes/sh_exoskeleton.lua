@@ -13,13 +13,13 @@ ITEM.defDurability = 5000
 ITEM.damageReduction = 0.5
 ITEM.replacement = "models/gmodz/characters/exoskeleton.mdl"
 ITEM.noCollisionGroup = true
-ITEM.price = 50000
+ITEM.price = 350000
 
 ITEM.speedModify = 25
 
 ITEM.disableSprint = true
 
-ITEM.rarity = { weight = 10 }
+ITEM.rarity = { weight = 5 }
 
 ix.anim.SetModelClass(ITEM.replacement, "player")
 

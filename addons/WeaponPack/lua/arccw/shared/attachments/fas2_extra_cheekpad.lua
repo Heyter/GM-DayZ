@@ -6,8 +6,14 @@ att.AutoStats = true
 
 att.Slot = "fas2_kar98kcheekpad"
 
+att.ItemData = {
+    width = 1,
+    height = 1,
+    price = 3000,
+    rarity = { weight = 35 },
+}
+
 att.Mult_Recoil = 0.8
 att.Mult_RecoilSide = 0.95
-att.Mult_RecoilPunch = 0.85
 
 att.ActivateElements = {"cheekpad"}

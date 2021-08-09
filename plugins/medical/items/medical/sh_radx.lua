@@ -18,4 +18,4 @@ else
 	end
 end
 
-ITEM.rarity = { weight = 33 }
+ITEM.rarity = { weight = 44 }

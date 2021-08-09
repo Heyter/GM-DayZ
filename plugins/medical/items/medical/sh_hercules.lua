@@ -9,4 +9,4 @@ ITEM.staminaRegenTime = 60
 -- TODO sound
 ITEM.useSound = "gmodz/items/water.wav"
 
-ITEM.rarity = { weight = 25 }
+ITEM.rarity = { weight = 30 }

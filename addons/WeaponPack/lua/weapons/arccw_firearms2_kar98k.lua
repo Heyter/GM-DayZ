@@ -77,7 +77,7 @@ SWEP.MoveDispersion = 150 -- inaccuracy added by moving. Applies in sights as we
 SWEP.SightsDispersion = 0 -- dispersion that remains even in sights
 SWEP.JumpDispersion = 300 -- dispersion penalty when in the air
 
-SWEP.Primary.Ammo = "7.62x54mm" -- what ammo type the gun uses
+SWEP.Primary.Ammo = "9x18mm" -- what ammo type the gun uses
 
 SWEP.ShootVol = 110 -- volume of shoot sound
 SWEP.ShootPitch = 100 -- pitch of shoot sound

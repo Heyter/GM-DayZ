@@ -13,9 +13,9 @@ ITEM.useDurability = nil
 ITEM.replacement = "models/gmodz/characters/ghillie.mdl"
 ITEM.noCollisionGroup = true
 
-ITEM.price = 40000
+ITEM.price = 80000
 
-ITEM.rarity = { weight = 12 }
+ITEM.rarity = { weight = 5 }
 
 ix.anim.SetModelClass(ITEM.replacement, "player")
 

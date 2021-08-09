@@ -6,6 +6,8 @@ att.Desc_Pros = {
 	"A 100% chance to set the enemy on fire"
 }
 
+att.Free = true
+
 att.AutoStats = true
 att.Slot = "fas2_ammo_shotgun"
 

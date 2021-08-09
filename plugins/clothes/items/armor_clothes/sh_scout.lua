@@ -13,9 +13,9 @@ ITEM.defDurability = 2000
 ITEM.damageReduction = 0.3
 ITEM.replacement = "models/gmodz/characters/scout.mdl"
 ITEM.noCollisionGroup = true
-ITEM.price = 30000
+ITEM.price = 120000
 
-ITEM.rarity = { weight = 15 }
+ITEM.rarity = { weight = 10 }
 
 ITEM.speedModify = -25
 

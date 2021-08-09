@@ -2,9 +2,8 @@ ITEM.name = "Epinephrine"
 ITEM.model = "models/gmodz/medical/epinephrine.mdl"
 ITEM.description = "epinephrine"
 
-ITEM.price = 4000
+ITEM.price = 1500
 
-ITEM.healthAmount = 5
 ITEM.useSound = "gmodz/items/syringe.wav"
 
 if (SERVER) then
@@ -18,4 +17,4 @@ else
 	end
 end
 
-ITEM.rarity = { weight = 30 }
+ITEM.rarity = { weight = 41 }

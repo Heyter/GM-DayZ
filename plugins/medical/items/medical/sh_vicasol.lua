@@ -2,9 +2,9 @@ ITEM.name = "Vicasol"
 ITEM.model = "models/gmodz/medical/vicasol.mdl"
 ITEM.description = ""
 ITEM.useSound = "gmodz/items/antirad.wav"
-ITEM.price = 4000
+ITEM.price = 5000
 
-ITEM.rarity = { weight = 20 }
+ITEM.rarity = { weight = 37 }
 
 if (SERVER) then
 	function ITEM:OnUse()

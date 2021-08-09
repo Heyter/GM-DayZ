@@ -9,9 +9,9 @@ ITEM.dropHat = true
 
 ITEM.categoryKit = "helmets"
 
-ITEM.rarity = { weight = 20 }
+ITEM.rarity = { weight = 15 }
 
-ITEM.price = 8000
+ITEM.price = 30000
 
 ITEM.width = 1
 ITEM.height = 1

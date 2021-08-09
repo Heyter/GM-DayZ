@@ -5,6 +5,8 @@ att.Description = "A modern shotgun slug is a heavy projectile made of lead, cop
 att.AutoStats = true
 att.Slot = "fas2_ammo_shotgun"
 
+att.Free = true
+
 att.Override_Num = 1
 
 att.Mult_Damage = 1.4

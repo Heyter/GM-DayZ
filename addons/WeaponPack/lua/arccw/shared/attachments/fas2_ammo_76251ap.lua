@@ -5,6 +5,8 @@ att.Description = ""
 att.AutoStats = true
 att.Slot = "fas2_ammo_76251ap"
 
+att.Free = true
+
 att.Mult_Damage = 1.25
 att.Mult_DamageMin = 1.05
 att.Mult_Penetration = 1.5

@@ -882,7 +882,7 @@ AddAmmoType("23x75mmr", "23x75MMR Ammo")
 
 AddAmmoType("12gaugeincendiary", "12 Gauge Incendiary Ammo")
 AddAmmoType("12gaugeslug", "12 Gauge Slug Ammo")
-AddAmmoType("7.62x54mmap", "7.62x54MM AP Ammo")
+AddAmmoType("7.62x51mmap", "7.62x51MM AP Ammo")
 
 AddAmmoType("40mmhe", "40MM HE Ammo")
 AddAmmoType("40mmsmoke", "40MM Smoke Ammo")

@@ -9,6 +9,13 @@ att.Desc_Cons = {
     "Gives out your location"
 }
 
+att.ItemData = {
+    width = 1,
+    height = 1,
+    price = 3000,
+    rarity = { weight = 35 },
+}
+
 att.Slot = "fas2_tactical"
 
 att.Model = "models/weapons/fas2/attachments/anpeq15.mdl"
