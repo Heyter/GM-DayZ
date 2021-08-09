@@ -33,11 +33,11 @@ function PLUGIN:ScalePlayerDamage(_, hit_group, dmg_info)
 	elseif (hit_group == HITGROUP_CHEST) then
 		dmg_info:ScaleDamage(1)
 	elseif (hit_group == HITGROUP_STOMACH) then
-		dmg_info:ScaleDamage(0.9)
+		dmg_info:ScaleDamage(1)
 	elseif (hit_group == HITGROUP_LEFTARM or hit_group == HITGROUP_RIGHTARM) then
-		dmg_info:ScaleDamage(0.8)
+		dmg_info:ScaleDamage(2)
 	elseif (hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) then
-		dmg_info:ScaleDamage(0.7)
+		dmg_info:ScaleDamage(2)
 	else
 		dmg_info:ScaleDamage(1)
 	end
@@ -49,11 +49,11 @@ function PLUGIN:ScaleNPCDamage(entity, hit_group, dmg_info)
 	elseif (hit_group == HITGROUP_CHEST) then
 		dmg_info:ScaleDamage(1)
 	elseif (hit_group == HITGROUP_STOMACH) then
-		dmg_info:ScaleDamage(0.9)
+		dmg_info:ScaleDamage(1)
 	elseif (hit_group == HITGROUP_LEFTARM or hit_group == HITGROUP_RIGHTARM) then
-		dmg_info:ScaleDamage(0.8)
+		dmg_info:ScaleDamage(2)
 	elseif (hit_group == HITGROUP_LEFTLEG or hit_group == HITGROUP_RIGHTLEG) then
-		dmg_info:ScaleDamage(0.7)
+		dmg_info:ScaleDamage(2)
 	else
 		dmg_info:ScaleDamage(1)
 	end
