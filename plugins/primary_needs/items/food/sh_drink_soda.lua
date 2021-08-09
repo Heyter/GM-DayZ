@@ -2,8 +2,8 @@ ITEM.name = "Blueberry Soda"
 ITEM.model = "models/props_junk/popcan01a.mdl"
 ITEM.description = "A blue can filled with some carbonated flavoured water."
 
-ITEM.thirstAmount = 0.4
-ITEM.price = 40
+ITEM.thirstAmount = 0.15
+ITEM.price = 100
 ITEM.useSound = "gmodz/items/can.wav"
 
 ITEM.iconCam = {
@@ -12,4 +12,4 @@ ITEM.iconCam = {
 	fov = 4.292031810357,
 }
 
-ITEM.rarity = { weight = 100 }
+ITEM.rarity = { weight = 48 }

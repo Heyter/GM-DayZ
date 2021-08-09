@@ -2,8 +2,9 @@ ITEM.name = "Morphine injector"
 ITEM.model = "models/gmodz/medical/morphine.mdl"
 ITEM.description = "Single-use syringe full of morphine - powerful drug, used primarily to treat both acute and chronic severe pain."
 
--- ITEM.healthAmount = 5
 ITEM.useSound = "gmodz/items/syringe.wav"
+
+ITEM.price = 6000
 
 function ITEM:OnCanUse()
 	return self.player:IsBrokenLeg()
@@ -20,4 +21,4 @@ else
 	end
 end
 
-ITEM.rarity = { weight = 70 }
+ITEM.rarity = { weight = 30 }

@@ -4,6 +4,20 @@ SWEP.Category = "ArcCW - Firearms: Source 2" -- edit this if you like
 SWEP.AdminOnly = false
 SWEP.Slot = 4
 
+SWEP.ItemData = {
+    width = 2,
+    height = 1,
+    JamCapacity = 200,
+    DegradeRate = 0.02,
+    price = 200,
+    rarity = { weight = 1 },
+    iconCam = {
+        pos = Vector(0, 200, 0),
+        ang = Angle(-1.5, 270.95, 0),
+        fov = 8
+    }
+}
+
 SWEP.PrintName = "BM-16 Short"
 SWEP.Trivia_Class = "Double-Barrel"
 SWEP.Trivia_Desc = ""

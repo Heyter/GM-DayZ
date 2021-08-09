@@ -4,6 +4,20 @@ SWEP.Category = "ArcCW - Firearms: Source 2" -- edit this if you like
 SWEP.AdminOnly = false
 SWEP.Slot = 3
 
+SWEP.ItemData = {
+    width = 2,
+    height = 1,
+    JamCapacity = 200,
+    DegradeRate = 0.02,
+    price = 200,
+    rarity = { weight = 1 },
+    iconCam = {
+        pos = Vector(0, 200, 0),
+        ang = Angle(-1.6, 272.6, 0),
+        fov = 12
+    }
+}
+
 SWEP.PrintName = "ASH-12"
 SWEP.Trivia_Class = "Bullpup Battle Rifle"
 SWEP.Trivia_Desc = ""
@@ -62,7 +76,7 @@ SWEP.MoveDispersion = 150 -- inaccuracy added by moving. Applies in sights as we
 SWEP.SightsDispersion = 0 -- dispersion that remains even in sights
 SWEP.JumpDispersion = 300 -- dispersion penalty when in the air
 
-SWEP.Primary.Ammo = "12.7x55MM" -- what ammo type the gun uses
+SWEP.Primary.Ammo = "12.7x55mm" -- what ammo type the gun uses
 SWEP.MagID = "" -- the magazine pool this gun draws from
 
 SWEP.ShootVol = 110 -- volume of shoot sound

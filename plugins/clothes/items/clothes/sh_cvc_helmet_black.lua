@@ -3,20 +3,25 @@ ITEM.desc = ""
 ITEM.model = "models/gmodz/equipments/cvc_helmet.mdl"
 ITEM.outfitCategory = "hat"
 
-ITEM.defDurability = 100
+ITEM.defDurability = 80
 ITEM.damageReduction = { [HITGROUP_HEAD] = 0.45 }
 ITEM.dropHat = true
 
 ITEM.categoryKit = "helmets"
 ITEM.skin = 2
 
-ITEM.rarity = { weight = 2 }
+ITEM.rarity = { weight = 20 }
 
+ITEM.price = 8000
+
+ITEM.width = 1
+ITEM.height = 1
 ITEM.iconCam = {
-	pos = Vector(119.12911987305, 100.74072265625, 78.613121032715),
-	ang = Angle(25.168048858643, -139.87422180176, 10.754030227661),
-	fov = 6.7973208900601,
+	pos = Vector(-111.63, -117.18, 68.13),
+	ang = Angle(21.24, 406.54, 0),
+	fov = 4.46
 }
+
 
 ITEM.pacData = {
 	[1] = {

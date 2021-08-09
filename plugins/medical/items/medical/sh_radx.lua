@@ -3,7 +3,7 @@ ITEM.model = "models/gmodz/medical/radioprotector.mdl"
 ITEM.description = "Protects against radiation exposure."
 
 ITEM.radiationAmount = -75
-ITEM.price = 350
+ITEM.price = 2500
 ITEM.useSound = "gmodz/items/antirad.wav"
 
 if (SERVER) then
@@ -18,4 +18,4 @@ else
 	end
 end
 
-ITEM.rarity = { weight = 70 }
+ITEM.rarity = { weight = 33 }

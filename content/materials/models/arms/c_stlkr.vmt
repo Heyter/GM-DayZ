@@ -1,5 +1,0 @@
-VertexLitGeneric
-{
-	"$basetexture"	"models\arms\c_stlkr.vtf"
-	"$bumpmap" "models\arms\c_stlkr_normal.vtf"
-}

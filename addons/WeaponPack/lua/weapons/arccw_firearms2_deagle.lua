@@ -4,6 +4,20 @@ SWEP.Category = "ArcCW - Firearms: Source 2" -- edit this if you like
 SWEP.AdminOnly = false
 SWEP.Slot = 1
 
+SWEP.ItemData = {
+    width = 1,
+    height = 1,
+    JamCapacity = 200,
+    DegradeRate = 0.02,
+    price = 200,
+    rarity = { weight = 1 },
+    iconCam = {
+        pos = Vector(0, 200, 0),
+        ang = Angle(-1.45, 271.8, 0),
+        fov = 4.5
+    }
+}
+
 SWEP.PrintName = "Desert Eagle"
 SWEP.Trivia_Class = "Semi-automatic pistol"
 SWEP.Trivia_Desc = ""
@@ -59,7 +73,7 @@ SWEP.MoveDispersion = 150 -- inaccuracy added by moving. Applies in sights as we
 SWEP.SightsDispersion = 0 -- dispersion that remains even in sights
 SWEP.JumpDispersion = 300 -- dispersion penalty when in the air
 
-SWEP.Primary.Ammo = ".50 AE" -- what ammo type the gun uses
+SWEP.Primary.Ammo = ".50ae" -- what ammo type the gun uses
 SWEP.MagID = "" -- the magazine pool this gun draws from
 
 SWEP.ShootVol = 90 -- volume of shoot sound

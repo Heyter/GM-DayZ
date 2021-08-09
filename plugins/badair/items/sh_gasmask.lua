@@ -2,11 +2,20 @@ ITEM.name = "Gasmask"
 ITEM.model = "models/gmodz/equipments/gasmask.mdl"
 ITEM.width = 1
 ITEM.height = 1
-ITEM.isGasMask = true
-ITEM.price = 250
+ITEM.price = 5000
 ITEM.category = "Clothes"
+ITEM.isGasMask = true
 
-ITEM.rarity = { weight = 12 }
+ITEM.rarity = { weight = 35 }
+
+ITEM.width = 1
+ITEM.height = 1
+ITEM.iconCam = {
+	pos = Vector(-180.9, -83.06, 74.35),
+	ang = Angle(19.79, 384.42, 0),
+	fov = 4.55
+}
+
 
 ITEM.pacData = {
 	[1] = {

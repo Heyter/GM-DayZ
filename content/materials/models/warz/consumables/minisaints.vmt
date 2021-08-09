@@ -1,9 +1,0 @@
-"VertexLitGeneric"
-{
-	"$basetexture" "models/warz/consumables/minisaints"
-	"$bumpmap" "models/warz/consumables/minisaints_norm"
-$phong 1
-$phongboost 0.3
-"$phongfresnelranges" "[0.05 0.5 5]"
-$phongexponent 44
-}

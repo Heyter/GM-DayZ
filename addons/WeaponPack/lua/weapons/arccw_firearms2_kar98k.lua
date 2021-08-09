@@ -4,6 +4,20 @@ SWEP.Category = "ArcCW - Firearms: Source 2" -- edit this if you like
 SWEP.AdminOnly = false
 SWEP.Slot = 3
 
+SWEP.ItemData = {
+    width = 3,
+    height = 1,
+    JamCapacity = 200,
+    DegradeRate = 0.02,
+    price = 200,
+    rarity = { weight = 1 },
+    iconCam = {
+        pos = Vector(0, 200, 0),
+        ang = Angle(-1.7, 269.3, 0),
+        fov = 17
+    }
+}
+
 SWEP.PrintName = "Kar98K"
 SWEP.Trivia_Class = "Bolt-Action Rifle"
 SWEP.Trivia_Desc = ""
@@ -63,7 +77,7 @@ SWEP.MoveDispersion = 150 -- inaccuracy added by moving. Applies in sights as we
 SWEP.SightsDispersion = 0 -- dispersion that remains even in sights
 SWEP.JumpDispersion = 300 -- dispersion penalty when in the air
 
-SWEP.Primary.Ammo = "7.62x54MM" -- what ammo type the gun uses
+SWEP.Primary.Ammo = "7.62x54mm" -- what ammo type the gun uses
 
 SWEP.ShootVol = 110 -- volume of shoot sound
 SWEP.ShootPitch = 100 -- pitch of shoot sound

@@ -123,17 +123,16 @@ if (CLIENT) then
 			},
 
 			male = {
-				Sound("vo/npc/male01/pain07.wav"),
-				Sound("vo/npc/male01/pain08.wav"),
-				Sound("vo/npc/male01/pain09.wav"),
-				Sound("vo/npc/male01/ow01.wav"),
-				Sound("vo/npc/male01/ow02.wav"),
-				Sound("vo/npc/male01/no02.wav"),
-				Sound("vo/npc/Barney/ba_ohshit03.wav"),
-				Sound("vo/npc/Barney/ba_ohshit03.wav"),
-				Sound("vo/npc/Barney/ba_no01.wav"),
-				Sound("vo/npc/Barney/ba_no02.wav"),
-				Sound("vo/coast/odessa/male01/nlo_cubdeath02.wav")
+				Sound("gmodz/player/death1.wav"),
+				Sound("gmodz/player/death2.wav"),
+				Sound("gmodz/player/death3.wav"),
+				Sound("gmodz/player/death4.wav"),
+				Sound("gmodz/player/death5.wav"),
+				Sound("gmodz/player/death6.wav"),
+				Sound("gmodz/player/death7.wav"),
+				Sound("gmodz/player/death8.wav"),
+				Sound("gmodz/player/death9.wav"),
+				Sound("gmodz/player/death10.wav")
 			}
 		}
 

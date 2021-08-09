@@ -2,11 +2,15 @@ ITEM.name = "Heavy body armor"
 ITEM.desc = ""
 ITEM.model = "models/Items/BoxMRounds.mdl"
 
-ITEM.defDurability = 5000
-ITEM.damageReduction = 0.25 -- резист всего тела на 45%
+ITEM.defDurability = 3000
+ITEM.damageReduction = 0.4
 ITEM.replacement = nil
 ITEM.noCollisionGroup = true
 
-ITEM.rarity = { weight = 4 }
+ITEM.price = 40000
+
+ITEM.speedModify = -35
+
+ITEM.rarity = { weight = 10 }
 
 -- ix.anim.SetModelClass(ITEM.replacement, "player")

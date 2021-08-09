@@ -1,7 +1,0 @@
-"VertexLitGeneric"
-{
-	"$basetexture" "models/carlsmei/escapefromtarkov/medical/alusplint"
-	"$envmap" "env_cubemap"
-	"$envmaptint" "[0.2 0.2 0.2]"
-	"%keywords" "carlsmei"
-}
