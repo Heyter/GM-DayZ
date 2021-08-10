@@ -181,9 +181,6 @@ function SWEP:PrimaryAttack()
         tracernum = 1
     end
 
-    local dmgtable = self.BodyDamageMults
-    dmgtable = self:GetBuff_Override("Override_BodyDamageMults") or dmgtable
-
     -- drive by is cool
     src = ArcCW:GetVehicleFireTrace(self:GetOwner(), src, dir) or src
 
@@ -245,17 +242,6 @@ function SWEP:PrimaryAttack()
 
         dmg:SetDamageType(hit.dmgtype)
         dmg:SetDamage(hit.damage)
-
-        if dmgtable then
-            local hg = tr.HitGroup
-            local gam = ArcCW.LimbCompensation[engine.ActiveGamemode()] or ArcCW.LimbCompensation[1]
-            if dmgtable[hg] then
-                dmg:ScaleDamage(dmgtable[hg])
-            end
-
-            -- cancelling gmod's stupid default values
-            if GetConVar("arccw_bodydamagemult_cancel"):GetBool() and gam[hg] then dmg:ScaleDamage(gam[hg]) end
-        end
 
         local effect = self:GetBuff_Override("Override_ImpactEffect", self.ImpactEffect)
         local decal  = self:GetBuff_Override("Override_ImpactDecal", self.ImpactDecal)

@@ -279,15 +279,10 @@ function ArcCW:ProgressPhysBullet(bullet, timestep)
                 end
                 return
             elseif SERVER then
-                local dmgtable
                 if IsValid(bullet.Weapon) then
                     bullet.Weapon:GetBuff_Hook("Hook_PhysBulletHit", {bullet = bullet, tr = tr})
-
-                    dmgtable = bullet.Weapon.BodyDamageMults
-                    dmgtable = bullet.Weapon:GetBuff_Override("Override_BodyDamageMults") or dmgtable
                 end
                 if bullet.PhysBulletImpact then
-
                     local delta = bullet.Travelled / (bullet.Range / ArcCW.HUToM)
                     delta = math.Clamp(delta, 0, 1)
                     local dmg = Lerp(delta, bullet.DamageMax, bullet.DamageMin)
@@ -334,17 +329,6 @@ function ArcCW:ProgressPhysBullet(bullet, timestep)
                                 else
                                     ctr.Entity:Ignite(1, 0)
                                 end
-                            end
-
-                            if dmgtable then
-                                local hg = ctr.HitGroup
-                                local gam = ArcCW.LimbCompensation[engine.ActiveGamemode()] or ArcCW.LimbCompensation[1]
-                                if dmgtable[hg] then
-                                    cdmg:ScaleDamage(dmgtable[hg])
-                                end
-
-                                -- cancelling gmod's stupid default values
-                                if GetConVar("arccw_bodydamagemult_cancel"):GetBool() and gam[hg] then cdmg:ScaleDamage(gam[hg]) end
                             end
 
                             ArcCW.TryBustDoor(ctr.Entity, cdmg)
