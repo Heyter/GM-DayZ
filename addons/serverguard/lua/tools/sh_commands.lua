@@ -1663,9 +1663,7 @@ local command = {}
 command.help = "Toggle noclip mode."
 command.command = "noclip"
 command.permissions = "Noclip"
-
 command.arguments = {"player"}
-
 command.immunity = SERVERGUARD.IMMUNITY.LESSOREQUAL
 command.bDisallowConsole = true
 
@@ -1703,11 +1701,8 @@ serverguard.command:Add(command)
 local command = {}
 command.help = "Restart the current map."
 command.command = "maprestart"
-
 command.arguments = {"delay seconds"}
-
 command.permissions = "Map Restart"
-
 command.aliases = {"restartmap"}
 
 function command:Execute(player, silent, arguments)
@@ -1752,9 +1747,7 @@ serverguard.command:Add(command)
 local command = {}
 command.help = "Jail a player."
 command.command = "jail"
-
 command.arguments = {"player", "seconds"}
-
 command.permissions = "Jail"
 command.immunity = SERVERGUARD.IMMUNITY.LESSOREQUAL
 
@@ -1799,9 +1792,7 @@ serverguard.command:Add(command)
 local command = {}
 command.help = "Teleport and jail a player."
 command.command = "jailtp"
-
 command.arguments = {"player", "seconds"}
-
 command.permissions = "Jail"
 command.bDisallowConsole = true
 
@@ -1828,11 +1819,8 @@ serverguard.command:Add(command)
 local command = {}
 command.help = "Unjail a player."
 command.command = "unjail"
-
 command.arguments = {"player"}
-
 command.permissions = "Jail"
-
 command.aliases = {"release"}
 
 function command:OnPlayerExecute(player, target)
@@ -1862,9 +1850,7 @@ serverguard.command:Add(command)
 local command = {}
 command.help = "Restrict a player from using certain features."
 command.command = "restrict"
-
 command.arguments = {"player", "time"}
-
 command.permissions = "Restrict"
 command.immunity = SERVERGUARD.IMMUNITY.LESS
 command.bSingleTarget = true
@@ -1899,9 +1885,7 @@ serverguard.command:Add(command)
 local command = {}
 command.help = "Unrestrict a player from using certain features."
 command.command = "unrestrict"
-
 command.arguments = {"player"}
-
 command.permissions = "Restrict"
 command.immunity = SERVERGUARD.IMMUNITY.LESS
 command.bSingleTarget = true
@@ -1945,9 +1929,7 @@ end
 serverguard.command:Add(command)
 
 serverguard.phrase:Add("english", "incognito_enabled", {SERVERGUARD.NOTIFY.GREEN, "You've gone incognito."})
-
 serverguard.phrase:Add("english", "incognito_disabled", {SERVERGUARD.NOTIFY.WHITE, "You're no longer incognito."})
-
 serverguard.phrase:Add("english", "incognito_prohibited", {SERVERGUARD.NOTIFY.RED, "Your rank isn't allowed to go incognito."})
 
 local COMMAND = {
@@ -2127,7 +2109,7 @@ end
 
 serverguard.command:Add(COMMAND)
 
-local command = {
+--[[ local command = {
     help = "Toggles nocollide between a player and entities",
     command = "nocollide",
     arguments = {"player"},
@@ -2163,4 +2145,4 @@ function command:OnNotify(pPlayer, targets)
     return SGPF("command_nocollide", serverguard.player:GetName(pPlayer), util.GetNotifyListForTargets(targets))
 end
 
-serverguard.command:Add(command)
+serverguard.command:Add(command) ]]

@@ -101,7 +101,7 @@ function category:Create(base)
 
                 function lastBase.view:DoClick()
                     local baseb = vgui.Create("tiger.panel")
-                    baseb:SetSize(ScrW() * 0.75, ScrH() * 0.75)
+                    baseb:SetSize(ScrW(), ScrH())
                     baseb:Center()
                     baseb:SetTitle("Screen Capture of " .. pPlayer:Name() .. " (" .. pPlayer:SteamID() .. ")")
                     baseb:MakePopup()

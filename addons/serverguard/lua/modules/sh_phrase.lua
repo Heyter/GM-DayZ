@@ -7,8 +7,7 @@
 -- Provides support for languages through the use of phrases.
 -- @module serverguard.phrase
 serverguard.phrase = serverguard.phrase or {
-    --currentLanguage = "english"
-	currentLanguage = "russian"
+    currentLanguage = "english"
 }
 
 local languages = {}

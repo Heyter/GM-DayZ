@@ -758,7 +758,10 @@ hook.Add("serverguard.Initialize", "serverguard.mysql.Initialize", function()
         config = util.KeyValuesToTable(file.Read("addons/serverguard_mysql.cfg", "MOD"))
     end
 
-    SERVERGUARD.STEAM_APIKEY = SERVERGUARD.STEAM_APIKEY or config.steam_apikey
+	if (#config.steam_apikey > 0) then
+		SERVERGUARD.STEAM_APIKEY = config.steam_apikey
+	end
+
     serverguard.mysql:SetModule(config.module or "sqlite")
     serverguard.mysql:Connect(config.host, config.username, config.password, config.database, config.port, config.unixsocket)
 end)
