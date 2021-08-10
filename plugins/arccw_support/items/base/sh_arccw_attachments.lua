@@ -14,7 +14,7 @@ if (CLIENT) then
 	end
 
 	function ITEM:CanTooltip(targetItem)
-		return targetItem.isWeapon and targetItem.attachments[self.uniqueID]
+		return targetItem.isWeapon and targetItem.attachments and targetItem.attachments[self.uniqueID]
 	end
 end
 

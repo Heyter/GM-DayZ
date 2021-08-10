@@ -95,7 +95,7 @@ if (CLIENT) then
 	function ITEM:CanTooltip(targetItem)
 		if (targetItem.ammoAmount and targetItem.ammo == self.ammo) then
 			return true
-		elseif (targetItem.isAttachment and self.attachments[targetItem.uniqueID]) then
+		elseif (targetItem.isAttachment and self.attachments and self.attachments[targetItem.uniqueID]) then
 			return true
 		end
 

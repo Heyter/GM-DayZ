@@ -24,7 +24,7 @@ if (CLIENT) then
 	end
 
 	function ITEM:CanTooltip(targetItem)
-		return targetItem.isWeapon and targetItem.ammo == self.ammo
+		return targetItem.isWeapon and targetItem.ammo and targetItem.ammo == self.ammo
 	end
 end
 
