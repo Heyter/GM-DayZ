@@ -103,3 +103,5 @@ do
 
 	function ixItemENT:GetEntityMenu() return nil end
 end
+
+GM.ScalePlayerDamage = nil

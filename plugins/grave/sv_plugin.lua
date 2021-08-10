@@ -31,7 +31,7 @@ function PLUGIN:DoPlayerDeath(client)
 
 	if (replication) then
 		charInventory.slots = {}
-		charInventory:HalfSync(client) // TODO: вынести в мету HalfSync
+		charInventory:HalfSync(client)
 	end
 
 	local money = character:GetMoney()

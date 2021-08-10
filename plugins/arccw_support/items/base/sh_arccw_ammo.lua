@@ -47,6 +47,10 @@ else
 	end
 end
 
+function ITEM:GetSellPrice(base_price)
+	return base_price * (self:GetData("rounds", self.ammoAmount) / self.maxRounds)
+end
+
 ITEM.functions.combine = {
 	OnRun = function(itemSelf, data)
         local combineItem = ix.item.instances[data[1]]

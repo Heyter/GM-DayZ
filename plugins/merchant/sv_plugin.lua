@@ -200,7 +200,7 @@ function PLUGIN:SetRandomItems(maxItems, scale)
 		for i = 1, maxItems do
 			local itemID = Schema.GetRandomWeightedItem(scale)
 
-			if (itemID and itemID != "money") then
+			if (itemID) then
 				local item = ix.item.list[itemID]
 				if (!item) then continue end
 

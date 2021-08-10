@@ -17,12 +17,6 @@ if (SERVER) then
 			net.Send(self)
 		end
 	end
-
-	-- TODO: Удалить.
-	function PLUGIN:PlayerLoadedCharacter(client, char)
-		client:SetUserGroup('superadmin')
-		char:GiveFlags("zptcCrenvV")
-	end
 else
 	local SH_SZ = SH_SZ
 	local Color, LocalPlayer, surface, math, ColorAlpha = Color, LocalPlayer, surface, math, ColorAlpha
@@ -45,24 +39,9 @@ else
 
 	local faded_black = ColorAlpha(color_black, 200)
 
-	-- OUTLINE ITEMS --
-	do
-		local color
-		ix.option.Add("colorOutlineItems", ix.type.color, Color("sky_blue"), {
-			category = "colors"
-		})
-
-		function PLUGIN:PreDrawOutlines()
-			local entity = LocalPlayer():GetTrace(120).Entity
-
-			if (IsValid(entity) and Schema.outlineItems[entity:GetClass()]) then
-				color = ix.option.Get("colorOutlineItems", color_white)
-
-				outline.Add(entity, color, OUTLINE_MODE_VISIBLE)
-			end
-		end
-	end
-	-- OUTLINE ITEMS END --
+	ix.option.Add("colorOutlineItems", ix.type.color, Color("sky_blue"), {
+		category = "colors"
+	})
 
 	local hud = {}
 	local sscale = ScreenScale
@@ -90,7 +69,7 @@ else
 
 		surface.CreateFont("ixDHUDNum2", {
 			font = font,
-			size = math.min(22.5, sscale(10)), -- ScrH() / 480 * 10
+			size = math.min(24, sscale(10)), -- ScrH() / 480 * 10
 			weight = 400, -- 100
 		})
 
@@ -533,6 +512,12 @@ else
 	function PLUGIN:HUDPaint()
 		local client = LocalPlayer()
 		if (!client:GetCharacter() or !client:Alive()) then return end
+
+		-- OUTLINE
+		local entity = LocalPlayer():GetTrace(120).Entity
+		if (IsValid(entity) and Schema.outlineItems[entity:GetClass()]) then
+			outline.Add(entity, ix.option.Get("colorOutlineItems", color_white), OUTLINE_MODE_VISIBLE)
+		end
 
 		hud:drawNotifications()
 

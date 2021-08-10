@@ -45,8 +45,6 @@ function PLUGIN:InitializedPlugins()
 		end
 	end
 
-	Schema.weightedItems[#Schema.weightedItems + 1] = {id = "money", weight = 90}
-
 	if (#Schema.weightedItems > 0) then
 		for _, v in ipairs(Schema.weightedItems) do
 			v.weight = v.weight / total_weight

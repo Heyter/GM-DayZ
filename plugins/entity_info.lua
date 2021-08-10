@@ -17,13 +17,25 @@ if (CLIENT) then
 	end
 
 	local rangeSize, angleCos = 200, math.cos(math.rad(90))
+	local client
 
 	function PLUGIN:HUDPaint()
+		client = LocalPlayer()
+
+		self.Trace = {
+			start = client:GetShootPos(),
+			endpos = true,
+			filter = client,
+		}
+
 		local noticeHeight = draw.GetFontHeight("ixNoticeFont")
-		local entities = ents.FindInCone(LocalPlayer():GetShootPos(), LocalPlayer():GetAimVector(), rangeSize, angleCos)
+		local entities = ents.FindInCone(self.Trace.start, client:GetAimVector(), rangeSize, angleCos)
 
 		for _, entity in ipairs(entities) do
 			if (IsValid(entity) and entity.GetItemTable and notShouldEnts[entity:GetClass()]) then
+				self.Trace.endpos = entity:WorldSpaceCenter()
+				local iSeeEntity = util.TraceLine(self.Trace).Entity == entity
+
 				local itemTable = entity:GetItemTable()
 				local itemName = (itemTable.GetName and itemTable:GetName() or itemTable.name) or ""
 
@@ -38,16 +50,17 @@ if (CLIENT) then
 				end
 
 				local x, y
-				local lastEntity = LocalPlayer():GetTrace(160, 2).Entity
+				local lastEntity = client:GetTrace(160, 2).Entity
 
 				if (lastEntity and lastEntity == entity) then
 					x, y = ScrW() / 2, ScrH() / 2
+					iSeeEntity = true
 				else
 					local position = entity:LocalToWorld(entity:OBBCenter())
 					x, y = position:ToScreen().x, position:ToScreen().y
 				end
 
-				if !(x and y) then continue end
+				if !(x and y) or !iSeeEntity then continue end
 
 				draw.SimpleTextOutlined(itemName, "ixNoticeFont",
 					x, y-(noticeHeight/2), color_white, 1, 1, 1, color_black
@@ -87,7 +100,7 @@ if (CLIENT) then
 				end
 			elseif (IsValid(entity) and (entity:GetClass() == "ix_money" or entity:GetClass() == "gmodz_npc_loot")) then
 				local x, y
-				local lastEntity = LocalPlayer():GetTrace(160, 2).Entity
+				local lastEntity = client:GetTrace(160, 2).Entity
 
 				if (lastEntity and lastEntity == entity) then
 					x, y = ScrW() / 2, ScrH() / 2

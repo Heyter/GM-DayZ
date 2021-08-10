@@ -241,7 +241,9 @@ function Schema:InitPostEntity()
     game.ConsoleCommand("sv_sticktoground 0\n")
     game.ConsoleCommand("sv_airaccelerate 1000\n")
     game.ConsoleCommand("sv_alltalk 0\n")
+end
 
+function Schema:PostLoadData()
 	local query = mysql:Delete("ix_items")
 		query:Where("inventory_id", 0)
 	query:Execute()

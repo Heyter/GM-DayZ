@@ -34,16 +34,16 @@ function PLUGIN:OnNPCKilled(npc, attacker, weapon)
 	end
 
 	if (maxItems > 0) then
+		if (math.random() < 0.2) then -- шанс удваивания денег 20%
+			money = money * 2
+		end
+
 		for i = 1, maxItems do
 			local itemID = Schema.GetRandomWeightedItem(3)
 			if (!itemID) then continue end
 
-			if (itemID == "money") then
-				money = money * 2
-			else
-				inventory:Add(itemID, 1, nil, nil, nil, true)
-				has_item = true
-			end
+			inventory:Add(itemID, 1, nil, nil, nil, true)
+			has_item = true
 		end
 
 		replication = true

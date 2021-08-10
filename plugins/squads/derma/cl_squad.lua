@@ -577,6 +577,8 @@ function PANEL:OnMousePressed(code)
 end
 
 function PANEL:SetAvatar(steamid)
+	self.noname = true
+
 	self.avatar:SetSteamID(steamid, 32)
 	self.name:SetText(steamid)
 
@@ -584,21 +586,38 @@ function PANEL:SetAvatar(steamid)
 		if (IsValid(v) and v:SteamID64() == steamid) then
 			self.name:SetTextColor(ix.option.Get("squadTeamColor", Color(51, 153, 255)))
 			self.name:SetText(v:Name())
+			ix.steam.users[steamid] = v:Name()
 			self.steamName = true
+			self.noname = nil
 			break
 		end
 	end
 
 	self.steamid = steamid
+	self.nextSteamQuery = nil
+	self:UpdateNickname(steamid)
+end
 
-	if (!self.steamName) then
+function PANEL:UpdateNickname(steamid)
+	if (ix.steam.users[steamid]) then
+		self.name:SetText(ix.steam.users[steamid])
+		self.noname = nil
+	elseif (!self.steamName and (self.nextSteamQuery or 0) < CurTime()) then
 		local name = ix.steam.GetNickName(steamid)
-		if name then self.name:SetText(name) end
+
+		if name then 
+			self.name:SetText(name)
+			self.noname = nil
+		end
 	end
 end
 
 function PANEL:Think()
 	if (self.next_think or 0) < CurTime() then
+		if (self.noname and self.steamid) then
+			self:UpdateNickname(self.steamid)
+			self.nextSteamQuery = CurTime() + 10
+		end
 
 		local panel = ix.gui.squad
 		if (IsValid(panel) and panel.data and !panel.data.members[self.steamid]) then

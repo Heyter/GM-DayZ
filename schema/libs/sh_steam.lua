@@ -51,6 +51,21 @@ if (CLIENT) then
 		end)
 	end
 
+	hook.Add("CharacterLoaded", "ix.steam.CharacterLoaded", function()
+		local id
+
+		for _, v in ipairs(player.GetHumans()) do
+			if (IsValid(v)) then
+				id = v:SteamID64()
+
+				ix.steam.GetAvatar(id)
+				ix.steam.users[id] = v:Name()
+			end
+		end
+
+		id = nil
+	end)
+
 	concommand.Add("ix_flush_avatars", function()
 		local root = "helix/avatars/"
 

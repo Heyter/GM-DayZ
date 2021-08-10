@@ -7,7 +7,8 @@ ix.geoip.blockedIPs = {
 	["loopback"] = true,
 	["localhost"] = true,
 	["127.0.0.1"] = true,
-	["::1"] = true
+	["::1"] = true,
+	["p2p"] = true
 }
 
 ix.geoip.cache = ix.geoip.cache or {}
@@ -40,11 +41,7 @@ function ix.geoip:Query(ip, callback)
 					if (callback) then
 						callback(ix.geoip.cache[ip])
 					end
-				else
-					error('[GeoIP] Failed to lookup ip: ' .. ip)
 				end
-			else
-				error('[GeoIP] Failed to lookup ip: ' .. ip)
 			end
 		end,
 

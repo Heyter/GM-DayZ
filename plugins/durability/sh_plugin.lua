@@ -40,29 +40,26 @@ if (CLIENT) then
 		panel:SetBackgroundColor(color)
 		panel:SizeToContents()
 	end
-end
 
-function PLUGIN:InitializedPlugins()
-	do
-		if (CLIENT) then
-			for _, WEAPON in ipairs(weapons.GetList()) do
-				local class = WEAPON.ClassName
+	hook.Add("ArccwSupportPostInit", "durability_weapons.ArccwSupportPostInit", function()
+		for _, SWEP in ipairs(weapons.GetList()) do
+			local class = SWEP.ClassName
 
-				if (weapons.IsBasedOn(class, "arccw_base") and !class:find("base") and ix.item.list[class]) then
-					WEAPON.msg_jammed = L("weaponJammed")
+			if (weapons.IsBasedOn(class, "arccw_base")) then
+				if (class:find("base") or class:find("nade") or class:find("melee")) then continue end
+				SWEP.msg_jammed = L("weaponJammed")
 
-					function WEAPON:Hook_PostFireBullets()
-						local durability = self:GetOwner():GetLocalVar("WeaponDurability", 100)
+				function SWEP:Hook_PostFireBullets()
+					local durability = self:GetOwner():GetLocalVar("WeaponDurability", 100)
 
-						if (durability <= 0) then
-							self.NextMalfunction = 999999
-						else
-							self.MalfunctionMeanCopy = self.MalfunctionMeanCopy or self:MalfunctionMeanCalculate()
-							self.MalfunctionMean = math.max(0, self.MalfunctionMeanCopy * (durability / 100))
-						end
+					if (durability <= 0) then
+						self.NextMalfunction = 999999
+					else
+						self.MalfunctionMeanCopy = self.MalfunctionMeanCopy or self:MalfunctionMeanCalculate()
+						self.MalfunctionMean = math.max(0, self.MalfunctionMeanCopy * (durability / 100))
 					end
 				end
 			end
 		end
-	end
+	end)
 end

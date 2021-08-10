@@ -29,12 +29,4 @@ if (CLIENT) then
 			outline = true
 		})
 	end
-
-	function PLUGIN:CharacterLoaded()
-		for k, v in ipairs(player.GetHumans()) do
-			if (IsValid(v)) then
-				ix.steam.GetAvatar(v:SteamID64())
-			end
-		end
-	end
 end

@@ -73,7 +73,8 @@ function PLUGIN:PlayerTakeDamage(client, damageInfo)
 					damage = math.max(0, damage - ((v.damageReduction or 0) * damage))
 				end
 
-				-- TODO: переделать (установку durability) как на оружие
+				-- TODO: переделать (установку durability) как на оружие (OnUnequipWeapon, OnSave)
+				-- учитывать здесь сколько раз попали в одежду и позже обновлять в ITEM:OnUnequipped и ITEM:OnSave
 				if (v.useDurability) then
 					local durability = math.max(0, v:GetData("durability", v.defDurability or 100) - damage)
 

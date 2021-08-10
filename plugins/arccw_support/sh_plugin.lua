@@ -274,6 +274,8 @@ function PLUGIN:InitPostEntity()
 					end
 
 					if (SWEP.Primary.Ammo and #SWEP.Primary.Ammo > 0) then
+						game.AddAmmoType({ name = SWEP.Primary.Ammo })
+
 						for _, itemAmmo in pairs(ix.item.list) do
 							if ((itemAmmo.base == "base_ammo" or itemAmmo.base == "base_arccw_ammo") and itemAmmo.ammo == SWEP.Primary.Ammo) then
 								item.ammo = itemAmmo.ammo
@@ -335,19 +337,12 @@ function PLUGIN:InitPostEntity()
 		-- Добавление патронов в игру
 		for _, v in pairs(ix.item.list) do
 			if (v.base == "base_arccw_ammo") then
-				game.AddAmmoType({
-					name = v.ammo,
-					dmgtype = DMG_BULLET,
-					tracer = TRACER_LINE,
-					plydmg = 0,
-					npcdmg = 0,
-					force = 2000,
-					minsplash = 10,
-					maxsplash = 5
-				})
+				game.AddAmmoType({ name = v.ammo })
 			end
 		end
 	end
+
+	hook.Run("ArccwSupportPostInit")
 end
 
 ix.util.Include("sv_plugin.lua")
