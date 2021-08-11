@@ -6,19 +6,10 @@
 local plugin = plugin
 plugin:IncludeFile("shared.lua", SERVERGUARD.STATE.SHARED)
 plugin:IncludeFile("cl_panel.lua", SERVERGUARD.STATE.CLIENT)
-
-local bypassRanks = { -- TODO: вынести в меню с добавлением групп
-	["admin"] = true,
-	["superadmin"] = true,
-	["founder"] = true
-}
-
 plugin:IncludeFile("shared.lua", SERVERGUARD.STATE.SHARED)
 plugin:IncludeFile("cl_panel.lua", SERVERGUARD.STATE.CLIENT)
 
-local function kickID(uniqueID, reason)
-    RunConsoleCommand("kickid", tostring(uniqueID), reason)
-end
+RESERVED_SLOTS = RESERVED_SLOTS or {}
 
 plugin.config:AddCallback("hide", function(value)
     RunConsoleCommand("sv_visiblemaxplayers", value and (game.MaxPlayers() - plugin.config:GetValue("slots")) or 0)
@@ -28,40 +19,57 @@ plugin.config:AddCallback("slots", function(value)
     RunConsoleCommand("sv_visiblemaxplayers", plugin.config:GetValue("hide") and (game.MaxPlayers() - value) or 0)
 end)
 
-plugin:Hook("PlayerAuthed", "reservedslots.PlayerAuthed", function(ply, steamID, uniqueID)
-    if (player.GetCount() + plugin.config:GetValue("slots") >= game.MaxPlayers()) then
-        local queryObj = serverguard.mysql:Select("serverguard_users")
-        queryObj:Select("rank")
-        queryObj:Where("steam_id", steamID)
-        queryObj:Callback(function(result, status, lastID)
-            local rank = "user"
+plugin.config:AddCallback("ranks", function(value)
+	if (!istable(value) or table.IsEmpty(value)) then return end
 
-            if (istable(result) and #result > 0) then
-                rank = result[1].rank
-            end
+	timer.Create("reservedslots_ranks", 5, 1, function()
+		local query = serverguard.mysql:Select("serverguard_users")
+			query:WhereIn("rank", table.GetKeys(value))
+			query:Callback(function(result)
+				if (istable(result)) then
+					RESERVED_SLOTS = {}
 
-			if (!bypassRanks[rank]) then
-                kickID(uniqueID, "Sorry, that slot has been reserved.")
+					for _, v in ipairs(result) do
+						RESERVED_SLOTS[v.steam_id] = true
+					end
+				end
+			end)
+		query:Execute()
+	end)
+end)
 
-                return
-            end
+hook.Add("serverguard.PostLoadConfig", "reservedslots", function()
+	local data = plugin.config and plugin.config.entries
+	if (!data or !data["ranks"]) then return end
 
---[[             local kickablePlayer, shortestTime = nil, math.huge
+	local query = serverguard.mysql:Select("serverguard_users")
+		query:WhereIn("rank", table.GetKeys(data["ranks"].value))
+		query:Callback(function(result)
+			if (istable(result)) then
+				RESERVED_SLOTS = {}
 
-            for _, client in ipairs(player.GetAll()) do
-                local vrank = serverguard.player:GetRank(client)
-                local timeConnected = client:TimeConnected()
+				for _, v in ipairs(result) do
+					RESERVED_SLOTS[v.steam_id] = true
+				end
+			end
+		end)
+	query:Execute()
+end)
 
-                if (timeConnected < shortestTime and !bypassRanks[vrank]) then
-                    kickablePlayer, timeConnected = client, timeConnected
-                end
-            end
+-- TODO: проверить работоспособность
+hook.Add("CheckPassword", "reservedslots", function(steamID64)
+	local steamID32 = util.SteamIDFrom64(steamID64)
 
-            if (kickablePlayer and IsValid(kickablePlayer)) then
-                kickablePlayer:Kick("Sorry, freeing up slots for reserved slots.")
-            end ]]
-        end)
-
-        queryObj:Execute()
+    if (!RESERVED_SLOTS[steamID32] and player.GetCount() + (plugin.config:GetValue("slots") or 0) >= game.MaxPlayers()) then
+		game.KickID(steamID32, 'Sorry, that slot has been reserved.')
     end
+end)
+
+hook.Add("CAMI.PlayerUsergroupChanged", "reservedslots", function(client, _, new)
+	local data = plugin.config and plugin.config.entries
+	if (!data) then return end
+
+	if (data['ranks'] and data['ranks'].value[new]) then
+		RESERVED_SLOTS[client:SteamID()] = true
+	end
 end)

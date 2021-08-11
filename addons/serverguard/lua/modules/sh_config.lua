@@ -8,7 +8,8 @@
 -- @module serverguard.config
 serverguard.AddFolder("config")
 serverguard.config = serverguard.config or {}
-local stored = {}
+serverguard.config.stored = serverguard.config.stored or {}
+local stored = serverguard.config.stored
 --- Configuration class object that's used to save, load, and network settings to clients.
 -- @type CONFIG_CLASS
 local CONFIG_CLASS = {}
@@ -28,7 +29,8 @@ local CONFIG_TYPES = {
     --- Adds a configuration option whose key is a boolean. -- @string key The key it's referenced by. -- @string value The default value that'll be set if none exists. -- @string description[opt] The description of the option. -- @usage config:AddBoolean("testbool", true, "Just a test boolean.");
     Boolean = function(value) return tobool(value) end,
     --- Adds a configuration option whose key is a number. -- @string key The key it's referenced by. -- @string value The default value that'll be set if none exists. -- @string description[opt] The description of the option. -- @usage config:AddNumber("testnumber", 1234, "Numbers are great!");
-    Number = function(value) return util.ToNumber(value) end
+    Number = function(value) return util.ToNumber(value) end,
+	Dictionary = function(value) return value end
 }
 
 --- Adds a configuration option whose key is a string.
@@ -49,7 +51,6 @@ function CONFIG_CLASS:New(name)
     object.name = name
     object.entries = {}
     object.autoSave = true
-    object.saveQueued = false
     object.loaded = false
     object.permissions = {}
 
@@ -89,7 +90,7 @@ function CONFIG_CLASS:SetValue(key, value, bDontNetwork)
 
     if (SERVER) then
         if (self.autoSave) then
-            self.saveQueued = true
+			serverguard.config.Save(self)
         end
     else
         for k, v in pairs(self.entries[key].boundPanels) do
@@ -216,107 +217,36 @@ function CONFIG_CLASS:Load()
 
             self.loaded = true
         else
-            self:Save(true)
+			serverguard.config.Save(self)
         end
-    end
-
-    if (CLIENT) then
-        timer.Simple(1, function()
-            self:RequestFullUpdate()
-        end)
     end
 
     return self
 end
 
 if (SERVER) then
-    local lastSaveTime = CurTime()
-    local fullRequestQueue = {}
+	hook.Add("PlayerInitialSpawn", "serverguard.config.PlayerInitialSpawn", function(client)
+		local data = {}
 
-    local function SaveConfigClass(object)
-        file.Write("serverguard/config/" .. object.name .. ".txt", object:GetSerialized())
-        object.saveQueued = false
-    end
+		for k, v in pairs(serverguard.config.stored) do
+			data[k] = data[k] or {}
 
-    --- **(SERVERSIDE)** Queues the configuration object to be saved to disk.
-    -- @bool bForce[opt] Whether or not to bypass the queue and save immediately to disk. Not recommended.
-    function CONFIG_CLASS:Save(bForce)
-        if (bForce) then
-            SaveConfigClass(self)
+			for k2, v2 in pairs(v.entries) do
+				data[k][k2] = v2.value
+			end
+		end
 
-            return
-        end
-
-        self.saveQueued = true
-    end
-
-    -- **(SERVERSIDE)** Sends a full update of all configuration options to the specified player(s).
-    -- @player player The player to send the update to. Can also be a table of players.
-    function CONFIG_CLASS:SendFullUpdate(player)
-        local data = {
-            name = self.name,
-            entries = {}
-        }
-
-        for k, v in pairs(self.entries) do
-            data.entries[k] = v.value
-        end
-
-        serverguard.netstream.Start(player, "sgReceiveFullUpdate", data)
-    end
-
-    hook.Add("Think", "serverguard.config.Think", function()
-        local bSaved = false
-
-        for k, v in pairs(stored) do
-            if (v.loaded and fullRequestQueue[k] and #fullRequestQueue > 0) then
-                v:SendFullUpdate(fullRequestQueue[k])
-                fullRequestQueue[k] = nil
-            end
-
-            if (v.loaded and CurTime() >= lastSaveTime + 25) then
-                if (not v.entries or not v.saveQueued) then continue end
-                SaveConfigClass(v)
-                bSaved = true
-            end
-        end
-
-        if (bSaved) then
-            lastSaveTime = CurTime()
-        end
-    end)
+		serverguard.netstream.Start(client, "sgReceiveFullUpdate", data)
+		data = nil
+	end)
 
     serverguard.netstream.Hook("sgConfigUpdate", function(player, data)
         if (not stored[data.name] or not stored[data.name]:CheckPermission(player)) then return end
         stored[data.name]:SetValue(data.key, data.value, true)
-        stored[data.name]:Save()
-    end)
-
-    serverguard.netstream.Hook("sgRequestFullUpdate", function(player, data)
-        if (not stored[data.name]) then return end
-
-        if (not stored[data.name].loaded) then
-            if (not fullRequestQueue[data.name]) then
-                fullRequestQueue[data.name] = {}
-            end
-
-            table.insert(fullRequestQueue[data.name], player)
-
-            return
-        end
-
-        stored[data.name]:SendFullUpdate(player)
+		serverguard.config.Save(stored[data.name])
     end)
 else
     local panelSetup = false
-
-    --- **(CLIENTSIDE)** Requests a full update of all configuration values from the server.
-    -- @see CONFIG_CLASS:Load
-    function CONFIG_CLASS:RequestFullUpdate()
-        serverguard.netstream.Start("sgRequestFullUpdate", {
-            name = self.name
-        })
-    end
 
     serverguard.netstream.Hook("sgConfigUpdate", function(data)
         if (not stored[data.name]) then return end
@@ -324,11 +254,12 @@ else
     end)
 
     serverguard.netstream.Hook("sgReceiveFullUpdate", function(data)
-        if (not stored[data.name]) then return end
+        for name, v in pairs(data) do
+			for key, entries in pairs(v) do
+				stored[name]:SetValue(key, entries, true)
+			end
 
-        for k, v in pairs(data.entries) do
-            stored[data.name]:SetValue(k, v, true)
-            stored[data.name].loaded = true -- client doesn't really care
+            stored[name].loaded = true -- client doesn't really care
         end
     end)
 
@@ -421,11 +352,15 @@ function serverguard.config.New(unique, callback)
     oldStored[unique] = callback
 end
 
---- **(DEPRECATED)** Saves the configuration entry.
+--- Saves the configuration entry.
 -- @string unique The unique ID of the entry.
 -- @table data The data to save.
-function serverguard.config.Save(unique, data)
-    file.Write("serverguard/config/" .. unique .. ".txt", serverguard.von.serialize(data))
+function serverguard.config.Save(object, data)
+	if (isstring(object)) then
+		file.Write("serverguard/config/" .. object .. ".txt", serverguard.von.serialize(data))
+	elseif (istable(object)) then
+		file.Write("serverguard/config/" .. object.name .. ".txt", object:GetSerialized())
+	end
 end
 
 if (SERVER) then

@@ -15,7 +15,7 @@ local config = serverguard.config.Create("reservedslots")
 config:SetPermission("Manage Reserved Slots")
 config:AddBoolean("hide", false, "Hide reserved slots")
 config:AddNumber("slots", 2, "Amount of reserved slots")
+config:AddDictionary("ranks", {
+	["founder"] = true
+}, "Ранги получаемые резервный слот")
 plugin.config = config:Load()
-
--- Добавить парсинг таблиц AddTable("ranks", ...)
--- Сделать выборку групп и при старте сервер парсить SteamID в локальный массив
