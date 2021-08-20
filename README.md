@@ -1,2 +1,5 @@
 # GM-DayZ
-garrysmod gamemode dayz
+
+Project done is 70%.
+
+Maybe someday I will complete this project.
