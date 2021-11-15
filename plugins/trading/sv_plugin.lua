@@ -30,21 +30,30 @@ function ix.trade.MenuAbort(client)
 end
 
 function ix.trade.Complete(client, clientCharacter, otherCharacter, bMoneyOther)
+
 	client.tradingItems = client.tradingItems or {}
 
 	if (!table.IsEmpty(client.tradingItems)) then
 		local inventory
 
 		if (bMoneyOther) then
-			inventory = clientCharacter:GetInventory()
-		else
+
 			inventory = otherCharacter:GetInventory()
+		else
+
+			inventory = clientCharacter:GetInventory()
 		end
 
+
 		if (inventory) then
+
 			for _, slot in pairs(inventory.slots) do
+				
 				for _, item in pairs(slot) do
+
 					if (client.tradingItems[item.id]) then
+
+
 						if (item:GetData("equip")) then
 							if (item.Unequip) then
 								item:Unequip(client)
@@ -55,7 +64,12 @@ function ix.trade.Complete(client, clientCharacter, otherCharacter, bMoneyOther)
 							end
 						end
 
-						item:Transfer(inventory:GetID())
+						if(inventory == otherCharacter:GetInventory()) then
+							item:Transfer(clientCharacter:GetInventory():GetID())
+						else
+							item:Transfer(otherCharacter:GetInventory():GetID())
+						end	
+						
 					end
 				end
 			end
@@ -76,6 +90,7 @@ function ix.trade.Complete(client, clientCharacter, otherCharacter, bMoneyOther)
 
 	ix.trade.ClearVars(client)
 	client:EmitSound("items/ammo_pickup.wav", 75, 100, 0.5)
+	print("Trade completed")
 end
 
 net.Receive("ixTradeConfirm", function(len, client)
@@ -187,6 +202,7 @@ net.Receive("ixTradeSendItem", function(len, client)
 	if (!item) then return end
 
 	client.tradingItems[id] = {item.width, item.height}
+
 	client.tradeConfirmed = nil
 
 	net.Start("ixTradeSyncItems")
@@ -198,6 +214,8 @@ net.Receive("ixTradeSendItem", function(len, client)
 		net.WriteTable(client.tradingItems)
 		net.WriteBool(true)
 	net.Send(client)
+
+
 end)
 
 net.Receive("ixTradeTakeItem", function(len, client)
