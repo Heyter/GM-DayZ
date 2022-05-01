@@ -61,17 +61,22 @@ function PLUGIN:LoadData()
 
 	if (!table.IsEmpty(data)) then
 		for _, v in pairs(data) do
-			for k, v2 in ipairs(v.items) do
-				if (istable(v2) and !ix.item.list[v2.id]) then
-					table.remove(v.items, k)
-				else
-					if (!ix.item.list[v2]) then
+			if (istable(v.items)) then
+				for k, v2 in ipairs(v.items) do
+					if (istable(v2) and !ix.item.list[v2.id]) then
 						table.remove(v.items, k)
+					else
+						if (!ix.item.list[v2]) then
+							table.remove(v.items, k)
+						end
 					end
 				end
-			end
 
-			if (table.IsEmpty(v.items)) then
+				if (table.IsEmpty(v.items)) then
+					v.chance_type = 3
+					v.items = nil
+				end
+			else
 				v.chance_type = 3
 				v.items = nil
 			end
