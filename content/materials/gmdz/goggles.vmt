@@ -1,0 +1,8 @@
+"Modulate"
+{
+	"$znearer" 1
+	"$basetexture" "gmdz/goggles"
+	"$translucent" "1"
+	"$additive" "1"
+	"$mod2x" "1"
+}
