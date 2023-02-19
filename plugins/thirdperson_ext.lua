@@ -19,7 +19,8 @@ function PLUGIN:PlayerBindPress(_, bind, pressed)
 end
 
 do
-	local blocked_att = Material("hud/atts/default.png", "mips smooth") -- ArcCW asset
+	-- https://github.com/HaodongMo/ArcCW/blob/master/materials/arccw/hud/atts/default.png
+	local blocked_att = Material("arccw/hud/atts/default.png", "mips smooth")
 	local icon_size = 32
 	local dark_red = Color(200, 50, 50)
 
